@@ -158,7 +158,7 @@ Objetivo: rama por defecto. Reglas: *Restrict deletions*, *Block force pushes*, 
 | Riesgo | Mitigación |
 |---|---|
 | Stryker tarda demasiado | Solo `Domain` y `Application`; en PR, modo `--since main` (solo lo cambiado) |
-| Repositorio privado en plan Free no aplica rulesets | P-02 del spec; repositorio público o GitHub Education |
+| Al ser público, un secreto subido por error queda expuesto de inmediato | Gitleaks en cada PR, protección de push activa y rotar de inmediato cualquier secreto filtrado |
 | Un check requerido queda pendiente en un PR que solo toca la otra carpeta | Job `changes` con `if`, nunca `paths` a nivel de workflow (ADR-26) |
 | Una acción de terceros comprometida | Fijada por SHA y actualizada por Dependabot |
 | El humo pasa pero el endpoint de negocio falla | Cada spec funcional agrega su prueba de humo |

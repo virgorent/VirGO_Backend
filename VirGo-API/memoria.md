@@ -8,7 +8,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 |---|---|
 | Constitución | v1.1.0 **propuesta** (pendiente de aprobación del equipo) |
 | Módulo en curso | `000-arquitectura-base` en revisión; `001`–`004` en borrador. Ninguna tarea ejecutada |
-| Tareas | 0 hechas (`000`: 22 vigentes · `001`: 10 · `002`: 12 · `003`: 13 · `004`: 9) |
+| Tareas | 0 hechas (`000`: 22 vigentes · `001`: 11 · `002`: 12 · `003`: 13 · `004`: 9) |
 | URL de producción | Pendiente (se obtiene en `002`: T209) |
 | Costo acumulado en AWS | $0 USD (todavía no se crea ningún recurso) |
 | Siguiente paso | Evaluación del 2026-11-04: aprobar la enmienda v1.1.0 y los specs `000`–`004` |
@@ -162,3 +162,14 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje:** ninguno.
 - **Pendiente:** archivar `Karasu0001/virGO_App` cuando el equipo confirme; `002` P-02 (el repositorio es privado y el ruleset no aplicaría).
+
+### 2026-11-04 · El repositorio ya es público
+
+- **Autor:** equipo + Claude Code (`arquitecto`)
+- **Módulo / tareas:** gobernanza · ninguna tarea ejecutada
+- **Qué se hizo:** se comprobó que `virgorent/virGO_App` es público, con lo que el ruleset y los revisores de los *environments* ya están disponibles en el plan Free. Se corrigió el conteo de tareas de `001` (11, por la T101 de Atlas).
+- **Evidencia:** la API pública de GitHub responde `visibility: public`. `Karasu0001/virGO_App` responde «not found».
+- **Decisiones:** se resuelve `VirGo-API` `002` P-02.
+- **Costo:** $0.
+- **Aprendizaje:** al ser público, todo lo que se suba es visible; Gitleaks y la protección de push son prioritarios.
+- **Pendiente:** crear el ruleset (`002`: T207) y aclarar `002` P-03 (`rama-apis`).

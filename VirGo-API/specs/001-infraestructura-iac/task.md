@@ -17,7 +17,7 @@
 
 ---
 
-## F0 · MCP y alojamiento
+## F0 · MCP, Atlas y alojamiento
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|

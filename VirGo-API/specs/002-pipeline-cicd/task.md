@@ -43,7 +43,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T207 | 🧑 Crear el ruleset único `main-protection` del repositorio (sección 6.5 del plan; requiere resolver P-02), activar la protección de push contra secretos y exportar el JSON a `.github/rulesets/` | T204, T205 | `devops-aws` | *Push* directo rechazado (CA-01); PR con prueba en rojo bloqueado (CA-02) | ⏳ |
+| T207 | 🧑 Crear el ruleset único `main-protection` del repositorio (sección 6.5 del plan), activar la protección de push contra secretos y exportar el JSON a `.github/rulesets/` | T204, T205 | `devops-aws` | *Push* directo rechazado (CA-01); PR con prueba en rojo bloqueado (CA-02) | ⏳ |
 
 ## F4 · CD manual y humo
 

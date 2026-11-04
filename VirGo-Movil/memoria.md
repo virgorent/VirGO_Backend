@@ -117,3 +117,14 @@ Se llena en T005 con las versiones estables verificadas.
 - **Costo:** $0.
 - **Aprendizaje:** ninguno.
 - **Pendiente:** archivar `Karasu0001/virGO_App` cuando el equipo confirme; `VirGo-API` `002` P-02 (el repositorio es privado y el ruleset no aplicaría).
+
+### 2026-11-04 · El repositorio ya es público
+
+- **Autor:** equipo + Claude Code (`arquitecto-movil`)
+- **Módulo / tareas:** gobernanza · ninguna tarea ejecutada
+- **Qué se hizo:** se comprobó que `virgorent/virGO_App` es público, con lo que el ruleset y los revisores de los *environments* ya están disponibles en el plan Free.
+- **Evidencia:** la API pública de GitHub responde `visibility: public`. `Karasu0001/virGO_App` responde «not found».
+- **Decisiones:** se resuelve `VirGo-API` `002` P-02.
+- **Costo:** $0.
+- **Aprendizaje:** al ser público, todo lo que se suba es visible; Gitleaks y la protección de push son prioritarios.
+- **Pendiente:** coordinar el ruleset con `VirGo-API` T207.
