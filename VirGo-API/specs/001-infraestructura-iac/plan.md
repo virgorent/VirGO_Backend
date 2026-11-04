@@ -91,7 +91,7 @@ Se conservan ADR-01 (Lambda + HTTP API), ADR-02 (runtime), ADR-05 (OIDC), ADR-06
 
 ### 6.2 Rol de despliegue (`virgo-github-deploy`)
 
-- Confianza: `token.actions.githubusercontent.com`, condición `sub = repo:Karasu0001/virGO_App:ref:refs/heads/main` y `aud = sts.amazonaws.com`. El *environment* `production` de `002` usa `sub = repo:Karasu0001/virGO_App:environment:production`; se permite solo ese valor.
+- Confianza: `token.actions.githubusercontent.com`, condición `sub = repo:virgorent/virGO_App:ref:refs/heads/main` y `aud = sts.amazonaws.com`. El *environment* `production` de `002` usa `sub = repo:virgorent/virGO_App:environment:production`; se permite solo ese valor.
 - Permisos: CloudFormation sobre `virgo-api-*`, `iam:PassRole` solo del rol de la Lambda, S3 del bucket de SAM y `ssm:GetParameter` de `/virgo/prod/*`. Nada de `*:*`.
 
 ### 6.3 Llave JWT y cadena de conexión

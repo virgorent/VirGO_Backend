@@ -4,7 +4,7 @@
 
 Este documento norma el proyecto Backend de VirGo. Todos los demás archivos (`AGENTS.md`, `memoria.md`, subagentes, skills y specs) deben estar alineados con él. Si un archivo lo contradice, prevalece este documento y el otro archivo se corrige.
 
-VirGo es una plataforma que conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-API/` del repositorio [`Karasu0001/virGO_App`](https://github.com/Karasu0001/virGO_App) y contiene solo la API que consumen la app móvil (`VirGo-Movil/`) y, en el futuro, la web.
+VirGo es una plataforma que conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-API/` del repositorio [`virgorent/virGO_App`](https://github.com/virgorent/virGO_App) y contiene solo la API que consumen la app móvil (`VirGo-Movil/`) y, en el futuro, la web.
 
 Se subordina a la constitución global de la raíz (`../constitution.md`): esta desarrolla sus principios para el proyecto. En lo técnico del proyecto manda este documento; en los principios generales, la global.
 

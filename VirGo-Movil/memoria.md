@@ -38,7 +38,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-12 | 2026-11-03 | **Pitest** (`gradle-pitest-plugin`) en módulos JVM puros | Mutación sin dispositivo; umbral tras medir |
 | ADR-13 | 2026-11-03 | MCP permitidos: `figma` (lectura del *canvas*) y `github` | Pantallas al vuelo desde la maqueta oficial |
 | ADR-14 | 2026-11-03 | Google Play como destino futuro, con enmienda | Tiene un pago único; por ahora GitHub Releases |
-| ADR-15 | 2026-11-03 | **Repositorio único** `Karasu0001/virGO_App` con carpetas por proyecto | Decisión del equipo |
+| ADR-15 | 2026-11-03 | **Repositorio único** `virgorent/virGO_App` con carpetas por proyecto | Decisión del equipo |
 
 ## Cambios de contrato (compartidos con Backend)
 
@@ -106,3 +106,14 @@ Se llena en T005 con las versiones estables verificadas.
 - **Costo:** $0.
 - **Aprendizaje:** ninguno nuevo; ver `VirGo-API/memoria.md`.
 - **Pendiente:** la visibilidad del repositorio (`VirGo-API` `002` P-02).
+
+### 2026-11-04 · El repositorio pasa a la organización `virgorent`
+
+- **Autor:** equipo + Claude Code (`arquitecto-movil`)
+- **Módulo / tareas:** gobernanza · `specs/000-arquitectura-base` · ninguna tarea ejecutada
+- **Qué se hizo:** no se pudo transferir `Karasu0001/virGO_App`, así que se creó `virgorent/virGO_App` vacío y se subieron `main`, `rama-apis`, `rama-backend`, `rama-movil` y `docs/sdd-virgo` con su historial. Las referencias vigentes apuntan al repositorio nuevo; las entradas anteriores de esta bitácora conservan el nombre de entonces.
+- **Evidencia:** `git ls-remote` muestra los mismos commits en ambos repositorios.
+- **Decisiones:** `virgorent/virGO_App` es el repositorio oficial.
+- **Costo:** $0.
+- **Aprendizaje:** ninguno.
+- **Pendiente:** archivar `Karasu0001/virGO_App` cuando el equipo confirme; `VirGo-API` `002` P-02 (el repositorio es privado y el ruleset no aplicaría).

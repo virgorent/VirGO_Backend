@@ -4,7 +4,7 @@
 
 Este documento norma el proyecto Móvil de VirGo. Todos los demás archivos (`AGENTS.md`, `memoria.md`, subagentes, skills y specs) deben estar alineados con él. Si un archivo lo contradice, prevalece este documento y el otro archivo se corrige.
 
-VirGo conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-Movil/` del repositorio [`Karasu0001/virGO_App`](https://github.com/Karasu0001/virGO_App) y contiene la app Android, que consume la API del proyecto `VirGo-API/`.
+VirGo conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-Movil/` del repositorio [`virgorent/virGO_App`](https://github.com/virgorent/virGO_App) y contiene la app Android, que consume la API del proyecto `VirGo-API/`.
 
 Se subordina a la constitución global de la raíz (`../constitution.md`): esta desarrolla sus principios para el proyecto. En lo técnico del proyecto manda este documento; en los principios generales, la global. El diseño de referencia es la maqueta funcional de Figma «Pantallas VirGo».
 

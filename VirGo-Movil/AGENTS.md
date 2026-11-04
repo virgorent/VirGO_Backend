@@ -1,6 +1,6 @@
 # AGENTS.md — VirGo Móvil (Android)
 
-Guía base para los agentes de IA y las personas que trabajan en este proyecto (carpeta `VirGo-Movil/` del repositorio `Karasu0001/virGO_App`). Sigue lo que dice [`constitution.md`](constitution.md); si algo aquí lo contradice, gana la constitución.
+Guía base para los agentes de IA y las personas que trabajan en este proyecto (carpeta `VirGo-Movil/` del repositorio `virgorent/virGO_App`). Sigue lo que dice [`constitution.md`](constitution.md); si algo aquí lo contradice, gana la constitución.
 
 ## Contexto del proyecto
 

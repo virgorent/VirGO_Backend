@@ -1,6 +1,6 @@
 # VirGo Mobile (Android)
 
-Android app for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`virGO_App`](https://github.com/Karasu0001/virGO_App) repository consumes the REST API from `../VirGo-API`.
+Android app for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`virGO_App`](https://github.com/virgorent/virGO_App) repository consumes the REST API from `../VirGo-API`.
 
 > **Status:** specification phase. The base architecture spec is under review. There is no application code yet.
 

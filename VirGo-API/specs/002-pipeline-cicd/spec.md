@@ -82,5 +82,5 @@ El objetivo es que el flujo **spec → rama → PR → CI → merge → deploy m
 | # | Pregunta | Responsable |
 |---|---|---|
 | P-01 | ¿Quién aprueba los PR a `main`? (antes P-02 de `000`) | Equipo |
-| P-02 | `Karasu0001/virGO_App` parece privado. Con el plan Free de GitHub, ni los rulesets ni los revisores obligatorios de los *environments* se aplican en privado: hay que hacerlo público (sin secretos en el código) o usar GitHub Education en la cuenta dueña. | Karasu0001 |
+| P-02 | `virgorent/virGO_App` es privado. Con el plan Free de GitHub, ni los rulesets ni los revisores obligatorios de los *environments* se aplican en privado: hay que hacerlo público (sin secretos en el código) o conseguir para la organización un plan que los incluya. | Equipo |
 | P-03 | ¿Para qué se usa `rama-apis`, si ya existe `rama-backend`? | Equipo |

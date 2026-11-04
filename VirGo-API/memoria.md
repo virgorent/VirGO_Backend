@@ -54,7 +54,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-23 | 2026-11-03 | **MongoDB Atlas M0** en AWS `us-east-1` como base de datos | Decisión del equipo: la base se hace en MongoDB; M0 es gratis permanente |
 | ADR-24 | 2026-11-03 | Atlas con lista de acceso `0.0.0.0/0` y controles compensatorios | Lambda no tiene IP fija sin NAT (prohibido); M0 no admite *private endpoint* |
 | ADR-25 | 2026-11-03 | **Testcontainers** para probar los repositorios de MongoDB en el CI | Gratis en GitHub Actions; local sigue sin Docker (en memoria) |
-| ADR-26 | 2026-11-03 | **Repositorio único** `Karasu0001/virGO_App` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
+| ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/virGO_App` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
 
 ## Cambios de contrato (compartidos con Móvil)
 
@@ -151,3 +151,14 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje:** un check requerido omitido por `paths` deja el PR pendiente; en repositorio único hay que usar jobs condicionales.
 - **Pendiente:** `002` P-02 (el repositorio parece privado y el ruleset no aplicaría) y P-03 (uso de `rama-apis`); `.specify/` lo exige la constitución global, pero no existe en el repositorio.
+
+### 2026-11-04 · El repositorio pasa a la organización `virgorent`
+
+- **Autor:** equipo + Claude Code (`arquitecto`)
+- **Módulo / tareas:** gobernanza · `specs/000`, `001`, `002` · ninguna tarea ejecutada
+- **Qué se hizo:** no se pudo transferir `Karasu0001/virGO_App`, así que se creó `virgorent/virGO_App` vacío y se subieron `main`, `rama-apis`, `rama-backend`, `rama-movil` y `docs/sdd-virgo` con su historial. Las referencias vigentes, incluido el `sub` de OIDC, apuntan al repositorio nuevo; las entradas anteriores de esta bitácora conservan el nombre de entonces.
+- **Evidencia:** `git ls-remote` muestra los mismos commits en ambos repositorios.
+- **Decisiones:** `virgorent/virGO_App` es el repositorio oficial.
+- **Costo:** $0.
+- **Aprendizaje:** ninguno.
+- **Pendiente:** archivar `Karasu0001/virGO_App` cuando el equipo confirme; `002` P-02 (el repositorio es privado y el ruleset no aplicaría).

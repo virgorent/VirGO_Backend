@@ -21,7 +21,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T001 | Confirmar que `VirGo-Movil/` entró a `main` del repositorio `Karasu0001/virGO_App` con su `.gitignore` DevSecOps (Art. V.8) y su `README.md` en inglés | — | `seguridad-ci` | `git remote -v` correcto; `git check-ignore local.properties` lo ignora | ⏳ |
+| T001 | Confirmar que `VirGo-Movil/` entró a `main` del repositorio `virgorent/virGO_App` con su `.gitignore` DevSecOps (Art. V.8) y su `README.md` en inglés | — | `seguridad-ci` | `git remote -v` correcto; `git check-ignore local.properties` lo ignora | ⏳ |
 | T002 | 🧑 Coordinar con `VirGo-API` T207 el ruleset único `main-protection` del repositorio (PR, 1 revisión, checks requeridos, sin *force push* ni borrado) y la protección de push contra secretos | T001 | `seguridad-ci` | Reglas visibles en GitHub (captura o `gh api`) | ⏳ |
 | T003 | [P] Agregar `.editorconfig` (ktlint) y, en la raíz del repositorio, el bloque de `VirGo-Movil` en `.github/dependabot.yml`; la plantilla de PR es común (Gradle agrupado por familia y Actions) | T001 | `seguridad-ci` | Archivos en el repositorio; Dependabot activo | ⏳ |
 | T004 | [P] Revisar la alineación de la gobernanza con `verificar-constitucion` | — | `arquitecto-movil` | Resultado «Alineado» en `memoria.md` | ⏳ |

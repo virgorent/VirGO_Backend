@@ -1,6 +1,6 @@
 # VirGo API
 
-REST API for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`virGO_App`](https://github.com/Karasu0001/virGO_App) repository contains only the backend; the Android app lives in `../VirGo-Movil`.
+REST API for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`virGO_App`](https://github.com/virgorent/virGO_App) repository contains only the backend; the Android app lives in `../VirGo-Movil`.
 
 > **Status:** specification phase. The architecture, infrastructure, pipeline and first endpoint specs are written and under review. There is no application code yet.
 

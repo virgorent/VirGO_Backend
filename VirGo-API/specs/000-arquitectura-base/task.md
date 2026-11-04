@@ -21,7 +21,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T001 | Confirmar que `VirGo-API/` entró a `main` del repositorio `Karasu0001/virGO_App` con su `.gitignore` DevSecOps (Art. V.10) y su `README.md` en inglés | — | `devops-aws` | `git remote -v` muestra el repositorio; `git status` limpio tras el primer commit | ⏳ |
+| T001 | Confirmar que `VirGo-API/` entró a `main` del repositorio `virgorent/virGO_App` con su `.gitignore` DevSecOps (Art. V.10) y su `README.md` en inglés | — | `devops-aws` | `git remote -v` muestra el repositorio; `git status` limpio tras el primer commit | ⏳ |
 | T002 | ➡️ Movida a `002-pipeline-cicd` como **T207** (ruleset `main-protection`) | — | — | — | ➡️ |
 | T003 | [P] Crear `.editorconfig` y `Directory.Build.props` (net10.0, `Nullable`, `AnalysisLevel=latest-recommended`, advertencias de seguridad como error) | T001 | `dev-dotnet` | Los archivos existen y la compilación los aplica (T006) | ⏳ |
 | T004 | [P] Revisar la alineación de `constitution.md`, `AGENTS.md`, subagentes, skills y specs con la skill `verificar-constitucion` | — | `arquitecto` | Tabla de resultados «Alineado» registrada en `memoria.md` | ⏳ |

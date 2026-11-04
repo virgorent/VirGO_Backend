@@ -80,7 +80,7 @@ VirGo-Movil/
 │   └── testing/                     # MainDispatcherRule, fakes y fixtures
 ```
 
-`.github/` no va aquí: vive en la raíz del repositorio `Karasu0001/virGO_App` (`movil-ci.yml`, `movil-codeql.yml`, `movil-release.yml`, `security.yml` y `dependabot.yml`).
+`.github/` no va aquí: vive en la raíz del repositorio `virgorent/virGO_App` (`movil-ci.yml`, `movil-codeql.yml`, `movil-release.yml`, `security.yml` y `dependabot.yml`).
 
 **Dependencias permitidas:**
 

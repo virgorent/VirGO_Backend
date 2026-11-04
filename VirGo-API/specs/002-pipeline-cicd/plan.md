@@ -11,7 +11,7 @@
 
 ## 1. Resumen técnico
 
-Cuatro workflows de GitHub Actions y un ruleset, todos en `.github/` de la **raíz** de `Karasu0001/virGO_App` (GitHub ignora `.github/` en subcarpetas) y compartidos con Móvil:
+Cuatro workflows de GitHub Actions y un ruleset, todos en `.github/` de la **raíz** de `virgorent/virGO_App` (GitHub ignora `.github/` en subcarpetas) y compartidos con Móvil:
 
 - `api-ci.yml` (PR y *push* a `main`): compilación, pruebas, mutación e IaC.
 - `security.yml` (común, todos los PR): secretos y dependencias.
