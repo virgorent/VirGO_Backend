@@ -2,7 +2,7 @@
 
 > Rector SDD. Ante conflicto con otro artefacto, **manda esta constitución**.
 > Filosofía madre: base SDD para proyecto Backend y Móvil, arquitectura ejecutable sin funcionalidad específica.
-> Fuera de alcance en esta etapa: funcionalidades de negocio, entidades CRUD específicas, hosting/CD.
+> Fuera de alcance en esta etapa: funcionalidades de negocio, entidades CRUD específicas y la ejecución de hosting/CD (los proyectos los especifican, pero no se ejecutan hasta su aprobación).
 
 ## 1. Propósito y alcance
 
@@ -31,7 +31,7 @@
 ## 4. Arquitectura
 
 - Estructura SDD obligatoria: `specs/`, `.opencode/`, `.specify/`.
-- Specs numeradas `nv-XX` con `spec.md`, `plan.md`, `task.md`.
+- Specs globales numeradas `nv-XX` con `spec.md`, `plan.md`, `task.md`. Los proyectos usan sus propios specs (sección 11).
 - Aprobación y trazabilidad obligatorias.
 - Sin duplicidad de información entre archivos.
 
@@ -70,3 +70,14 @@
 - `AGENTS.md` dice cómo, `constitution.md` dice qué no se negocia.
 - Specs en `/specs/nv-0X` con plantilla completa.
 - Sin funcionalidad específica hasta siguiente fase.
+
+## 11. Proyectos
+
+| Proyecto | Carpeta | Gobernanza propia |
+|---|---|---|
+| Backend | `VirGo-API/` | `constitution.md`, `AGENTS.md`, `memoria.md`, `specs/NNN-…` |
+| Móvil | `VirGo-Movil/` | `constitution.md`, `AGENTS.md`, `memoria.md`, `specs/NNN-…` |
+
+- Esta constitución manda en los **principios generales**. La de cada proyecto los desarrolla y manda en lo **técnico** de ese proyecto.
+- `.github/` vive en la raíz y se comparte: GitHub no lee esa carpeta dentro de subcarpetas.
+- `Modelo de datos VirGo.md` vive en la raíz porque lo usan ambos proyectos.

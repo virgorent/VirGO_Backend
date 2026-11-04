@@ -1,0 +1,89 @@
+# =========================================================
+# VirGo API — .gitignore (Art. V.10 de constitution.md)
+# Quitar una regla de la sección de seguridad requiere enmienda.
+# =========================================================
+
+# ---------- Seguridad (DevSecOps): secretos y credenciales ----------
+.env
+.env.*
+*.env
+!.env.example
+appsettings.*.local.json
+secrets.json
+*.secrets.json
+**/Properties/launchSettings.local.json
+# Llaves, certificados y almacenes
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+*.crt
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+# Credenciales de nube
+.aws/
+credentials
+*.credentials
+aws-exports.*
+# Configuración local de SAM (puede guardar perfiles o parámetros)
+samconfig.local.toml
+# Configuración local de MCP / agentes (tokens personales)
+opencode.local.json
+.opencode/*.local.*
+# Volcados y logs que pueden contener datos personales o tokens
+*.log
+*.dmp
+logs/
+
+# ---------- .NET ----------
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm64/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+project.lock.json
+project.fragment.lock.json
+artifacts/
+publish/
+*.nupkg
+*.snupkg
+
+# ---------- Pruebas, cobertura y mutación ----------
+TestResults/
+[Tt]est[Rr]esult*/
+coverage/
+coverage*.json
+coverage*.xml
+*.coverage
+*.coveragexml
+StrykerOutput/
+mutation-report*/
+
+# ---------- AWS SAM / CloudFormation ----------
+.aws-sam/
+packaged*.yaml
+cdk.out/
+
+# ---------- IDEs y editores ----------
+.vs/
+.idea/
+*.swp
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# ---------- Sistema operativo ----------
+.DS_Store
+Thumbs.db
+desktop.ini

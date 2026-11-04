@@ -1,0 +1,30 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "aws-docs": {
+      "type": "local",
+      "command": ["uvx", "awslabs.aws-documentation-mcp-server@latest"],
+      "environment": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "enabled": true
+    },
+    "mongodb": {
+      "type": "local",
+      "command": ["npx", "-y", "mongodb-mcp-server@latest"],
+      "environment": {
+        "MDB_MCP_CONNECTION_STRING": "{env:VIRGO_MONGO_MCP_URI}",
+        "MDB_MCP_READ_ONLY": "true"
+      },
+      "enabled": false
+    },
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_MCP_PAT}"
+      },
+      "enabled": false
+    }
+  }
+}
