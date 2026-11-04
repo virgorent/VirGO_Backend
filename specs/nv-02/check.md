@@ -29,7 +29,8 @@
 | Control | Evidencia | Estado |
 |---|---|---|
 | Gitleaks en PR, `main` y semanal | Configurado en `security.yml`; primer run pendiente | ✅ |
-| Dependency review en PRs | Configurado en `security.yml`; primer run pendiente | ✅ |
+| Dependency review en PRs | Configurado; se ejecuta solo con cambios en manifiestos | ✅ |
+| Dependency graph habilitado | Requiere un administrador en Settings → Code security and analysis | ⏳ |
 | Dependabot semanal (Actions, NuGet, Gradle) | `.github/dependabot.yml` | ✅ |
 | Acciones fijadas por SHA | `security.yml` (checkout, dependency review) | ✅ |
 | Ruleset configurado | `.github/rulesets/main-protection.json` | ✅ |
@@ -46,6 +47,7 @@
 ## 4. Pendiente operativo
 
 - Aplicar `.github/rulesets/main-protection.json` con permisos de administración y verificar con `gh api repos/virgorent/virGO_App/rulesets`.
+- Habilitar **Dependency graph** en `Settings → Code security and analysis`.
 - Antes del primer PR de código, añadir los checks SAST/pruebas de cada proyecto al ruleset.
 
 ## 5. Resultado

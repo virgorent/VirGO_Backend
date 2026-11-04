@@ -1,0 +1,11 @@
+title = "virGO_APP gitleaks"
+
+[allowlist]
+description = "Ejemplos ficticios de tokens en documentación; no son credenciales reales"
+regexes = [
+  '''eyJhbGciOiJIUzI1NiIs\.\.\.''',
+  '''q3Jx\.\.\.Base64Url''',
+]
+paths = [
+  '''\.gitleaks\.toml''',
+]

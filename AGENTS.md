@@ -64,7 +64,7 @@ Skills en `.opencode/skills/` guían el trabajo por fase. Cada proyecto define a
 ## 7. DevSecOps (gates obligatorios)
 
 - **Secretos**: Gitleaks en cada PR y push a `main`; sin secretos en código, logs, errores ni historial.
-- **Dependencias**: Dependabot semanal y `dependency-review` en PRs; no fusionar con vulnerabilidades altas.
+- **Dependencias**: Dependabot semanal y `dependency-review` en PRs que cambien manifiestos; requiere Dependency graph habilitado. No fusionar con vulnerabilidades altas.
 - **SAST y pruebas**: los workflows de cada proyecto (`api-*.yml`, `movil-*.yml`) ejecutan CodeQL/linters y pruebas; hasta que existan, el ruleset solo exige `gitleaks` y `dependency review`. Antes del primer PR de código se añaden esos checks al ruleset.
 - **Mínimo privilegio**: workflows con `permissions` acotados; nube por OIDC, sin llaves de larga duración.
 - **Rama protegida**: PR obligatorio, una revisión, checks requeridos, sin force push ni borrado.

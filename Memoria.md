@@ -6,7 +6,7 @@
 ## Estado actual
 
 - **Fecha inicio**: 2026-10-30
-- **Fase**: Gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendiente operativo: aplicar el ruleset de `main`).
+- **Fase**: Gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendientes operativos: aplicar el ruleset de `main` y habilitar Dependency graph).
 - **Objetivo**: Monorepo SDD con `VirGo-API` y `VirGo-Movil` en especificación, sin código todavía.
 - **Constitución global**: v1.0.0, ratificada el 2026-11-04.
 
@@ -22,7 +22,7 @@
 | 2026-11-04 | Cerrar `nv-00` y `nv-01` como Cumplido | La estructura existe y se verificó con `check.md` |
 | 2026-11-04 | Plantillas SDD en `.specify/templates/` y `.specify/memory/` | Evitar specs ad hoc y asegurar controles de seguridad desde el diseño |
 | 2026-11-04 | Baseline DevSecOps en `.github/` | Gitleaks, dependency review, Dependabot y ruleset compartidos por ambos proyectos |
-| 2026-11-04 | Cerrar `nv-02` como Cumplido con pendiente operativo | La gobernanza, plantillas y baseline están verificados; falta aplicar el ruleset de `main` con permisos de administración |
+| 2026-11-04 | Cerrar `nv-02` como Cumplido con pendientes operativos | La gobernanza, plantillas y baseline están verificados; faltan aplicar el ruleset de `main` y habilitar Dependency graph |
 
 ## Errores a evitar
 
