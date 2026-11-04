@@ -1,0 +1,14 @@
+# Reglas comunes; cada proyecto tiene además su propio .gitignore
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+*.keystore
+opencode.local.json
+.DS_Store
+Thumbs.db
+desktop.ini

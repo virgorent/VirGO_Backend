@@ -21,6 +21,9 @@
 | Agentes | `.opencode/agents/` | Sub-agentes SDD |
 | Skills | `.opencode/skills/` | Guías por fase/habilidad |
 | Templates | `.specify/templates/` | Plantillas reutilizables |
+| Backend | `VirGo-API/` | Proyecto con su propia gobernanza y specs `NNN-…` |
+| Móvil | `VirGo-Movil/` | Proyecto con su propia gobernanza y specs `NNN-…` |
+| Datos | `Modelo de datos VirGo.md` | Modelo de MongoDB compartido |
 
 ## 3. Fases
 
@@ -36,6 +39,8 @@
 - **Specs**: Siempre `spec.md`, `plan.md`, `task.md` por fase
 - **Alineación**: Todos los archivos deben ser coherentes con `constitution.md`
 - **Sin funcionalidad**: No crear código de negocio en esta fase
+
+**Ramas:** `rama-backend` y `rama-movil` entran a `main` por PR. Dentro de una carpeta de proyecto, sigue el `AGENTS.md` de esa carpeta.
 
 ## 5. Sub-agentes
 

@@ -15,6 +15,7 @@
 |---|---|---|
 | 2026-10-30 | Seguir metodología SDD como en api_sdd | Requerido en clase |
 | 2026-10-30 | Crear solo base SDD (nv-00, nv-01) sin funcionalidad | Instrucciones: "Aun no ejecuten las tareas", "Para la funcionalidad especifica... aun no trabajen" |
+| 2026-11-03 | Un solo repositorio con carpetas `VirGo-API/` y `VirGo-Movil/`; esta base queda como gobernanza global | Propuesta en el PR de `docs/sdd-virgo`, para revisión del equipo |
 
 ## Errores a evitar
 

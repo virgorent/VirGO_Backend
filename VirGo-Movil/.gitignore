@@ -1,0 +1,59 @@
+# =========================================================
+# VirGo Móvil — .gitignore (Art. V.8 de constitution.md)
+# Quitar una regla de la sección de seguridad requiere enmienda.
+# =========================================================
+
+# ---------- Seguridad (DevSecOps): secretos y firma ----------
+local.properties
+keystore.properties
+signing.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+.env
+.env.*
+*.env
+!.env.example
+google-services.json
+GoogleService-Info.plist
+# Credenciales de Google Play (para cuando se habilite la publicación)
+play-service-account*.json
+*-service-account.json
+# Configuración local de MCP / agentes (tokens personales)
+opencode.local.json
+.opencode/*.local.*
+# Logs que pueden contener tokens o datos personales
+*.log
+*.hprof
+
+# ---------- Gradle y Kotlin ----------
+.gradle/
+build/
+.kotlin/
+/captures
+.externalNativeBuild/
+.cxx/
+
+# ---------- Artefactos de Android ----------
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+/app/release/
+/app/debug/
+
+# ---------- IDEs ----------
+.idea/
+*.iml
+.navigation/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# ---------- Sistema operativo ----------
+.DS_Store
+Thumbs.db
+desktop.ini
