@@ -4,7 +4,7 @@
 |---|---|
 | Módulo | `000-arquitectura-base` |
 | Versión | 1.1.0 |
-| Estado | Aprobado. Tareas habilitadas. |
+| Estado | Aprobado. 3/39 tareas hechas. |
 | Fecha | 2026-10-29 |
 | Spec / Plan / Check | [spec.md](spec.md) · [plan.md](plan.md) · [check.md](check.md) |
 | Constitución | v1.1.0 |
@@ -21,17 +21,19 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T001 | Confirmar que `VirGo-Movil/` entró a `main` del repositorio `virgorent/virGO_App` con su `.gitignore` DevSecOps (Art. V.8) y su `README.md` en inglés | — | `seguridad-ci` | `git remote -v` correcto; `git check-ignore local.properties` lo ignora | ⏳ |
+| T001 | Confirmar que `VirGo-Movil/` entró a `main` del repositorio `virgorent/virGO_App` con su `.gitignore` DevSecOps (Art. V.8) y su `README.md` en inglés | — | `seguridad-ci` | `git remote -v` correcto; `git check-ignore local.properties` lo ignora | ✅ |
 | T002 | 🧑 Coordinar con `VirGo-API` T207 el ruleset único `main-protection` del repositorio (PR, 1 revisión, checks requeridos, sin *force push* ni borrado) y la protección de push contra secretos | T001 | `seguridad-ci` | Reglas visibles en GitHub (captura o `gh api`) | ⏳ |
-| T003 | [P] Agregar `.editorconfig` (ktlint) y, en la raíz del repositorio, el bloque de `VirGo-Movil` en `.github/dependabot.yml`; la plantilla de PR es común (Gradle agrupado por familia y Actions) | T001 | `seguridad-ci` | Archivos en el repositorio; Dependabot activo | ⏳ |
+| T003 | [P] Agregar `.editorconfig` (ktlint) y, en la raíz del repositorio, el bloque de `VirGo-Movil` en `.github/dependabot.yml`; la plantilla de PR es común (Gradle agrupado por familia y Actions) | T001 | `seguridad-ci` | Archivos en el repositorio; Dependabot activo | ✅ |
 | T004 | [P] Revisar la alineación de la gobernanza con `verificar-constitucion` | — | `arquitecto-movil` | Resultado «Alineado» en `memoria.md` | ⏳ |
-| T037 | [P] Instalar y probar los MCP `figma` (lectura del *canvas* de «Pantallas VirGo») y `github` de `opencode.json`, con tokens en variables de entorno | — | `arquitecto-movil` | `opencode mcp list` los muestra conectados; captura en `memoria.md` | ⏳ |
+| T037 | [P] Instalar y probar los MCP `figma` (lectura del *canvas* de «Pantallas VirGo») y `github` de `opencode.json`, con tokens en variables de entorno | — | `arquitecto-movil` | `opencode mcp list` los muestra conectados; captura en `memoria.md` | ⛔ |
+
+> T037 bloqueada: `figma` responde `HTTP 405` en `https://mcp.figma.com/mcp` (problema conocido de opencode) y `github` sigue deshabilitado; requiere OAuth de Figma y `GITHUB_MCP_PAT`.
 
 ## F1 · Proyecto Gradle y módulos
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T005 | Crear el proyecto (wrapper de Gradle, `settings.gradle.kts`, `gradle/libs.versions.toml`) con versiones **estables y compatibles** de Kotlin, AGP, KSP, Compose BOM y Hilt; registrar las versiones en `memoria.md` | T001 | `dev-android` | `./gradlew help` sin errores; tabla de versiones en la memoria | ⏳ |
+| T005 | Crear el proyecto (wrapper de Gradle, `settings.gradle.kts`, `gradle/libs.versions.toml`) con versiones **estables y compatibles** de Kotlin, AGP, KSP, Compose BOM y Hilt; registrar las versiones en `memoria.md` | T001 | `dev-android` | `./gradlew help` sin errores; tabla de versiones en la memoria | ✅ |
 | T006 | *Convention plugins* en `build-logic/convention`: `virgo.android.application`, `virgo.android.library`, `virgo.android.compose`, `virgo.hilt` y `virgo.jvm.library` (SDK 26/36, JDK 17) | T005 | `dev-android` | Un módulo de prueba aplica los plugins y compila | ⏳ |
 | T007 | Crear `:app` (`mx.virgo.app`) y `:core:designsystem`, `:core:common`, `:core:domain` (JVM puro), `:core:network`, `:core:data`, `:core:datastore` y `:core:testing`, respetando las dependencias permitidas del plan (sección 4) | T006 | `dev-android` | `./gradlew assembleDebug` OK; `:core:domain` sin dependencias de Android | ⏳ |
 | T008 | [P] Configurar ktlint y detekt (`config/detekt.yml`) sin *baseline* de errores | T007 | `dev-android` | `./gradlew ktlintCheck detekt` en verde | ⏳ |

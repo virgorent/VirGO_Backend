@@ -2,7 +2,7 @@
 
 Android app for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`virGO_App`](https://github.com/virgorent/virGO_App) repository consumes the REST API from `../VirGo-API`.
 
-> **Status:** base architecture approved on 2026-11-05. Implementation is starting; there is no application code yet.
+> **Status:** base architecture approved on 2026-11-05. The Gradle scaffold is in place; there is no application code yet.
 
 ## Tech stack
 
@@ -27,9 +27,15 @@ VirGo-Movil/
 ├── constitution.md        # Project rules (Spanish). Everything else must align with it
 ├── AGENTS.md              # Guide for AI agents and contributors
 ├── memoria.md             # Project log: decisions (ADR), contract changes, releases
+├── .editorconfig          # Code style and ktlint settings
 ├── opencode.json          # Approved MCP servers (Figma, GitHub)
 ├── .opencode/             # Sub-agents and internal skills
 ├── specs/                 # One folder per module: spec.md, plan.md, task.md, check.md
+├── build.gradle.kts       # Root plugin declarations
+├── settings.gradle.kts    # Repositories and project name
+├── gradle.properties      # JVM, AndroidX and cache settings
+├── gradlew / gradlew.bat  # Gradle 9.8.2 wrapper
+├── gradle/                # Version catalog and wrapper files
 ├── app/                   # (planned) Application, navigation, root theme
 ├── core/                  # (planned) designsystem, network, data, datastore, common, testing
 ```
@@ -40,11 +46,17 @@ GitHub workflows live in `.github/` at the repository root (`api-*`, `movil-*` a
 
 | Module | Scope | Status |
 |---|---|---|
-| [`000-arquitectura-base`](specs/000-arquitectura-base/spec.md) | Modules, design system, navigation, networking, secure storage, CI/CD | In review |
+| [`000-arquitectura-base`](specs/000-arquitectura-base/spec.md) | Modules, design system, navigation, networking, secure storage, CI/CD | Approved; implementation in progress |
 
 Screen specs (`001-…`) are written one screen or flow at a time, once the backend hands over the HTTPS URL and the tested JSON of the endpoints they consume.
 
 ## Getting started
+
+The Gradle wrapper and root configuration are ready:
+
+```bash
+./gradlew help                        # Verify the wrapper and root build
+```
 
 These commands will work once module `000` is implemented:
 

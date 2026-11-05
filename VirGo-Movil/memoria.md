@@ -7,17 +7,17 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | Campo | Valor |
 |---|---|
 | Constitución | v1.1.0 aprobada por el equipo el 2026-11-05 |
-| Módulo en curso | `000-arquitectura-base`: spec, plan y tareas **aprobados**; tareas habilitadas |
-| Tareas | 0 / 39 hechas |
+| Módulo en curso | `000-arquitectura-base`: aprobado; T001, T003 y T005 hechas |
+| Tareas | 3 / 39 hechas (T037 bloqueada por MCP) |
 | `API_BASE_URL` de *release* | Pendiente (la entrega `VirGo-API` en `002`: T210) |
 | Última versión publicada | Ninguna |
-| Siguiente paso | Ejecutar T001, T003 y T037; resolver P-01/P-02 |
+| Siguiente paso | Ejecutar T006 y T007; desbloquear T037; resolver P-01/P-02 |
 
 ## Módulos
 
 | Módulo | Estado | Notas |
 |---|---|---|
-| `000-arquitectura-base` | 🚧 Aprobado; implementación pendiente | Base técnica sin pantallas del negocio |
+| `000-arquitectura-base` | 🚧 Aprobado; T001/T003/T005 hechas | Base técnica sin pantallas del negocio |
 | `001-…` pantallas | ⏸ No iniciados | Un spec atómico por pantalla o flujo, al vuelo; los primeros serán «Iniciar sesión» y «Cerrar sesión», con el JSON de `VirGo-API` `003` y `004` |
 
 ## Decisiones (ADR)
@@ -49,11 +49,17 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 ## Versiones de librerías
 
-Se llena en T005 con las versiones estables verificadas.
+Versiones fijadas en T005 y verificadas con `./gradlew help`.
 
-| Librería | Versión |
+| Librería / herramienta | Versión |
 |---|---|
-| — | — |
+| Gradle | 9.8.2 |
+| Android Gradle Plugin | 9.5.1 |
+| Kotlin (KGP, Compose y serialización) | 2.4.10 |
+| KSP | 2.3.13 |
+| Hilt | 2.60.1 |
+| Compose BOM | 2026.09.00 |
+| JDK de ejecución local | 25 (el CI usará JDK 17) |
 
 ---
 
@@ -150,3 +156,17 @@ Se llena en T005 con las versiones estables verificadas.
 - **Costo:** $0.
 - **Aprendizaje:** el puerto local del backend debe ser la fuente de verdad para la URL de debug del móvil.
 - **Pendiente:** PR de aprobación/corrección; P-01 (ID de app), P-02 (keystore), MCP Figma/GitHub (T037) y ejecución de T001/T003.
+
+### 2026-11-05 · T001, T003 y T005: repositorio, estilo y proyecto Gradle
+
+- **Autor:** equipo + opencode (`seguridad-ci` / `dev-android`)
+- **Módulo / tareas:** `000-arquitectura-base` · T001, T003 y T005 hechas; T037 bloqueada
+- **Qué se hizo:**
+  - T001: se confirmó el remoto `https://github.com/virgorent/virGO_App.git`, la presencia de `VirGo-Movil/.gitignore` y `README.md`, y que `git check-ignore VirGo-Movil/local.properties` lo ignora.
+  - T003: se agregó `VirGo-Movil/.editorconfig` con `ktlint_official`, longitud máxima de 120 y estilo Kotlin; el bloque `gradle` de `VirGo-Movil` ya existía en `.github/dependabot.yml`.
+  - T005: se creó el wrapper de Gradle 9.8.2, `settings.gradle.kts`, `build.gradle.kts`, `gradle.properties` y `gradle/libs.versions.toml` con AGP 9.5.1, Kotlin 2.4.10, KSP 2.3.13, Hilt 2.60.1 y Compose BOM 2026.09.00. Se usa Kotlin integrado de AGP 9 en módulos Android y KGP 2.4.10 para JVM.
+- **Evidencia:** `./gradlew help` termina en `BUILD SUCCESSFUL`; `git check-ignore -v VirGo-Movil/local.properties` responde con la regla de `.gitignore`.
+- **Decisiones:** AGP 9.5.1 activa Kotlin integrado; no se aplica `org.jetbrains.kotlin.android` en módulos Android. La versión de Kotlin del *catalog* se usa en módulos JVM y en los plugins de Compose y serialización.
+- **Costo:** $0.
+- **Aprendizaje:** con AGP 9 el proyecto no debe declarar `kotlin-android`; el wrapper de Gradle 9.8.2 funciona con el JDK 25 local, aunque el CI mantiene JDK 17.
+- **Pendiente:** T006 (convention plugins), T007 (módulos), T037 (Figma devuelve HTTP 405 y GitHub sigue deshabilitado), P-01 y P-02.

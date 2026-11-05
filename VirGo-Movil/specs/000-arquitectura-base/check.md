@@ -5,15 +5,15 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | Campo | Valor |
 |---|---|
 | Módulo | `000-arquitectura-base` |
-| Estado del spec | Aprobado; implementación pendiente |
+| Estado del spec | Aprobado; implementación en curso |
 | Revisó | Equipo (2026-11-05) |
 | Fecha de cierre | — |
 
 ## 1. Especificación y gobernanza
 
 - [ ] Spec, plan y tareas aprobados por el profesor y el equipo. Equipo: 2026-11-05; profesor: pendiente.
-- [ ] El Constitution Check del plan no tiene ❌ (constitución v1.1.0 aprobada).
-- [ ] `README.md` en inglés y `.gitignore` DevSecOps en el primer commit (T001).
+- [x] El Constitution Check del plan no tiene ❌ (constitución v1.1.0 aprobada).
+- [x] `README.md` en inglés y `.gitignore` DevSecOps en el primer commit (T001). Evidencia: `git ls-tree origin/main VirGo-Movil/.gitignore VirGo-Movil/README.md`; `git check-ignore -v VirGo-Movil/local.properties`.
 - [ ] `verificar-constitucion` sobre la gobernanza: «Alineado» (T004).
 - [ ] MCP `figma` y `github` instalados y probados (T037).
 - [ ] P-01 (ID de la app) y P-02 (custodia del keystore) respondidas.

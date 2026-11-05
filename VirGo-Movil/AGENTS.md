@@ -8,7 +8,7 @@ Guía base para los agentes de IA y las personas que trabajan en este proyecto (
 - **Stack:** Kotlin, Jetpack Compose (Material 3), MVVM/UDF, Hilt, Retrofit + OkHttp + kotlinx.serialization, DataStore, Gradle con *version catalog* y GitHub Actions.
 - **Backend:** `VirGo-API` (.NET 10 en AWS). Su contrato está en el Art. IV.
 - **Diseño de referencia:** la maqueta funcional de VirGo y el archivo de Figma «Pantallas VirGo».
-- **Estado actual:** `000-arquitectura-base` aprobado el 2026-11-05; tareas habilitadas. Todavía **no hay código** de la app. Los specs de pantallas (`001-…`) se crean uno por pantalla o flujo, al vuelo, cuando el backend entregue la URL y el JSON de sus endpoints.
+- **Estado actual:** `000-arquitectura-base` aprobado el 2026-11-05; T001, T003 y T005 hechas. El proyecto Gradle ya existe, pero todavía **no hay código** de la app. Los specs de pantallas (`001-…`) se crean uno por pantalla o flujo, al vuelo, cuando el backend entregue la URL y el JSON de sus endpoints.
 
 ## Estructura del proyecto
 
@@ -18,6 +18,7 @@ La estructura objetivo la define el plan de la arquitectura base:
 VirGo-Movil/
 ├── README.md                  # Portada en inglés (Art. XII.1)
 ├── .gitignore                 # Exclusiones DevSecOps (Art. V.8)
+├── .editorconfig              # Estilo de código y ktlint (T003)
 ├── constitution.md
 ├── AGENTS.md
 ├── memoria.md
@@ -26,15 +27,27 @@ VirGo-Movil/
 │   ├── agents/
 │   └── skills/
 ├── specs/000-arquitectura-base/{spec.md, plan.md, task.md, check.md}
+├── build.gradle.kts           # Plugins raíz (T005)
+├── settings.gradle.kts        # Repositorios y nombre del proyecto (T005)
+├── gradle.properties          # JVM, AndroidX y caché (T005)
+├── gradlew / gradlew.bat      # Wrapper de Gradle 9.8.2 (T005)
+├── gradle/
+│   ├── libs.versions.toml     # Versiones centralizadas (T005)
+│   └── wrapper/               # Jar y propiedades del wrapper (T005)
 ├── app/                       # (pendiente) Aplicación, navegación y tema raíz
 ├── core/                      # (pendiente) designsystem, network, data, datastore, common, testing
-├── gradle/libs.versions.toml  # (pendiente) Versiones centralizadas
 └── (sin .github aquí)         # GitHub solo lee `.github/` de la raíz del repositorio
 ```
 
 En la raíz del repositorio están `.github/` (pendiente: `movil-ci.yml`, `movil-codeql.yml`, `movil-release.yml`, `security.yml`, `rulesets/`) y la gobernanza global. Todos los comandos de abajo se ejecutan dentro de `VirGo-Movil/`.
 
 ## Comandos
+
+Ya funciona el esqueleto de Gradle:
+
+```bash
+./gradlew help                        # Verifica el wrapper y la configuración raíz (T005)
+```
 
 Estos comandos estarán disponibles al terminar la arquitectura base:
 
