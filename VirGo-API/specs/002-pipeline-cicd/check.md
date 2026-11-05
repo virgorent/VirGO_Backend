@@ -5,7 +5,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | Campo | Valor |
 |---|---|
 | Módulo | `002-pipeline-cicd` |
-| Estado del spec | Implementación local; ejecución en GitHub pendiente |
+| Estado del spec | Borrador |
 | Revisó | — |
 | Fecha de cierre | — |
 
@@ -23,12 +23,14 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 |---|---|---|
 | CA-01 *Push* directo rechazado | Salida de `git push` rechazado | ⏳ |
 | CA-02 PR con prueba en rojo bloqueado | Enlace al PR de prueba | ⏳ |
-| CA-03 Secreto detectado | Enlace al job `secrets` fallido | ⏳ |
-| CA-04 Todos los checks y reporte de mutación | Workflows creados; ejecución de GitHub pendiente; Stryker local 36.36 % | 🔄 |
+| CA-03 Secreto detectado | Enlace al job `gitleaks` fallido | ⏳ |
+| CA-04 Todos los checks | Captura de los checks | ⏳ |
 | CA-05 Despliegue manual con URL `https://` | Enlace a la ejecución de `api-deploy.yml` | ⏳ |
 | CA-06 Despliegue desde otra rama se niega | Enlace a la ejecución omitida | ⏳ |
 | CA-07 Humo fallido deja el workflow en rojo | Ejecución de prueba o salida local de `smoke.sh` contra una URL inválida | ⏳ |
 | CA-08 URL en ambas memorias | Enlaces a las entradas de `memoria.md` | ⏳ |
+| CA-09 Reporte de mutación nocturna | Artefacto de Stryker | ⏳ |
+| CA-10 Semgrep bloquea y comenta | Enlace al PR de prueba | ⏳ |
 
 ## 3. Pruebas
 
@@ -36,9 +38,11 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 |---|---|---|
 | Unitarias | Job `build-test` en verde | ⏳ |
 | Integración | Job `build-test` en verde | ⏳ |
-| Seguridad | `VirGo.SecurityTests` 3 pruebas en verde; CodeQL, Gitleaks, *dependency review* y Checkov pendientes de GitHub | 🔄 |
-| Mutación | Puntaje base: 36.36 % · Umbral provisional: 0 % | 🔄 |
+| Seguridad | `VirGo.SecurityTests` en verde; CodeQL, Gitleaks, *dependency review* y Checkov sin hallazgos altos | ⏳ |
+| Mutación | Puntaje base: — % · Umbral fijado: — % | ⏳ |
 | Humo | `smoke.sh` en verde contra producción | ⏳ |
+| Análisis | Semgrep, SonarCloud y ZAP sin hallazgos altos | ⏳ |
+| Validación de longitudes | Job `api-schema` en verde | ⏳ |
 
 ## 4. PR e integración continua
 

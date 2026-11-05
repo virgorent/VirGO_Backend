@@ -7,7 +7,7 @@
 | Estado | En revisión |
 | Fecha | 2026-10-29 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
-| Constitución | v1.2.0 |
+| Constitución | v1.1.0 |
 
 ## 1. Resumen técnico
 
@@ -70,7 +70,7 @@ VirGo-API/
 │   │   ├── Controllers/            # (vacío; lo llenan los módulos funcionales)
 │   │   ├── Middleware/             # CorrelationId, SecurityHeaders
 │   │   ├── Errors/                 # Manejo global de excepciones a Problem Details
-│   │   └── appsettings*.json       # Sin secretos
+│   │   └── appsettings.Example.json # Plantilla; appsettings.json no se sube
 │   ├── VirGo.Application/          # Aplicación
 │   │   ├── Abstractions/           # IRepository<T>, IClock, IUnitOfWork (si aplica)
 │   │   └── Common/                 # Result<T>, errores de aplicación, paginación
@@ -78,12 +78,11 @@ VirGo-API/
 │   │   └── Common/                 # Entity base, value objects comunes
 │   └── VirGo.Infrastructure/       # Infraestructura
 │       ├── Persistence/InMemory/   # Implementación en memoria
-│       ├── Persistence/MongoDb/    # MongoClient único, opciones y repositorios del contrato existente
+│       ├── Persistence/MongoDb/    # MongoClient único, opciones, inicializador de índices
 │       └── DependencyInjection.cs  # AddInfrastructure(config)
 ├── tests/
 │   ├── VirGo.UnitTests/
-│   ├── VirGo.IntegrationTests/
-│   └── VirGo.SecurityTests/          # Controles base de seguridad; se amplía en 002
+│   └── VirGo.IntegrationTests/
 ├── infra/
 │   ├── bootstrap.yaml              # Una sola vez: OIDC, rol de despliegue y presupuesto de $1
 │   └── template.yaml               # SAM: HTTP API, Lambda, parámetros SSM y LogGroup
@@ -140,10 +139,11 @@ VirGo-API/
 
 ### 6.4 Base de datos MongoDB (solo la estructura)
 
-- Clúster Atlas M0 `virgo-cluster`, base `virgo` (producción) y `virgo_dev` (desarrollo).
+- Clúster Atlas M0 `virgo-dev`, base `virgo` (producción) y `virgo_dev` (desarrollo).
 - Un `MongoClient` único por proceso (singleton), creado fuera del manejador para reutilizar conexiones entre invocaciones de Lambda, con `maxPoolSize` de 10 (M0 admite 500 conexiones).
-- `VirGo-Database` es responsable de las colecciones, validadores e índices. La API crea un `MongoClient` singleton y consume el contrato existente; no ejecuta DDL ni inicializa índices al arrancar.
-- Documentos con `_id` UUID (representación estándar), nombres de campo en `camelCase` inglés y fechas en UTC.
+- `MongoIndexInitializer` crea de forma idempotente validadores e índices desde `db/schema/` al arrancar. Así, al ejecutar el primer *task* de usuarios, la base y sus colecciones se crean solas.
+- Documentos con `_id` y referencias como texto UUID (`BsonRepresentation(BsonType.String)`, ADR-28), nombres de campo en `camelCase` inglés y fechas en UTC.
+- La fuente de verdad son los archivos de `db/schema/` (`007-esquema-mongodb`): el inicializador los aplica tal cual.
 
 La base no define entidades: los módulos funcionales documentan sus patrones de llave en su propio plan.
 

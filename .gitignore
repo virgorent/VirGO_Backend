@@ -1,4 +1,6 @@
 # Reglas comunes; cada proyecto tiene además su propio .gitignore
+node_modules/
+*.log
 .env
 .env.*
 !.env.example

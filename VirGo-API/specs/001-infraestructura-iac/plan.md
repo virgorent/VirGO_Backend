@@ -27,7 +27,7 @@ Se valida con `sam validate --lint`, `cfn-lint` y **Checkov** antes de desplegar
 | Región | `us-east-1` |
 | Nombre del stack | `virgo-api-prod` (aplicación) y `virgo-bootstrap` (arranque) |
 | Validación | `sam validate --lint`, `cfn-lint`, `checkov -d infra` |
-| Base de datos | MongoDB Atlas M0, proveedor AWS, región `us-east-1`, clúster `virgo-cluster` |
+| Base de datos | MongoDB Atlas M0, proveedor AWS, región `us-east-1`, clúster `virgo-dev` |
 | MCP de apoyo | `aws-docs` (solo lectura) y `mongodb` (usuario `virgo-mcp` de solo lectura; herramientas de Atlas solo en T101) |
 
 ## 3. Constitution Check
@@ -78,7 +78,7 @@ Se conservan ADR-01 (Lambda + HTTP API), ADR-02 (runtime), ADR-05 (OIDC), ADR-06
 |---|---|---|---|
 | 1 | API Gateway HTTP API | `VirGoHttpApi` | Entrada HTTPS, *throttling* 20 rps / ráfaga 40, CORS |
 | 2 | Lambda | `VirGoApiFunction` (512 MB, 15 s, arm64) | Ejecuta `VirGo.Api` |
-| 3 | MongoDB Atlas M0 (externo) | `virgo-cluster`, bases `virgo` y `virgo_dev` | 512 MB; TLS obligatorio; cifrado en reposo por defecto; usuarios `virgo-api-prod` (`readWrite@virgo`), `virgo-api-dev` (`readWrite@virgo_dev`) y `virgo-mcp` (`read` en ambas) |
+| 3 | MongoDB Atlas M0 (externo) | `virgo-dev`, bases `virgo` y `virgo_dev` | 512 MB; TLS obligatorio; cifrado en reposo por defecto; usuarios `virgo-api-prod` (`readWrite@virgo`), `virgo-api-dev` (`readWrite@virgo_dev`) y `virgo-mcp` (`read` en ambas) |
 | 4 | SSM Parameter Store | `/virgo/prod/jwt-signing-key`, `/virgo/prod/mongo-uri` | Llave JWT (≥ 32 bytes) y cadena de conexión de Atlas, ambas SecureString |
 | 5 | KMS | Llave administrada `aws/ssm` | Cifra el SecureString, sin costo |
 | 6 | IAM | `virgo-github-deploy`, rol de ejecución de la Lambda | Mínimo privilegio |

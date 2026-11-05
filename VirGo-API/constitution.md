@@ -43,7 +43,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | Infraestructura | `VirGo.Infrastructure` | Persistencia (MongoDB), servicios de AWS, implementaciones |
 
 3. **Inyección de dependencias** con el contenedor nativo de .NET. No se instancian servicios con `new` dentro de los controladores.
-4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. `VirGo-Database` es responsable de las colecciones, validadores e índices; la API consume ese contrato y no ejecuta DDL ni modifica la estructura al arrancar.
+4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. La fuente de verdad de campos, validadores e índices es `db/schema/`, mantenida por `VirGo-Database`; la API consume ese contrato y no ejecuta DDL al arrancar.
 5. **Ejecución dual:** la misma aplicación corre localmente con Kestrel y en AWS Lambda. No se mantienen dos bases de código.
 
 ## Artículo IV. Contrato de la API (acuerdo con Móvil)
@@ -66,7 +66,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 6. Hay límites de solicitudes en API Gateway y en la aplicación.
 7. Se envían los encabezados de seguridad y CORS con una lista explícita de orígenes, nunca `*` en producción.
 8. Los logs no contienen datos personales, contraseñas ni tokens.
-9. Las dependencias se revisan con Dependabot y *dependency review*, y el código con análisis estático (CodeQL) en cada PR. La infraestructura como código se analiza con `cfn-lint` y Checkov, y el repositorio se escanea en busca de secretos (Gitleaks y la protección de push de GitHub).
+9. Las dependencias se revisan con Dependabot y *dependency review*, y el código con análisis estático (CodeQL) en cada PR. El código se analiza además con Semgrep y SonarCloud, la API en ejecución con OWASP ZAP, la infraestructura como código con `cfn-lint` y Checkov, y el repositorio se escanea en busca de secretos (Gitleaks y la protección de push de GitHub).
 10. El `.gitignore` existe desde el primer commit y excluye secretos (`.env`, llaves, certificados, credenciales de AWS, `appsettings.*.local.json`), artefactos de compilación y reportes. Agregar una exclusión de seguridad no requiere enmienda; quitarla, sí.
 11. **MongoDB Atlas:** conexión solo por TLS; un usuario por ambiente con el rol mínimo (`readWrite` solo sobre su base de datos; el MCP usa un usuario de solo lectura); la cadena de conexión vive solo en SSM SecureString y en variables de entorno locales. Como Lambda no tiene IP fija sin un NAT Gateway (prohibido por costo), la lista de acceso de red de Atlas admite `0.0.0.0/0`; esto se compensa con TLS, contraseñas aleatorias de 32 caracteres o más, usuarios de mínimo privilegio y alertas de Atlas.
 
@@ -83,8 +83,9 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | Mutación | Stryker.NET (`stryker-config.json`) | Que las pruebas detecten cambios en el código del dominio y la aplicación |
    | Humo | `tests/smoke/` en el CD | El endpoint desplegado responde por HTTPS después de cada despliegue |
 3. La compilación no debe dejar advertencias nuevas. Las advertencias de seguridad se tratan como errores.
-4. Los umbrales de cobertura y de mutación se fijan después de medirlos, nunca antes.
+4. Los umbrales de cobertura y de mutación se fijan después de medirlos, nunca antes. La mutación corre cada noche y bajo demanda, no en cada PR.
 5. No se fusiona un PR con pruebas en rojo.
+6. **Ningún campo sin límite:** todo texto de entrada tiene longitud máxima, se valida en el DTO y en `db/schema/`, y tiene pruebas de seguridad en el límite, en el límite + 1 y con 1500 caracteres.
 
 ## Artículo VII. Infraestructura a costo cero
 
@@ -112,7 +113,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 ## Artículo VIII. Integración y entrega continuas
 
 1. **GitHub** aloja el código. La rama `main` está protegida con un **ruleset** de GitHub: PR obligatorio con una revisión, *status checks* del CI requeridos, sin `push --force` y sin borrar la rama.
-2. **CI** en cada PR: restaurar, compilar, pruebas unitarias, de integración, de seguridad y de mutación, análisis de seguridad (CodeQL, *dependency review*, Gitleaks y Checkov) y validación de la infraestructura. Si el CI falla, se corrige en la misma rama y sobre el mismo spec antes de fusionar.
+2. **CI** en cada PR: restaurar, compilar, pruebas unitarias, de integración y de seguridad, análisis de seguridad (CodeQL, Semgrep, SonarCloud, OWASP ZAP, *dependency review*, Gitleaks y Checkov), validación de la infraestructura y del esquema. Si el CI falla, un comentario en el PR resume qué falló, y se corrige en la misma rama y sobre el mismo spec antes de fusionar.
 3. **CD manual:** el despliegue se lanza a mano desde GitHub con el botón *Run workflow* (`workflow_dispatch`), solo desde `main` y con el CI en verde. Usa el *environment* `production`, sus *secrets* y variables, entra a AWS por OIDC, despliega con SAM, ejecuta las pruebas de humo y publica la **URL HTTPS** en el resumen del workflow.
 4. La URL HTTPS de producción se registra en `memoria.md` y se comparte con el proyecto Móvil como `API_BASE_URL`.
 5. Cada despliegue es reproducible y trazable a su commit.
@@ -157,5 +158,5 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1.0.0 | 2026-10-29 | Versión inicial |
-| 1.1.0 | 2026-11-03 | Lineamientos de la clase del 28 y 29 de octubre: `check.md` y specs atómicos (I.4–I.7), redacción anticipada de specs funcionales (II.2), `.gitignore` y escaneos DevSecOps (V.9–V.10), cinco tipos de prueba con mutación (VI.2, VI.4), servicios auxiliares de AWS y **MongoDB Atlas M0 como base de datos** en lugar de DynamoDB (III.4, V.11, VII), ruleset, CD manual, repositorio único y aprendizaje tras el despliegue (VIII), servidores MCP (XI.6) y README en inglés (XII.1). |
+| 1.1.0 | 2026-11-03 | **Propuesta, pendiente de aprobación del equipo.** Lineamientos de la clase del 28 y 29 de octubre: `check.md` y specs atómicos (I.4–I.7), redacción anticipada de specs funcionales (II.2), `.gitignore` y escaneos DevSecOps (V.9–V.10), cinco tipos de prueba con mutación nocturna y longitudes obligatorias (VI.2, VI.4, VI.6), servicios auxiliares de AWS y **MongoDB Atlas M0 como base de datos** en lugar de DynamoDB (III.4, V.11, VII), ruleset, CD manual, repositorio único y aprendizaje tras el despliegue (VIII), servidores MCP (XI.6) y README en inglés (XII.1). |
 | 1.2.0 | 2026-11-04 | Aprobada por el equipo: `VirGo-Database` administra colecciones, validadores e índices; `VirGo-API` no ejecuta DDL ni modifica la estructura de MongoDB al arrancar, conforme a `API-HANDOFF.md`. |

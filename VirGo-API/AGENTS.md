@@ -6,8 +6,7 @@ Guía base para los agentes de IA y las personas que trabajan en este proyecto (
 
 - **Qué es:** la API REST de VirGo. La consume la app móvil Android (`VirGo-Movil`).
 - **Stack:** .NET 10, ASP.NET Core Web API, AWS Lambda, API Gateway (HTTP API), MongoDB Atlas M0, AWS SAM y GitHub Actions.
-- **Fuente de datos:** `API-HANDOFF.md` entregado por el equipo y el repositorio `VirGo-Database` mandan sobre colecciones, campos, validadores, índices y reglas de persistencia. `Modelo de datos VirGo.md` queda como contexto histórico hasta sincronizar una copia versionada.
-- **Estado actual:** implementación local parcial. Existen la base `000`, las plantillas de `001`, los workflows de `002` y los endpoints de autenticación de `003`/`004`; quedan pendientes las validaciones externas, el despliegue y el cierre formal de los specs.
+- **Estado actual:** implementación local parcial. Existen la base `000`, las plantillas de `001`, los workflows de `002` y el vertical slice de siete endpoints (`003`–`009`); quedan pendientes la validación externa, el despliegue y el cierre formal de los specs.
 
 ## Estructura del proyecto
 
@@ -29,29 +28,32 @@ VirGo-API/
 │   ├── 001-infraestructura-iac/
 │   ├── 002-pipeline-cicd/
 │   ├── 003-auth-login/
-│   └── 004-auth-logout/
+│   ├── 004-auth-logout/
+│   └── 007-esquema-mongodb/
+├── db/                      # schema/ (fuente de verdad) y tools/check_schema.py
 ├── src/                     # VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
 ├── tests/                   # UnitTests, IntegrationTests, SecurityTests, smoke/
 ├── infra/                   # template.yaml (SAM), bootstrap.yaml
-└── (sin .github aquí)       # GitHub solo lee `.github/` de la raíz del repositorio
+└── (sin .github aquí)        # GitHub solo lee `.github/` de la raíz del repositorio
 ```
 
-En la raíz del repositorio están `.github/` con los workflows y el ruleset exportado, la gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`) y `Modelo de datos VirGo.md` como contexto histórico. Todos los comandos de abajo se ejecutan dentro de `VirGo-API/`.
+En la raíz del repositorio están `.github/` con los workflows y el ruleset, la gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`) y `Modelo de datos VirGo.md` como contexto histórico. Todos los comandos de abajo se ejecutan dentro de `VirGo-API/`.
 
 ## Comandos
 
-Comandos de verificación local:
+Estos comandos estarán disponibles al terminar las tareas de la arquitectura base:
 
 ```powershell
 dotnet restore
-dotnet build VirGo.slnx -c Release --no-restore
-dotnet test VirGo.slnx -c Release --no-build # Unitarias, integración y seguridad
+dotnet build -c Release --no-restore
+dotnet test -c Release --no-build            # Unitarias, integración y seguridad
 dotnet tool restore && dotnet stryker        # Pruebas de mutación (Domain y Application)
+python db/tools/check_schema.py              # Límites del esquema; con --live compara contra la base
 dotnet run --project src/VirGo.Api          # http://localhost:5080, usa la persistencia en memoria
 bash tests/smoke/smoke.sh https://<api-url>  # Pruebas de humo contra una URL desplegada
 ```
 
-Orden del pipeline de CI: `restore → build → unitarias → integración → seguridad → mutación`, en paralelo con `Gitleaks`, `dependency review`, `IaC (sam validate, cfn-lint, Checkov)` y `CodeQL`. El despliegue es **manual** con *Run workflow* en `api-deploy.yml`.
+Orden del pipeline de CI: `restore → build → unitarias → integración → seguridad → esquema`, en paralelo con `Semgrep`, `SonarCloud`, `OWASP ZAP`, `CodeQL`, `Gitleaks`, `dependency review` e `IaC (sam validate, cfn-lint, Checkov)`. La mutación corre cada noche. El despliegue es **manual** con *Run workflow* en `api-deploy.yml`.
 
 ## Flujo de trabajo SDD (obligatorio)
 

@@ -1,0 +1,183 @@
+{
+  "collection": "providers",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "providers",
+      "required": [
+        "_id",
+        "userId",
+        "businessName",
+        "category",
+        "description",
+        "zones",
+        "packages",
+        "rating",
+        "status",
+        "createdAt",
+        "updatedAt",
+        "pricing",
+        "responseTime"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "userId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "businessName": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "category": {
+          "bsonType": "string",
+          "enum": [
+            "Catering",
+            "Música",
+            "Fotografía",
+            "Decoración",
+            "Mobiliario"
+          ]
+        },
+        "description": {
+          "bsonType": "string",
+          "minLength": 20,
+          "maxLength": 2000
+        },
+        "zones": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "maxLength": 50
+          }
+        },
+        "packages": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "id": {
+                "bsonType": "string",
+                "maxLength": 36
+              },
+              "name": {
+                "bsonType": "string",
+                "maxLength": 100
+              },
+              "price": {
+                "bsonType": "decimal"
+              },
+              "includes": {
+                "bsonType": [
+                  "string",
+                  "array"
+                ],
+                "items": {
+                  "bsonType": "string",
+                  "maxLength": 200
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "price",
+              "includes"
+            ]
+          }
+        },
+        "gallery": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "url": {
+                "bsonType": "string",
+                "maxLength": 500
+              },
+              "order": {
+                "bsonType": "int",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "url",
+              "order"
+            ]
+          }
+        },
+        "coverUrl": {
+          "bsonType": "string",
+          "maxLength": 500
+        },
+        "rating": {
+          "bsonType": "object",
+          "properties": {
+            "average": {
+              "bsonType": "number",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "count": {
+              "bsonType": "int",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "average",
+            "count"
+          ]
+        },
+        "status": {
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "published"
+          ]
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "updatedAt": {
+          "bsonType": "date"
+        },
+        "pricing": {
+          "bsonType": "string",
+          "enum": [
+            "per_person",
+            "per_event"
+          ]
+        },
+        "responseTime": {
+          "bsonType": "string",
+          "maxLength": 50
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "userId_1_unique",
+      "key": {
+        "userId": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    {
+      "name": "status_1_category_1_businessName_1",
+      "key": {
+        "status": 1,
+        "category": 1,
+        "businessName": 1
+      },
+      "options": {}
+    }
+  ]
+}

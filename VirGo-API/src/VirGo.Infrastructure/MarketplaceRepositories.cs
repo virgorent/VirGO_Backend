@@ -144,8 +144,9 @@ public sealed class MongoQuoteRepository(IMongoDatabase database) : IQuoteReposi
 {
     private readonly IMongoCollection<BsonDocument> quotes = database.GetCollection<BsonDocument>("quotes");
 
-    public Task AddAsync(Quote quote, CancellationToken cancellationToken = default) =>
-        quotes.InsertOneAsync(new BsonDocument
+    public Task AddAsync(Quote quote, CancellationToken cancellationToken = default)
+    {
+        var document = new BsonDocument
         {
             ["_id"] = quote.Id,
             ["clientId"] = quote.ClientId,
@@ -156,16 +157,25 @@ public sealed class MongoQuoteRepository(IMongoDatabase database) : IQuoteReposi
                 ["id"] = quote.TargetId,
                 ["name"] = quote.TargetName
             },
-            ["eventId"] = quote.EventId is null ? BsonNull.Value : quote.EventId,
             ["eventType"] = quote.EventType,
             ["eventDate"] = quote.EventDate,
             ["guests"] = quote.Guests,
             ["requestedServices"] = new BsonArray(quote.RequestedServices),
-            ["message"] = quote.Message is null ? BsonNull.Value : quote.Message,
             ["status"] = quote.Status,
             ["createdAt"] = new BsonDateTime(quote.CreatedAt),
             ["updatedAt"] = new BsonDateTime(quote.UpdatedAt)
-        }, cancellationToken: cancellationToken);
+        };
+        if (quote.EventId is not null)
+        {
+            document["eventId"] = quote.EventId;
+        }
+        if (quote.Message is not null)
+        {
+            document["message"] = quote.Message;
+        }
+
+        return quotes.InsertOneAsync(document, cancellationToken: cancellationToken);
+    }
 }
 
 public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRepository
@@ -189,15 +199,14 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
         return $"VG-{year:D4}-{counter["next"].ToInt32():D4}";
     }
 
-    public Task AddAsync(Booking booking, CancellationToken cancellationToken = default) =>
-        bookings.InsertOneAsync(new BsonDocument
+    public Task AddAsync(Booking booking, CancellationToken cancellationToken = default)
+    {
+        var document = new BsonDocument
         {
             ["_id"] = booking.Id,
             ["folio"] = booking.Folio,
             ["clientId"] = booking.ClientId,
             ["clientName"] = booking.ClientName,
-            ["quoteId"] = booking.QuoteId is null ? BsonNull.Value : booking.QuoteId,
-            ["eventId"] = booking.EventId is null ? BsonNull.Value : booking.EventId,
             ["venue"] = new BsonDocument
             {
                 ["venueId"] = booking.VenueId,
@@ -212,5 +221,16 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
             ["payments"] = new BsonArray(),
             ["createdAt"] = new BsonDateTime(booking.CreatedAt),
             ["updatedAt"] = new BsonDateTime(booking.UpdatedAt)
-        }, cancellationToken: cancellationToken);
+        };
+        if (booking.QuoteId is not null)
+        {
+            document["quoteId"] = booking.QuoteId;
+        }
+        if (booking.EventId is not null)
+        {
+            document["eventId"] = booking.EventId;
+        }
+
+        return bookings.InsertOneAsync(document, cancellationToken: cancellationToken);
+    }
 }

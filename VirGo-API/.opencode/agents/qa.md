@@ -34,6 +34,7 @@ Un reporte con el comando ejecutado, los totales de pruebas, los criterios cumpl
 
 ## Lineamientos de la constitución v1.1.0
 
+- Cada campo de texto tiene pruebas en el límite, en el límite + 1 y con 1500 caracteres.
 - Cubres **cinco tipos de prueba**: unitarias (`VirGo.UnitTests`), integración (`VirGo.IntegrationTests`), seguridad (`VirGo.SecurityTests`), mutación (Stryker.NET) y humo (`tests/smoke/smoke.sh`).
 - **Mutación:** primero mides la línea base y la registras; después propones el umbral (Art. VI.4). Un mutante sobreviviente en una regla de seguridad (bloqueo, expiración, revocación) es un defecto.
 - **Humo:** cada endpoint agrega su caso a `smoke.sh` y debe pasar por HTTPS después del despliegue manual.

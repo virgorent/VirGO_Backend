@@ -1,62 +1,88 @@
 # AGENTS.md — virGO_APP
 
-> Rector: `constitution.md` manda ante conflicto. 
+> Rector: `constitution.md` manda ante conflicto.
 > Este archivo dice **cómo** trabajar. La constitución dice **qué** no se negocia.
 
 ## 1. Forma de trabajo
 
-- **Metodología**: Spec-Driven Development (SDD)
-- **Fase actual**: implementación local de la arquitectura base, IaC, CI/CD y autenticación; sin CRUDs ni entidades de negocio.
-- **Principio**: `spec → plan → task → implementación → check`.
-- **Todo debe alinearse** a `constitution.md`
+- **Metodología**: Spec-Driven Development (SDD).
+- **Fase actual**: gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendiente operativo: aplicar el ruleset de `main`). `VirGo-API` y `VirGo-Movil` están en fase de especificación. **Todavía no hay código.**
+- **Principio**: `spec → plan → task → check`. No ejecutar tareas sin aprobación explícita.
+- **DevSecOps**: ningún cambio se fusiona sin escaneo de secretos, revisión de dependencias y, cuando el proyecto ya tenga su workflow, análisis estático en verde.
+- **Todo debe alinearse** a `constitution.md`.
 
 ## 2. Estructura obligatoria
 
 | Componente | Ruta | Propósito |
 |---|---|---|
-| Constitución | `constitution.md` | Fuente de verdad |
+| Constitución | `constitution.md` | Fuente de verdad global |
 | Manual operativo | `AGENTS.md` | Cómo trabajar |
-| Memoria | `Memoria.md` | Bitácora de decisiones |
-| Specs | `specs/nv-00/`, `specs/nv-01/` | Especificaciones por fase |
-| Agentes | `.opencode/agents/` | Sub-agentes SDD |
-| Skills | `.opencode/skills/` | Guías por fase/habilidad |
-| Templates | `.specify/templates/` | Plantillas reutilizables |
-| Backend | `VirGo-API/` | Proyecto con su propia gobernanza y specs `NNN-…` |
-| Móvil | `VirGo-Movil/` | Proyecto con su propia gobernanza y specs `NNN-…` |
+| Memoria global | `Memoria.md` | Bitácora de decisiones |
+| Specs globales | `specs/nv-00/`, `specs/nv-01/`, `specs/nv-02/` | Fases de gobernanza (spec, plan, task, check) |
+| Plantillas | `.specify/templates/` | Plantillas reutilizables por proyecto |
+| Memoria reutilizable | `.specify/memory/` | Plantilla de bitácora; no duplica `Memoria.md` |
+| Agentes globales | `.opencode/agents/` | Sub-agentes SDD |
+| Skills globales | `.opencode/skills/` | Guías por fase/habilidad |
+| CI/CD compartido | `.github/` | Workflows, Dependabot, ruleset y plantilla de PR |
+| Documentación de apoyo | `docs/` | Notas y diagramas (README) |
+| Scripts de apoyo | `scripts/` | Automatizaciones locales (README) |
+| Backend | `VirGo-API/` | Gobernanza y specs `NNN-…` propios |
+| Móvil | `VirGo-Movil/` | Gobernanza y specs `NNN-…` propios |
 | Datos | `Modelo de datos VirGo.md` | Modelo de MongoDB compartido |
 
 ## 3. Fases
 
 | Fase | Objetivo | Estado |
 |---|---|---|
-| **nv-00** | Constitución SDD - Definir metodología, reglas, límites | Pendiente (crear estructura) |
-| **nv-01** | Arquitectura base - Estructura sin funcionalidad | Pendiente (crear estructura) |
+| **nv-00** | Constitución SDD y reglas globales | Cumplido (2026-11-04) |
+| **nv-01** | Arquitectura base SDD | Cumplido (2026-11-04) |
+| **nv-02** | Gobernanza global de proyectos | Cumplido con pendiente operativo (aplicar ruleset) |
+| **VirGo-API** | Backend .NET 10 (specs `000`–`004`) | Especificación |
+| **VirGo-Movil** | App Android (spec `000`) | Especificación |
 
 ## 4. Convenciones
 
-- **Idioma**: Español/inglés coherente con proyecto
-- **Archivos**: Markdown bien formateado
-- **Specs**: Siempre `spec.md`, `plan.md`, `task.md` por fase
-- **Alineación**: Todos los archivos deben ser coherentes con `constitution.md`
-- **Sin CRUDs de negocio**: la autenticación transversal sí está implementada; los módulos funcionales restantes siguen sujetos a sus specs.
+- **Idioma**: documentación en español; código e identificadores en inglés; README raíz y de proyecto en inglés (los README internos de carpetas van en español).
+- **Archivos**: Markdown bien formateado.
+- **Specs globales**: `nv-XX` con `spec.md`, `plan.md`, `task.md` y `check.md`.
+- **Specs de proyecto**: `NNN-…` con los mismos cuatro archivos; un spec es atómico.
+- **Plantillas**: todo spec nuevo parte de `.specify/templates/`.
+- **Alineación**: todos los archivos deben ser coherentes con `constitution.md`.
+- **Sin duplicidad**: la bitácora canónica es `Memoria.md` (global) o `memoria.md` (proyecto).
+- **Sin funcionalidad**: no crear código de negocio sin spec aprobado.
 
-**Ramas:** `rama-backend` y `rama-movil` entran a `main` por PR. Dentro de una carpeta de proyecto, sigue el `AGENTS.md` de esa carpeta.
+**Ramas:** `main` se protege con el ruleset de `.github/rulesets/main-protection.json` (aplicación manual pendiente). `rama-backend`, `rama-apis` y `rama-movil` integran por PR. Las ramas de trabajo usan `feat/NNN-modulo` o `fix/…`.
 
 ## 5. Sub-agentes
 
-Usar sub-agentes ubicados en `.opencode/agents/` para mantener consistencia con metodología SDD.
+Usar los sub-agentes de `.opencode/agents/` para mantener la metodología SDD. Cada proyecto define además los suyos.
 
 ## 6. Skills
 
-Skills en `.opencode/skills/` guiarán el trabajo por fase.
+Skills en `.opencode/skills/` guían el trabajo por fase. Cada proyecto define además las suyas.
 
-## 7. Verificación
+## 7. DevSecOps (gates obligatorios)
 
-- [ ] `constitution.md` existe y es fuente de verdad
-- [ ] `AGENTS.md` coherente con `constitution.md`
-- [ ] `Memoria.md` creado
-- [ ] `.opencode/agents/` con sub-agentes
-- [ ] `.opencode/skills/` con skills
-- [ ] `specs/nv-00/` con spec.md, plan.md, task.md
-- [ ] `specs/nv-01/` con spec.md, plan.md, task.md
-- [ ] Todo alineado y coherente
+- **Secretos**: Gitleaks en cada PR y push a `main`; sin secretos en código, logs, errores ni historial.
+- **Dependencias**: Dependabot semanal y `dependency-review` en PRs que cambien manifiestos; requiere Dependency graph habilitado. No fusionar con vulnerabilidades altas.
+- **SAST y pruebas**: los workflows de cada proyecto (`api-*.yml`, `movil-*.yml`) ejecutan CodeQL/linters y pruebas; hasta que existan, el ruleset solo exige `gitleaks` y `dependency review`. Antes del primer PR de código se añaden esos checks al ruleset.
+- **Mínimo privilegio**: workflows con `permissions` acotados; nube por OIDC, sin llaves de larga duración.
+- **Rama protegida**: PR obligatorio, una revisión, checks requeridos, sin force push ni borrado.
+- **Release**: artefactos firmados y verificables; credenciales solo en GitHub Secrets.
+- **Plantilla de PR**: `.github/pull_request_template.md` incluye la checklist de seguridad.
+
+## 8. Verificación
+
+- [x] `constitution.md` versionada y vigente
+- [x] `AGENTS.md` coherente con `constitution.md`
+- [x] `Memoria.md` actualizado
+- [x] `.opencode/agents/` con sub-agentes
+- [x] `.opencode/skills/` con skills
+- [x] `specs/nv-00/` con spec, plan, task y check
+- [x] `specs/nv-01/` con spec, plan, task y check
+- [x] `specs/nv-02/` con spec, plan, task y check (pendiente operativo: aplicar ruleset)
+- [x] `.specify/templates/` con plantillas
+- [x] `.specify/memory/` con plantilla de bitácora
+- [x] `.github/` con baseline DevSecOps
+- [ ] Constituciones de proyecto v1.1.0 aprobadas
+- [ ] Specs `000` de cada proyecto aprobados

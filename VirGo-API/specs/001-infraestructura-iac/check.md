@@ -49,7 +49,7 @@ Lista de verificación del módulo (Art. I.4). Se llena conforme avanzan las tar
 
 ## 5. Despliegue
 
-- [ ] Clúster Atlas M0 `virgo-cluster` creado y documentado en `infra/atlas.md` (T101).
+- [ ] Clúster Atlas M0 `virgo-dev` creado y documentado en `infra/atlas.md` (T101).
 - [ ] Stack `virgo-bootstrap` en `CREATE_COMPLETE` (T107).
 - [ ] Stack `virgo-api-prod` desplegado por el workflow manual; commit —
 - [ ] URL HTTPS: —

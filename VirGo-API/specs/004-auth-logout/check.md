@@ -36,6 +36,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | Seguridad | 3 aprobadas · revisión de `seguridad` pendiente | 🔄 |
 | Mutación | Línea base general: 36.36 % · umbral provisional 0 % | 🔄 |
 | Humo | Caso de logout en `smoke.sh` en verde | ⏳ |
+| Validación de longitudes | ➖ Sin cuerpo; `Authorization` de 1500 caracteres da 401 | ⏳ |
 
 ## 4. PR e integración continua
 

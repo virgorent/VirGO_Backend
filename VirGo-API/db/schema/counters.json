@@ -1,0 +1,26 @@
+{
+  "collection": "counters",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "counters",
+      "required": [
+        "_id",
+        "next"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^folio-\\d{4}$"
+        },
+        "next": {
+          "bsonType": "int",
+          "minimum": 1
+        }
+      }
+    }
+  },
+  "indexes": []
+}

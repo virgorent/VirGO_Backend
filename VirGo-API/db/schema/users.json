@@ -1,0 +1,102 @@
+{
+  "collection": "users",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "users",
+      "required": [
+        "_id",
+        "name",
+        "email",
+        "passwordHash",
+        "role",
+        "phone",
+        "isVerified",
+        "createdAt",
+        "updatedAt",
+        "failedLoginCount",
+        "unreadNotices"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "name": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "bsonType": "string",
+          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+          "maxLength": 150
+        },
+        "passwordHash": {
+          "bsonType": "string",
+          "maxLength": 255
+        },
+        "role": {
+          "bsonType": "string",
+          "enum": [
+            "client",
+            "owner",
+            "provider"
+          ]
+        },
+        "phone": {
+          "bsonType": "string",
+          "maxLength": 16
+        },
+        "providerId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "isVerified": {
+          "bsonType": "bool"
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "updatedAt": {
+          "bsonType": "date"
+        },
+        "failedLoginCount": {
+          "bsonType": "int",
+          "minimum": 0
+        },
+        "lockoutEndsAt": {
+          "bsonType": [
+            "date",
+            "null"
+          ]
+        },
+        "unreadNotices": {
+          "bsonType": "int",
+          "minimum": 0
+        },
+        "city": {
+          "bsonType": "string",
+          "maxLength": 80
+        },
+        "defaultGuests": {
+          "bsonType": "int",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "indexes": [
+    {
+      "name": "email_1_unique",
+      "key": {
+        "email": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  ]
+}

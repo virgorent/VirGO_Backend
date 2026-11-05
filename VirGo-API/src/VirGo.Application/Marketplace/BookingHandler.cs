@@ -1,3 +1,4 @@
+using System.Globalization;
 using VirGo.Application.Abstractions;
 using VirGo.Domain.Marketplace;
 
@@ -30,7 +31,7 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
             EventId = string.IsNullOrWhiteSpace(command.EventId) ? null : command.EventId,
             VenueId = venue.Id,
             VenueName = venue.Name,
-            Date = date.ToString("yyyy-MM-dd"),
+            Date = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             Hours = command.Hours,
             Total = total,
             Deposit = command.Deposit is > 0 and var deposit ? Math.Min(deposit, total) : 0,

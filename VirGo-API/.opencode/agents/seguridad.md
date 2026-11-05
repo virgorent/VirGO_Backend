@@ -41,7 +41,7 @@ Una lista de hallazgos con su severidad (crítica, alta, media o baja), el archi
 | Área nueva | Revisión |
 |---|---|
 | `.gitignore` | Las exclusiones de seguridad (Art. V.10) siguen presentes; quitar una es un hallazgo alto |
-| Escaneos | Gitleaks, *dependency review* y Checkov en verde o con cada excepción justificada |
+| Escaneos | Gitleaks, Semgrep, SonarCloud, OWASP ZAP, *dependency review* y Checkov en verde o con cada excepción justificada |
 | Pruebas de seguridad | `VirGo.SecurityTests` cubre autenticación, autorización, entradas, encabezados, CORS, límites y fugas de información de cada endpoint |
 | Ruleset | `main` sin *force push* ni borrado, con PR, revisión y checks requeridos |
 | MCP | Cada MCP usa credenciales de mínimo privilegio desde variables de entorno; ninguno puede escribir en producción |

@@ -2,7 +2,7 @@
 
 REST API for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`virGO_App`](https://github.com/virgorent/virGO_App) repository contains only the backend; the Android app lives in `../VirGo-Movil`.
 
-> **Status:** local implementation of the architecture, infrastructure, pipeline and authentication slice. The API handoff is the data-contract authority; cloud validation and deployment remain pending.
+> **Status:** local implementation of the architecture, infrastructure, pipeline and seven-endpoint vertical slice. Cloud validation and deployment remain pending.
 
 ## Tech stack
 
@@ -15,7 +15,7 @@ REST API for **VirGo**, a platform that connects people organizing an event with
 | Secrets | AWS SSM Parameter Store (SecureString) and GitHub Secrets |
 | Infrastructure as Code | AWS SAM / CloudFormation |
 | CI/CD | GitHub Actions with OIDC to AWS: CI on every PR, manual deploy |
-| Security (DevSecOps) | CodeQL, Dependabot, dependency review, Gitleaks, Checkov, GitHub rulesets |
+| Security (DevSecOps) | CodeQL, Semgrep, SonarCloud, OWASP ZAP, Dependabot, dependency review, Gitleaks, Checkov, GitHub rulesets |
 | Tests | xUnit (unit, integration, security), Testcontainers for MongoDB repositories, Stryker.NET (mutation), smoke tests after deploy |
 
 ## Architecture
@@ -42,6 +42,7 @@ VirGo-API/
 ├── specs/            # One folder per module: spec.md, plan.md, task.md, check.md
 ├── src/              # VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
 ├── tests/            # Unit, Integration, Security, smoke
+├── db/               # MongoDB schema (source of truth) and check tool
 ├── infra/            # SAM template and bootstrap stack
 ```
 
@@ -63,6 +64,7 @@ The project follows **Spec-Driven Development**: no code without an approved spe
 | [`007-venues-catalog`](specs/007-venues-catalog/spec.md) | `GET /api/v1/venues` | Local |
 | [`008-quotes-create`](specs/008-quotes-create/spec.md) | `POST /api/v1/quotes` | Local |
 | [`009-bookings-create`](specs/009-bookings-create/spec.md) | `POST /api/v1/bookings` | Local |
+| [`007-esquema-mongodb`](specs/007-esquema-mongodb/spec.md) | MongoDB schema as the single source of truth | Draft |
 
 ## Getting started
 

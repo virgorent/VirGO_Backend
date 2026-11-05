@@ -1,3 +1,4 @@
+using System.Globalization;
 using VirGo.Application.Abstractions;
 using VirGo.Domain.Marketplace;
 
@@ -31,7 +32,7 @@ public sealed class QuoteHandler(IVenueRepository venues, IQuoteRepository quote
             TargetName = venue.Name,
             EventId = string.IsNullOrWhiteSpace(command.EventId) ? null : command.EventId,
             EventType = command.EventType.Trim(),
-            EventDate = command.EventDate.ToString("yyyy-MM-dd"),
+            EventDate = command.EventDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             Guests = command.Guests,
             RequestedServices = command.RequestedServices,
             Message = command.Message,

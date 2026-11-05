@@ -4,13 +4,17 @@
   "enforcement": "active",
   "conditions": {
     "ref_name": {
-      "include": ["~DEFAULT_BRANCH"],
+      "include": ["refs/heads/main"],
       "exclude": []
     }
   },
   "rules": [
-    { "type": "deletion" },
-    { "type": "non_fast_forward" },
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
     {
       "type": "pull_request",
       "parameters": {
@@ -24,15 +28,15 @@
     {
       "type": "required_status_checks",
       "parameters": {
-        "required_status_checks": [
-          { "context": "api-build-test", "integration_id": 15368 },
-          { "context": "api-mutation", "integration_id": 15368 },
-          { "context": "api-iac", "integration_id": 15368 },
-          { "context": "secrets", "integration_id": 15368 },
-          { "context": "dependency-review", "integration_id": 15368 }
-        ],
         "strict_required_status_checks_policy": true,
-        "do_not_enforce_on_create": false
+        "required_status_checks": [
+          {
+            "context": "gitleaks"
+          },
+          {
+            "context": "dependency review"
+          }
+        ]
       }
     }
   ]

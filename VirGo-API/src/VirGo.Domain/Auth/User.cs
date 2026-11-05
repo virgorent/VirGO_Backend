@@ -23,6 +23,12 @@ public sealed class User
 
     public bool IsVerified { get; init; }
 
+    public int FailedLoginCount { get; set; }
+
+    public DateTime? LockoutEndsAt { get; set; }
+
+    public int UnreadNotices { get; set; }
+
     public DateTime CreatedAt { get; init; }
 
     public DateTime UpdatedAt { get; set; }

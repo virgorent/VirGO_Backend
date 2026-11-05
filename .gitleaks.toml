@@ -1,10 +1,11 @@
-[extend]
-useDefault = true
+title = "virGO_APP gitleaks"
 
 [allowlist]
-description = "Development-only placeholders and generated build output"
+description = "Ejemplos ficticios de tokens en documentación; no son credenciales reales"
+regexes = [
+  '''eyJhbGciOiJIUzI1NiIs\.\.\.''',
+  '''q3Jx\.\.\.Base64Url''',
+]
 paths = [
-  '''(^|/)bin/''',
-  '''(^|/)obj/''',
-  '''appsettings\.json$'''
+  '''\.gitleaks\.toml''',
 ]

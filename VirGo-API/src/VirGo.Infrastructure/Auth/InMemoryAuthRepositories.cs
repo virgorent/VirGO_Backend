@@ -26,6 +26,8 @@ public sealed class InMemoryUserRepository : IUserRepository
             PasswordHash = string.Empty,
             Role = UserRole.Client,
             IsVerified = false,
+            FailedLoginCount = 0,
+            UnreadNotices = 0,
             CreatedAt = now,
             UpdatedAt = now
         };

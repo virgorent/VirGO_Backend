@@ -1,0 +1,79 @@
+{
+  "collection": "sessions",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "sessions",
+      "required": [
+        "_id",
+        "userId",
+        "tokenHash",
+        "createdAt",
+        "expiresAt",
+        "purgeAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "userId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "tokenHash": {
+          "bsonType": "string",
+          "maxLength": 88
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "expiresAt": {
+          "bsonType": "date"
+        },
+        "purgeAt": {
+          "bsonType": "date"
+        },
+        "device": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "revokedAt": {
+          "bsonType": [
+            "date",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "tokenHash_1_unique",
+      "key": {
+        "tokenHash": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    {
+      "name": "userId_1",
+      "key": {
+        "userId": 1
+      },
+      "options": {}
+    },
+    {
+      "name": "purgeAt_ttl",
+      "key": {
+        "purgeAt": 1
+      },
+      "options": {
+        "expireAfterSeconds": 0
+      }
+    }
+  ]
+}

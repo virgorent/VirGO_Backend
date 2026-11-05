@@ -128,3 +128,14 @@ Se llena en T005 con las versiones estables verificadas.
 - **Costo:** $0.
 - **Aprendizaje:** al ser público, todo lo que se suba es visible; Gitleaks y la protección de push son prioritarios.
 - **Pendiente:** coordinar el ruleset con `VirGo-API` T207.
+
+### 2026-11-04 · Regla de longitudes tras la clase
+
+- **Autor:** equipo + Claude Code (`arquitecto-movil`)
+- **Módulo / tareas:** gobernanza · ninguna tarea ejecutada
+- **Qué se hizo:** `sdd-flujo` y `verificar-constitucion` exigen ahora longitud máxima por campo y comprobar lo afirmado contra la realidad.
+- **Evidencia:** archivos en el repositorio.
+- **Decisiones:** ninguna.
+- **Costo:** $0.
+- **Aprendizaje:** ver `VirGo-API/memoria.md`.
+- **Pendiente:** usar las longitudes de `Modelo de datos VirGo.md` (sección 8) en los formularios.

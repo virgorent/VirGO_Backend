@@ -22,7 +22,7 @@
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
 | T100 | Instalar y probar los MCP `aws-docs` y `mongodb` de `opencode.json` | — | `devops-aws` | `opencode mcp list` los muestra conectados; captura en `memoria.md` | ⏳ |
-| T101 | 🧑 Crear en MongoDB Atlas (organización sin método de pago) el clúster M0 `virgo-cluster` en AWS `us-east-1`; los usuarios `virgo-api-prod`, `virgo-api-dev` y `virgo-mcp` (sección 6.1 del plan); la lista de acceso y las alertas; documentarlo en `infra/atlas.md` | T100 | `devops-aws` | `mongosh` conecta por TLS con cada usuario; `virgo-mcp` no puede escribir; captura del nivel M0 (CA-03, CA-09) | ⏳ |
+| T101 | 🧑 Completar en MongoDB Atlas (organización sin método de pago; el clúster ya existe) el clúster M0 `virgo-dev` en AWS `us-east-1`; los usuarios `virgo-api-prod`, `virgo-api-dev` y `virgo-mcp` (sección 6.1 del plan); la lista de acceso y las alertas; documentarlo en `infra/atlas.md` | T100 | `devops-aws` | `mongosh` conecta por TLS con cada usuario; `virgo-mcp` no puede escribir; captura del nivel M0 (CA-03, CA-09) | ⏳ |
 | T110 | Verificar si existe el runtime `dotnet10` administrado en `us-east-1` (ADR-02), registrar el resultado y agregar `AddAWSLambdaHosting(LambdaEventSource.HttpApi)` | `000`: T009 | `devops-aws` | Decisión en `memoria.md`; la app sigue arrancando en local | ⏳ |
 
 ## F1 · Plantillas

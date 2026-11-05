@@ -1,20 +1,28 @@
-## Change
+## Qué cambia
 
-- Task ID:
-- Spec:
-- Module:
+<!-- Describe el cambio en 1-3 frases. -->
 
-## Verification
+## SDD
 
-- [ ] `dotnet build VirGo.slnx -c Release`
-- [ ] `dotnet test VirGo.slnx -c Release`
-- [ ] Relevant IaC and security checks pass
-- [ ] `check.md` updated with evidence
-- [ ] No secrets or personal data were added
+- [ ] Existe `spec.md`, `plan.md` y `task.md` aprobados para este cambio.
+- [ ] La tarea corresponde a un ID de `task.md`.
+- [ ] `check.md` se actualizó con la evidencia.
 
-## Constitution
+## Seguridad (DevSecOps)
 
-- Articles reviewed:
-- [ ] SDD flow followed
-- [ ] Security requirements reviewed
-- [ ] Cost impact recorded in `memoria.md`
+- [ ] Sin secretos, tokens ni datos personales en el diff.
+- [ ] Dependencias revisadas (sin vulnerabilidades altas).
+- [ ] Entradas validadas en la frontera y permisos de mínimo privilegio.
+- [ ] Sin credenciales en logs ni artefactos.
+
+## Verificación
+
+- [ ] Pruebas en verde.
+- [ ] Análisis estático (lint/SAST) en verde.
+- [ ] Gitleaks en verde.
+- [ ] Documentación y bitácora actualizadas (`Memoria.md` global o `memoria.md` del proyecto).
+
+## Datos y validaciones
+
+- [ ] Todo campo de texto nuevo tiene longitud máxima y sus pruebas.
+- [ ] `python VirGo-API/db/tools/check_schema.py` pasa, si cambió el esquema.

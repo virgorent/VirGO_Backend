@@ -33,7 +33,7 @@ El objetivo es que el flujo **spec → rama → PR → CI → merge → deploy m
 |---|---|
 | RF-01 | La rama principal solo acepta cambios por PR, con una revisión aprobada y los checks requeridos en verde; no admite *push* forzado ni borrado. |
 | RF-02 | Cada PR compila la solución y ejecuta las pruebas unitarias, de integración y de seguridad. |
-| RF-03 | Cada PR ejecuta pruebas de mutación sobre el dominio y la aplicación y publica su reporte. |
+| RF-03 | Cada noche y bajo demanda se ejecutan pruebas de mutación sobre el dominio y la aplicación, y se publica su reporte. |
 | RF-04 | Cada PR ejecuta análisis estático de código, revisión de dependencias nuevas, búsqueda de secretos y análisis de seguridad de la infraestructura. |
 | RF-05 | Cada PR valida las plantillas de infraestructura sin desplegarlas. |
 | RF-06 | El despliegue a producción se lanza manualmente, solo desde la rama principal, y usa credenciales temporales. |
@@ -41,6 +41,8 @@ El objetivo es que el flujo **spec → rama → PR → CI → merge → deploy m
 | RF-08 | El resumen del despliegue muestra la URL HTTPS, el commit desplegado y el resultado de las pruebas de humo. |
 | RF-09 | Las dependencias se actualizan con PRs automáticos semanales. |
 | RF-10 | La plantilla de PR pide el ID de la tarea, el spec, los artículos revisados y el estado del `check.md`. |
+| RF-11 | Cada PR analiza el código con dos herramientas de análisis estático y una de calidad, y la API en ejecución con una prueba dinámica. |
+| RF-12 | Si algo falla en un PR, un comentario resume qué falló para que se corrija sobre el mismo spec. |
 
 ## 4. Requerimientos no funcionales
 
@@ -58,11 +60,13 @@ El objetivo es que el flujo **spec → rama → PR → CI → merge → deploy m
 | CA-01 | **Dado** un *push* directo a `main`, **cuando** se intenta, **entonces** GitHub lo rechaza. |
 | CA-02 | **Dado** un PR con una prueba en rojo, **cuando** termina el CI, **entonces** no se puede fusionar. |
 | CA-03 | **Dado** un PR que agrega un secreto de prueba, **cuando** corre el CI, **entonces** el escaneo de secretos falla. |
-| CA-04 | **Dado** un PR, **cuando** termina el CI, **entonces** aparecen los checks de pruebas, mutación, CodeQL, revisión de dependencias, secretos e infraestructura, y el reporte de mutación queda como artefacto. |
+| CA-04 | **Dado** un PR, **cuando** termina el CI, **entonces** aparecen los checks de pruebas, CodeQL, Semgrep, SonarCloud, OWASP ZAP, revisión de dependencias, secretos, infraestructura y esquema. |
 | CA-05 | **Dado** `main` en verde, **cuando** presiono *Run workflow* en el despliegue, **entonces** se despliega, las pruebas de humo pasan y el resumen muestra la URL `https://`. |
 | CA-06 | **Dado** una rama distinta de `main`, **cuando** intento lanzar el despliegue, **entonces** el workflow se niega. |
 | CA-07 | **Dado** un despliegue cuya prueba de humo falla, **cuando** termina, **entonces** el workflow queda en rojo. |
 | CA-08 | **Dado** el despliegue exitoso, **cuando** reviso `memoria.md` de ambos proyectos, **entonces** aparecen la URL y el enlace al OpenAPI. |
+| CA-09 | **Dado** la ejecución nocturna, **cuando** termina, **entonces** el reporte de mutación queda como artefacto. |
+| CA-10 | **Dado** un PR con un hallazgo de Semgrep, **cuando** termina el CI, **entonces** no se puede fusionar y un comentario indica qué falló. |
 
 ## 6. Fuera de alcance
 

@@ -34,6 +34,8 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
             ["passwordHash"] = user.PasswordHash,
             ["role"] = user.Role.ToString().ToLowerInvariant(),
             ["isVerified"] = user.IsVerified,
+            ["failedLoginCount"] = user.FailedLoginCount,
+            ["unreadNotices"] = user.UnreadNotices,
             ["createdAt"] = new BsonDateTime(user.CreatedAt),
             ["updatedAt"] = new BsonDateTime(user.UpdatedAt)
         };
@@ -67,6 +69,9 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
             PasswordHash = document.GetValue("passwordHash").AsString,
             Role = ParseRole(document.GetValue("role").AsString),
             IsVerified = document.TryGetValue("isVerified", out var isVerified) && isVerified.IsBoolean && isVerified.AsBoolean,
+            FailedLoginCount = document.TryGetValue("failedLoginCount", out var failedLoginCount) && failedLoginCount.IsInt32 ? failedLoginCount.AsInt32 : 0,
+            LockoutEndsAt = document.TryGetValue("lockoutEndsAt", out var lockoutEndsAt) && lockoutEndsAt.IsBsonDateTime ? lockoutEndsAt.AsBsonDateTime.ToUniversalTime() : null,
+            UnreadNotices = document.TryGetValue("unreadNotices", out var unreadNotices) && unreadNotices.IsInt32 ? unreadNotices.AsInt32 : 0,
             CreatedAt = document.GetValue("createdAt").AsBsonDateTime.ToUniversalTime(),
             UpdatedAt = document.GetValue("updatedAt").AsBsonDateTime.ToUniversalTime()
         };
