@@ -4,7 +4,7 @@ This file documents the one-time Atlas setup without storing credentials.
 
 ## Target
 
-- Cluster: `virgo-cluster`
+- Cluster: `virgo-dev`
 - Tier: M0
 - Provider/region: AWS `us-east-1`
 - Development database: `virgo_dev`
