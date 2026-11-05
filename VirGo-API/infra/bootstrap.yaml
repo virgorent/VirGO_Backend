@@ -99,8 +99,8 @@ Resources:
           IncludeTax: true
           IncludeSubscription: true
           IncludeSupport: true
-        IncludeDiscount: true
-        UseBlended: false
+          IncludeDiscount: true
+          UseBlended: false
       NotificationsWithSubscribers:
         - Notification:
             NotificationType: ACTUAL
