@@ -6,18 +6,18 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 | Campo | Valor |
 |---|---|
-| Constitución | v1.1.0 **propuesta** (pendiente de aprobación del equipo) |
-| Módulo en curso | `000-arquitectura-base`: spec, plan y tareas **en revisión**; tareas **sin ejecutar** |
+| Constitución | v1.1.0 aprobada por el equipo el 2026-11-05 |
+| Módulo en curso | `000-arquitectura-base`: spec, plan y tareas **aprobados**; tareas habilitadas |
 | Tareas | 0 / 39 hechas |
 | `API_BASE_URL` de *release* | Pendiente (la entrega `VirGo-API` en `002`: T210) |
 | Última versión publicada | Ninguna |
-| Siguiente paso | Evaluación del 2026-11-04: aprobar la enmienda v1.1.0 y `000-arquitectura-base` |
+| Siguiente paso | Ejecutar T001, T003 y T037; resolver P-01/P-02 |
 
 ## Módulos
 
 | Módulo | Estado | Notas |
 |---|---|---|
-| `000-arquitectura-base` | 📝 En revisión | Base técnica sin pantallas del negocio |
+| `000-arquitectura-base` | 🚧 Aprobado; implementación pendiente | Base técnica sin pantallas del negocio |
 | `001-…` pantallas | ⏸ No iniciados | Un spec atómico por pantalla o flujo, al vuelo; los primeros serán «Iniciar sesión» y «Cerrar sesión», con el JSON de `VirGo-API` `003` y `004` |
 
 ## Decisiones (ADR)
@@ -139,3 +139,14 @@ Se llena en T005 con las versiones estables verificadas.
 - **Costo:** $0.
 - **Aprendizaje:** ver `VirGo-API/memoria.md`.
 - **Pendiente:** usar las longitudes de `Modelo de datos VirGo.md` (sección 8) en los formularios.
+
+### 2026-11-05 · Aprobación de la gobernanza móvil y corrección del puerto local
+
+- **Autor:** equipo + opencode (`arquitecto-movil`)
+- **Módulo / tareas:** gobernanza · `000-arquitectura-base` · T001/T003/T037 habilitadas
+- **Qué se hizo:** se aprobó la constitución v1.1.0 y el spec, plan y tareas de `000`; se corrigió el puerto local de la API de `5080` a `5122` en `spec.md` y `plan.md` para alinearlo con `VirGo-API/src/VirGo.Api/Properties/launchSettings.json`.
+- **Evidencia:** `git diff --check` limpio; `launchSettings.json` usa `http://localhost:5122`.
+- **Decisiones:** el equipo aprueba la gobernanza móvil el 2026-11-05; el visto bueno del profesor queda pendiente en `check.md`.
+- **Costo:** $0.
+- **Aprendizaje:** el puerto local del backend debe ser la fuente de verdad para la URL de debug del móvil.
+- **Pendiente:** PR de aprobación/corrección; P-01 (ID de app), P-02 (keystore), MCP Figma/GitHub (T037) y ejecución de T001/T003.
