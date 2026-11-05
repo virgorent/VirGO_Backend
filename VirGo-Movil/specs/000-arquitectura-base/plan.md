@@ -4,7 +4,7 @@
 |---|---|
 | Módulo | `000-arquitectura-base` |
 | Versión | 1.1.0 |
-| Estado | En revisión |
+| Estado | Aprobado |
 | Fecha | 2026-10-29 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) |
 | Constitución | v1.1.0 |
@@ -135,7 +135,7 @@ VirGo-Movil/
 
 | Elemento | Definición |
 |---|---|
-| `API_BASE_URL` | *debug*: `local.properties → virgo.apiBaseUrl` o, por defecto, `http://10.0.2.2:5080/`. *release*: variable de GitHub `VIRGO_API_BASE_URL` (debe ser `https://`) |
+| `API_BASE_URL` | *debug*: `local.properties → virgo.apiBaseUrl` o, por defecto, `http://10.0.2.2:5122/`. *release*: variable de GitHub `VIRGO_API_BASE_URL` (debe ser `https://`) |
 | Interceptores de OkHttp | `CorrelationIdInterceptor` (UUID en `X-Correlation-Id`), `AuthInterceptor` (lee `TokenStore`; si hay token, agrega `Authorization: Bearer`) y `HttpLoggingInterceptor` solo en *debug* con nivel `BASIC` |
 | Tiempos de espera | Conexión 10 s, lectura 20 s |
 | `HealthApi` | `GET health` → `HealthDto(status)` |

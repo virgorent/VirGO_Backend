@@ -1,6 +1,6 @@
 # Constitution — VirGo Móvil (Android)
 
-**Versión:** 1.1.0 (propuesta, pendiente de aprobación del equipo) · **Ratificada:** 2026-10-29 · **Última enmienda:** 2026-11-03
+**Versión:** 1.1.0 · **Ratificada:** 2026-10-29 · **Última enmienda:** 2026-11-03
 
 Este documento norma el proyecto Móvil de VirGo. Todos los demás archivos (`AGENTS.md`, `memoria.md`, subagentes, skills y specs) deben estar alineados con él. Si un archivo lo contradice, prevalece este documento y el otro archivo se corrige.
 
@@ -143,4 +143,4 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | 1.0.0 | 2026-10-29 | Versión inicial |
-| 1.1.0 | 2026-11-03 | **Propuesta, pendiente de aprobación del equipo.** Lineamientos de la clase del 28 y 29 de octubre: `check.md` y specs atómicos por pantalla (I.4–I.7), redacción anticipada (II.2), `.gitignore` y Gitleaks (V.6, V.8), cinco tipos de prueba con mutación y humo (VI.6–VI.7), ruleset, CD manual, Google Play como destino futuro, entrega de URL y JSON por el backend, repositorio único y aprendizaje tras el release (VIII), servidores MCP (XI.6) y README en inglés (XII.1). |
+| 1.1.0 | 2026-11-03 | **Aprobada por el equipo el 2026-11-05.** Lineamientos de la clase del 28 y 29 de octubre: `check.md` y specs atómicos por pantalla (I.4–I.7), redacción anticipada (II.2), `.gitignore` y Gitleaks (V.6, V.8), cinco tipos de prueba con mutación y humo (VI.6–VI.7), ruleset, CD manual, Google Play como destino futuro, entrega de URL y JSON por el backend, repositorio único y aprendizaje tras el release (VIII), servidores MCP (XI.6) y README en inglés (XII.1). |

@@ -6,18 +6,18 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 | Campo | Valor |
 |---|---|
-| Constitución | v1.1.0 **propuesta** (pendiente de aprobación del equipo) |
-| Módulo en curso | `000-arquitectura-base`: spec, plan y tareas **en revisión**; tareas **sin ejecutar** |
-| Tareas | 0 / 39 hechas |
+| Constitución | v1.1.0 aprobada por el equipo el 2026-11-05 |
+| Módulo en curso | `000-arquitectura-base`: T001, T003, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014 hechas |
+| Tareas | 12 / 39 hechas (T037 bloqueada por MCP) |
 | `API_BASE_URL` de *release* | Pendiente (la entrega `VirGo-API` en `002`: T210) |
 | Última versión publicada | Ninguna |
-| Siguiente paso | Evaluación del 2026-11-04: aprobar la enmienda v1.1.0 y `000-arquitectura-base` |
+| Siguiente paso | Ejecutar T006 y T007; desbloquear T037; resolver P-01/P-02 |
 
 ## Módulos
 
 | Módulo | Estado | Notas |
 |---|---|---|
-| `000-arquitectura-base` | 📝 En revisión | Base técnica sin pantallas del negocio |
+| `000-arquitectura-base` | 🚧 Aprobado; T001/T003/T005 hechas | Base técnica sin pantallas del negocio |
 | `001-…` pantallas | ⏸ No iniciados | Un spec atómico por pantalla o flujo, al vuelo; los primeros serán «Iniciar sesión» y «Cerrar sesión», con el JSON de `VirGo-API` `003` y `004` |
 
 ## Decisiones (ADR)
@@ -49,11 +49,17 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 ## Versiones de librerías
 
-Se llena en T005 con las versiones estables verificadas.
+Versiones fijadas en T005 y verificadas con `./gradlew help`.
 
-| Librería | Versión |
+| Librería / herramienta | Versión |
 |---|---|
-| — | — |
+| Gradle | 9.8.2 |
+| Android Gradle Plugin | 9.5.1 |
+| Kotlin (KGP, Compose y serialización) | 2.4.10 |
+| KSP | 2.3.13 |
+| Hilt | 2.60.1 |
+| Compose BOM | 2026.09.00 |
+| JDK de ejecución local | 25 (el CI usará JDK 17) |
 
 ---
 
@@ -139,3 +145,60 @@ Se llena en T005 con las versiones estables verificadas.
 - **Costo:** $0.
 - **Aprendizaje:** ver `VirGo-API/memoria.md`.
 - **Pendiente:** usar las longitudes de `Modelo de datos VirGo.md` (sección 8) en los formularios.
+
+### 2026-11-05 · Aprobación de la gobernanza móvil y corrección del puerto local
+
+- **Autor:** equipo + opencode (`arquitecto-movil`)
+- **Módulo / tareas:** gobernanza · `000-arquitectura-base` · T001/T003/T037 habilitadas
+- **Qué se hizo:** se aprobó la constitución v1.1.0 y el spec, plan y tareas de `000`; se corrigió el puerto local de la API de `5080` a `5122` en `spec.md` y `plan.md` para alinearlo con `VirGo-API/src/VirGo.Api/Properties/launchSettings.json`.
+- **Evidencia:** `git diff --check` limpio; `launchSettings.json` usa `http://localhost:5122`.
+- **Decisiones:** el equipo aprueba la gobernanza móvil el 2026-11-05; el visto bueno del profesor queda pendiente en `check.md`.
+- **Costo:** $0.
+- **Aprendizaje:** el puerto local del backend debe ser la fuente de verdad para la URL de debug del móvil.
+- **Pendiente:** PR de aprobación/corrección; P-01 (ID de app), P-02 (keystore), MCP Figma/GitHub (T037) y ejecución de T001/T003.
+
+### 2026-11-05 · T001, T003 y T005: repositorio, estilo y proyecto Gradle
+
+- **Autor:** equipo + opencode (`seguridad-ci` / `dev-android`)
+- **Módulo / tareas:** `000-arquitectura-base` · T001, T003 y T005 hechas; T037 bloqueada
+- **Qué se hizo:**
+  - T001: se confirmó el remoto `https://github.com/virgorent/virGO_App.git`, la presencia de `VirGo-Movil/.gitignore` y `README.md`, y que `git check-ignore VirGo-Movil/local.properties` lo ignora.
+  - T003: se agregó `VirGo-Movil/.editorconfig` con `ktlint_official`, longitud máxima de 120 y estilo Kotlin; el bloque `gradle` de `VirGo-Movil` ya existía en `.github/dependabot.yml`.
+  - T005: se creó el wrapper de Gradle 9.8.2, `settings.gradle.kts`, `build.gradle.kts`, `gradle.properties` y `gradle/libs.versions.toml` con AGP 9.5.1, Kotlin 2.4.10, KSP 2.3.13, Hilt 2.60.1 y Compose BOM 2026.09.00. Se usa Kotlin integrado de AGP 9 en módulos Android y KGP 2.4.10 para JVM.
+- **Evidencia:** `./gradlew help` termina en `BUILD SUCCESSFUL`; `git check-ignore -v VirGo-Movil/local.properties` responde con la regla de `.gitignore`.
+- **Decisiones:** AGP 9.5.1 activa Kotlin integrado; no se aplica `org.jetbrains.kotlin.android` en módulos Android. La versión de Kotlin del *catalog* se usa en módulos JVM y en los plugins de Compose y serialización.
+- **Costo:** $0.
+- **Aprendizaje:** con AGP 9 el proyecto no debe declarar `kotlin-android`; el wrapper de Gradle 9.8.2 funciona con el JDK 25 local, aunque el CI mantiene JDK 17.
+- **Pendiente:** T006 (convention plugins), T007 (módulos), T037 (Figma devuelve HTTP 405 y GitHub sigue deshabilitado), P-01 y P-02.
+
+### 2026-11-05 · T006, T007, T008 y T009: convention plugins, estructura modular y herramientas de calidad
+
+- **Autor:** equipo + opencode (`dev-android` / `seguridad-ci`)
+- **Módulo / tareas:** `000-arquitectura-base` · T006, T007, T008 y T009 hechas
+- **Qué se hizo:**
+  - T006: Se implementaron los *convention plugins* en `build-logic/convention`: `virgo.android.application`, `virgo.android.library`, `virgo.android.compose`, `virgo.hilt` y `virgo.jvm.library`.
+  - T007: Se crearon e integraron en `settings.gradle.kts` los módulos `:app` y la capa `:core:*` (`:core:designsystem`, `:core:common`, `:core:domain`, `:core:network`, `:core:data`, `:core:datastore`, `:core:testing`).
+  - T008: Se configuraron Ktlint y Detekt en `build.gradle.kts` y `config/detekt.yml` ajustando `jvmTarget = "17"` para compatibilidad con la Toolchain de Kotlin y JDK local.
+  - T009: Configuración básica de Hilt en `VirGoApplication`, `MainActivity` y el módulo de dispatchers en `:core:common`.
+- **Evidencia:** `./gradlew ktlintCheck detekt assembleDebug` finaliza con `BUILD SUCCESSFUL`.
+- **Decisiones:** Se fuerza `jvmTarget = "17"` en las tareas de Kotlin y Detekt para alinearse con el JDK 17 exigido por la constitución.
+- **Costo:** $0.
+- **Aprendizaje:** Detekt requiere la especificación explícita de `jvmTarget` cuando la JVM de ejecución difiere de la JVM objetivo del proyecto.
+- **Pendiente:** Fase 2 (Sistema de diseño en `:core:designsystem`: T010-T014).
+
+### 2026-11-05 · T010 a T014: Sistema de diseño en `:core:designsystem`
+
+- **Autor:** equipo + opencode (`ui-designsystem` / `dev-android`)
+- **Módulo / tareas:** `000-arquitectura-base` · T010, T011, T012, T013 y T014 hechas
+- **Qué se hizo:**
+  - T010 & T012: Creación de `Color.kt`, `Shape.kt`, `Spacing.kt` y `Theme.kt` con la paleta de la marca VirGo (`#7357F6`, `#F5F5F7`, Slate palette) y `VirGoTheme` para modo claro y oscuro.
+  - T011: Configuración de `Type.kt` con `VirGoTypography` según la escala tipográfica de Material 3.
+  - T013: Implementación de componentes atómicos en `:core:designsystem`: `VirGoButton`, `VirGoOutlinedButton`, `VirGoTextField` (con toggle de contraseña e input background `#F5F5F7`), `VirGoCard` y `VirGoBadge`.
+  - T014: Ajustes de accesibilidad (áreas táctiles >= 48 dp, contraste AA) y actualización de `.editorconfig` y `detekt.yml` para soportar convenciones de Jetpack Compose (`@Composable`).
+- **Evidencia:** `./gradlew ktlintCheck detekt assembleDebug` finaliza con `BUILD SUCCESSFUL`.
+- **Decisiones:** Se adaptaron las reglas de ktlint y detekt para permitir nombres en mayúscula en composables y listas de parámetros extendidas en componentes de UI.
+- **Costo:** $0.
+- **Aprendizaje:** ktlint requiere `ktlint_function_naming_ignore_when_annotated_with = Composable` en `.editorconfig` para no reportar nombres de funciones composables como violaciones de estilo.
+- **Pendiente:** Fase 3 (Arranque y navegación: T015-T017) e integración de la pantalla de Login basada en el diseño recibido.
+
+
