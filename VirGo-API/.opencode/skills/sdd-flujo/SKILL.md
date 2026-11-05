@@ -51,13 +51,15 @@ Secciones obligatorias:
 - Estados: ⏳ Pendiente, 🔄 En curso, ✅ Hecha (con evidencia) y ⛔ Bloqueada (con motivo).
 - Cada RF y cada CA del spec debe quedar cubierto por al menos una tarea. Agrega al final la matriz de trazabilidad.
 
+> **Ningún campo sin límite:** cada campo de texto del spec declara su longitud máxima, y sus pruebas cubren el límite, el límite + 1 y 1500 caracteres.
+
 ## 5. `check.md`: evidencia
 
 Secciones obligatorias, todas con una columna o casilla para la evidencia:
 
 1. **Especificación:** atomicidad, matriz completa, Constitution Check sin ❌, preguntas abiertas resueltas, MCP listos.
 2. **Criterios de aceptación:** una fila por CA con la prueba o captura que lo demuestra.
-3. **Pruebas:** una fila por tipo (unitarias, integración, seguridad, mutación, humo; en Móvil también UI) con totales o ➖ justificado.
+3. **Pruebas:** una fila de validación de longitudes y una fila por tipo (unitarias, integración, seguridad, mutación, humo; en Móvil también UI) con totales o ➖ justificado.
 4. **PR e integración continua:** enlace al PR, checks en verde, revisión.
 5. **Despliegue o release:** ejecución manual, commit, URL o versión.
 6. **Memoria y aprendizaje:** entrada en `memoria.md` y mejoras propuestas a la constitución, `AGENTS.md`, skills y subagentes.

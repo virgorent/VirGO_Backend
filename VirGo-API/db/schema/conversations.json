@@ -1,0 +1,98 @@
+{
+  "collection": "conversations",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "conversations",
+      "required": [
+        "_id",
+        "clientId",
+        "target",
+        "targetUserId",
+        "lastMessage",
+        "lastAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "clientId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "target": {
+          "bsonType": "object",
+          "properties": {
+            "type": {
+              "bsonType": "string",
+              "enum": [
+                "venue",
+                "provider"
+              ]
+            },
+            "id": {
+              "bsonType": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "name": {
+              "bsonType": "string",
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "name"
+          ]
+        },
+        "targetUserId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "quoteId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "lastMessage": {
+          "bsonType": "string",
+          "maxLength": 200
+        },
+        "lastAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "clientId_1_lastAt_-1",
+      "key": {
+        "clientId": 1,
+        "lastAt": -1
+      },
+      "options": {}
+    },
+    {
+      "name": "targetUserId_1_lastAt_-1",
+      "key": {
+        "targetUserId": 1,
+        "lastAt": -1
+      },
+      "options": {}
+    },
+    {
+      "name": "clientId_1_targetType_1_targetId_1_unique",
+      "key": {
+        "clientId": 1,
+        "target.type": 1,
+        "target.id": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  ]
+}

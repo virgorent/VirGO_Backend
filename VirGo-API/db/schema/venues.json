@@ -1,0 +1,335 @@
+{
+  "collection": "venues",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "venues",
+      "required": [
+        "_id",
+        "ownerId",
+        "name",
+        "shortName",
+        "description",
+        "address",
+        "zone",
+        "location",
+        "capacity",
+        "price",
+        "services",
+        "photos",
+        "categories",
+        "rating",
+        "verified",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "ownerId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "name": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "shortName": {
+          "bsonType": "string",
+          "maxLength": 20
+        },
+        "description": {
+          "bsonType": "string",
+          "minLength": 20,
+          "maxLength": 2000
+        },
+        "address": {
+          "bsonType": "string",
+          "maxLength": 200
+        },
+        "zone": {
+          "bsonType": "string",
+          "enum": [
+            "Juriquilla",
+            "Centro",
+            "El Refugio",
+            "Santa Fe",
+            "Antea",
+            "Jurica",
+            "Corregidora",
+            "El Marqués"
+          ]
+        },
+        "location": {
+          "bsonType": "object",
+          "properties": {
+            "type": {
+              "bsonType": "string",
+              "enum": [
+                "Point"
+              ]
+            },
+            "coordinates": {
+              "bsonType": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "bsonType": "number"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ]
+        },
+        "capacity": {
+          "bsonType": "int",
+          "minimum": 1
+        },
+        "price": {
+          "bsonType": "object",
+          "properties": {
+            "base": {
+              "bsonType": "decimal"
+            },
+            "unit": {
+              "bsonType": "string",
+              "enum": [
+                "hour",
+                "day"
+              ]
+            },
+            "minHours": {
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "weekendPct": {
+              "bsonType": "number",
+              "minimum": 0
+            },
+            "highSeasonPct": {
+              "bsonType": "number",
+              "minimum": 0
+            },
+            "highSeasonMonths": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "int",
+                "minimum": 1,
+                "maximum": 12
+              }
+            }
+          },
+          "required": [
+            "base",
+            "unit",
+            "minHours"
+          ]
+        },
+        "amenities": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": [
+              "Estacionamiento",
+              "Cocina",
+              "Aire acondicionado",
+              "Pista de baile",
+              "Sonido",
+              "Pantalla LED"
+            ]
+          }
+        },
+        "services": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "name": {
+                "bsonType": "string",
+                "maxLength": 100
+              },
+              "included": {
+                "bsonType": "bool"
+              },
+              "price": {
+                "bsonType": "decimal"
+              }
+            },
+            "required": [
+              "name",
+              "included",
+              "price"
+            ]
+          }
+        },
+        "photos": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "url": {
+                "bsonType": "string",
+                "maxLength": 500
+              },
+              "order": {
+                "bsonType": "int",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "url",
+              "order"
+            ]
+          }
+        },
+        "setups": {
+          "bsonType": "object",
+          "properties": {
+            "banquet": {
+              "bsonType": "int",
+              "minimum": 0
+            },
+            "auditorium": {
+              "bsonType": "int",
+              "minimum": 0
+            },
+            "cocktail": {
+              "bsonType": "int",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "banquet",
+            "auditorium",
+            "cocktail"
+          ]
+        },
+        "floorPlanUrl": {
+          "bsonType": "string",
+          "maxLength": 500
+        },
+        "tour360Url": {
+          "bsonType": "string",
+          "maxLength": 500
+        },
+        "categories": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": [
+              "Salon",
+              "Jardin",
+              "Terraza",
+              "Hacienda",
+              "Rooftop",
+              "Salon de eventos"
+            ]
+          }
+        },
+        "rating": {
+          "bsonType": "object",
+          "properties": {
+            "average": {
+              "bsonType": "number",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "count": {
+              "bsonType": "int",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "average",
+            "count"
+          ]
+        },
+        "verified": {
+          "bsonType": "bool"
+        },
+        "status": {
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "review",
+            "published"
+          ]
+        },
+        "allies": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "providerId": {
+                "bsonType": "string",
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+              },
+              "name": {
+                "bsonType": "string",
+                "maxLength": 100
+              },
+              "category": {
+                "bsonType": "string",
+                "enum": [
+                  "Banquete",
+                  "Fotografía",
+                  "Video",
+                  "Música",
+                  "Flores",
+                  "Pastelería",
+                  "Mobiliario",
+                  "Animación",
+                  "Maquillaje"
+                ]
+              }
+            },
+            "required": [
+              "providerId",
+              "name",
+              "category"
+            ]
+          }
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "updatedAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "location_2dsphere_status_1",
+      "key": {
+        "location": "2dsphere",
+        "status": 1
+      },
+      "options": {}
+    },
+    {
+      "name": "ownerId_1",
+      "key": {
+        "ownerId": 1
+      },
+      "options": {}
+    },
+    {
+      "name": "status_1_zone_1_categories_1",
+      "key": {
+        "status": 1,
+        "zone": 1,
+        "categories": 1
+      },
+      "options": {}
+    }
+  ]
+}

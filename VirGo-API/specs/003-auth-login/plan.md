@@ -183,6 +183,7 @@ Login: 1 lectura por el índice de `email` + 1 actualización de `users` + 1 ins
 |---|---|
 | Unitarias | `Email` normaliza y rechaza formatos inválidos; `LoginHandler`: éxito, contraseña incorrecta, correo inexistente, quinto fallo bloquea, bloqueo vigente, éxito reinicia el contador, *rehash*; `JwtTokenService` incluye `sub`, `sid`, `role` y expira en 15 min |
 | Integración | Repositorios `MongoUserRepository` y `MongoSessionRepository` contra Testcontainers (índice único, TTL creado); 200 con la forma exacta del JSON y `camelCase`; correo con mayúsculas; 400 con `errors`; 401 genérico; 429 al sexto intento; sesión creada en el repositorio en memoria; aparece en `/openapi/v1.json` |
+| Longitudes | `email` de 150 pasa y de 151 da 400; `password` de 128 pasa y de 129 da 400; `device` de 100 pasa y de 101 da 400; 1500 caracteres en cada campo da 400 |
 | Seguridad | Mismo cuerpo y estado para correo inexistente y contraseña incorrecta; diferencia de tiempo acotada; contraseña y tokens ausentes de los logs (logger de prueba); `tokenHash` ≠ `refreshToken`; contraseña de 129 caracteres → 400; *payloads* tipo inyección (`{"$ne":null}`, `' OR 1=1`) → 400 o 401, nunca 500; límite por IP → 429 |
 | Mutación | Stryker sobre `LoginHandler`, `Email` y la lógica de bloqueo; sin mutantes sobrevivientes en las condiciones de bloqueo |
 | Humo | `POST {ApiUrl}/api/v1/auth/login` con datos inválidos → 401 `application/problem+json` |

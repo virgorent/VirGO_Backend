@@ -15,7 +15,7 @@ REST API for **VirGo**, a platform that connects people organizing an event with
 | Secrets | AWS SSM Parameter Store (SecureString) and GitHub Secrets |
 | Infrastructure as Code | AWS SAM / CloudFormation |
 | CI/CD | GitHub Actions with OIDC to AWS: CI on every PR, manual deploy |
-| Security (DevSecOps) | CodeQL, Dependabot, dependency review, Gitleaks, Checkov, GitHub rulesets |
+| Security (DevSecOps) | CodeQL, Semgrep, SonarCloud, OWASP ZAP, Dependabot, dependency review, Gitleaks, Checkov, GitHub rulesets |
 | Tests | xUnit (unit, integration, security), Testcontainers for MongoDB repositories, Stryker.NET (mutation), smoke tests after deploy |
 
 ## Architecture
@@ -42,6 +42,7 @@ VirGo-API/
 ├── specs/            # One folder per module: spec.md, plan.md, task.md, check.md
 ├── src/              # (planned) VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
 ├── tests/            # (planned) Unit, Integration, Security, smoke
+├── db/               # MongoDB schema (source of truth) and check tool
 ├── infra/            # (planned) SAM template and bootstrap stack
 ```
 
@@ -58,6 +59,7 @@ The project follows **Spec-Driven Development**: no code without an approved spe
 | [`002-pipeline-cicd`](specs/002-pipeline-cicd/spec.md) | CI with DevSecOps checks, rulesets, manual CD, smoke tests | Draft |
 | [`003-auth-login`](specs/003-auth-login/spec.md) | `POST /api/v1/auth/login` | Draft |
 | [`004-auth-logout`](specs/004-auth-logout/spec.md) | `POST /api/v1/auth/logout` | Draft |
+| [`007-esquema-mongodb`](specs/007-esquema-mongodb/spec.md) | MongoDB schema as the single source of truth | Draft |
 
 ## Getting started
 

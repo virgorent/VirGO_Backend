@@ -1,0 +1,217 @@
+{
+  "collection": "bookings",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "bookings",
+      "required": [
+        "_id",
+        "folio",
+        "clientId",
+        "clientName",
+        "venue",
+        "date",
+        "hours",
+        "total",
+        "deposit",
+        "status",
+        "payments",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "folio": {
+          "bsonType": "string",
+          "pattern": "^VG-\\d{4}-\\d{4,}$"
+        },
+        "clientId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "clientName": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "eventId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "quoteId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "venue": {
+          "bsonType": "object",
+          "properties": {
+            "venueId": {
+              "bsonType": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "name": {
+              "bsonType": "string",
+              "maxLength": 100
+            },
+            "photoUrl": {
+              "bsonType": "string",
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "venueId",
+            "name",
+            "photoUrl"
+          ]
+        },
+        "date": {
+          "bsonType": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "hours": {
+          "bsonType": "int",
+          "minimum": 1
+        },
+        "total": {
+          "bsonType": "decimal"
+        },
+        "deposit": {
+          "bsonType": "decimal"
+        },
+        "status": {
+          "bsonType": "string",
+          "enum": [
+            "pending_payment",
+            "confirmed",
+            "cancelled"
+          ]
+        },
+        "extras": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "name": {
+                "bsonType": "string",
+                "maxLength": 100
+              },
+              "price": {
+                "bsonType": "decimal"
+              }
+            },
+            "required": [
+              "name",
+              "price"
+            ]
+          }
+        },
+        "payments": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "paymentId": {
+                "bsonType": "string",
+                "maxLength": 36
+              },
+              "concept": {
+                "bsonType": "string",
+                "maxLength": 150
+              },
+              "amount": {
+                "bsonType": "decimal"
+              },
+              "method": {
+                "bsonType": "string",
+                "enum": [
+                  "card",
+                  "transfer",
+                  "external"
+                ]
+              },
+              "reference": {
+                "bsonType": "string",
+                "maxLength": 100
+              },
+              "status": {
+                "bsonType": "string",
+                "enum": [
+                  "completed",
+                  "pending",
+                  "failed",
+                  "refunded"
+                ]
+              },
+              "paidAt": {
+                "bsonType": "date"
+              }
+            },
+            "required": [
+              "paymentId",
+              "concept",
+              "amount",
+              "method",
+              "status"
+            ]
+          }
+        },
+        "cancellation": {
+          "bsonType": "object",
+          "properties": {
+            "at": {
+              "bsonType": "date"
+            },
+            "refund": {
+              "bsonType": "decimal"
+            }
+          },
+          "required": [
+            "at",
+            "refund"
+          ]
+        },
+        "rescheduledFrom": {
+          "bsonType": "string",
+          "maxLength": 10
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "updatedAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "folio_1_unique",
+      "key": {
+        "folio": 1
+      },
+      "options": {
+        "unique": true
+      }
+    },
+    {
+      "name": "clientId_1_date_-1",
+      "key": {
+        "clientId": 1,
+        "date": -1
+      },
+      "options": {}
+    },
+    {
+      "name": "venueId_1_date_1",
+      "key": {
+        "venue.venueId": 1,
+        "date": 1
+      },
+      "options": {}
+    }
+  ]
+}

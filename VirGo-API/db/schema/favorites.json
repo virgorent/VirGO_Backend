@@ -1,0 +1,71 @@
+{
+  "collection": "favorites",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "favorites",
+      "required": [
+        "_id",
+        "userId",
+        "targetType",
+        "targetId",
+        "name",
+        "photoUrl",
+        "rating",
+        "createdAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "userId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "targetType": {
+          "bsonType": "string",
+          "enum": [
+            "venue",
+            "provider"
+          ]
+        },
+        "targetId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "name": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "photoUrl": {
+          "bsonType": "string",
+          "maxLength": 500
+        },
+        "rating": {
+          "bsonType": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "createdAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "userId_1_targetType_1_targetId_1_unique",
+      "key": {
+        "userId": 1,
+        "targetType": 1,
+        "targetId": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  ]
+}

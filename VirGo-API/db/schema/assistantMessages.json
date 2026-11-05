@@ -1,0 +1,65 @@
+{
+  "collection": "assistantMessages",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "assistantMessages",
+      "required": [
+        "_id",
+        "userId",
+        "role",
+        "text",
+        "createdAt",
+        "purgeAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "userId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "role": {
+          "bsonType": "string",
+          "enum": [
+            "user",
+            "assistant"
+          ]
+        },
+        "text": {
+          "bsonType": "string",
+          "maxLength": 4000
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "purgeAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "userId_1_createdAt_-1",
+      "key": {
+        "userId": 1,
+        "createdAt": -1
+      },
+      "options": {}
+    },
+    {
+      "name": "purgeAt_ttl",
+      "key": {
+        "purgeAt": 1
+      },
+      "options": {
+        "expireAfterSeconds": 0
+      }
+    }
+  ]
+}

@@ -40,6 +40,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | Seguridad | Totales: — · Revisión de `seguridad` sin hallazgos altos | ⏳ |
 | Mutación | Puntaje: — % (umbral — %) · Sobrevivientes en el bloqueo: 0 | ⏳ |
 | Humo | Caso de login en `smoke.sh` en verde | ⏳ |
+| Validación de longitudes | `email`, `password` y `device`: límite, límite + 1 y 1500 caracteres | ⏳ |
 
 ## 4. PR e integración continua
 

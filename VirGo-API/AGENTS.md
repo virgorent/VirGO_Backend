@@ -28,7 +28,9 @@ VirGo-API/
 │   ├── 001-infraestructura-iac/
 │   ├── 002-pipeline-cicd/
 │   ├── 003-auth-login/
-│   └── 004-auth-logout/
+│   ├── 004-auth-logout/
+│   └── 007-esquema-mongodb/
+├── db/                      # schema/ (fuente de verdad) y tools/check_schema.py
 ├── src/                     # (pendiente) VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
 ├── tests/                   # (pendiente) VirGo.UnitTests, VirGo.IntegrationTests, VirGo.SecurityTests, smoke/
 ├── infra/                   # (pendiente) template.yaml (SAM), bootstrap.yaml
@@ -46,11 +48,12 @@ dotnet restore
 dotnet build -c Release --no-restore
 dotnet test -c Release --no-build            # Unitarias, integración y seguridad
 dotnet tool restore && dotnet stryker        # Pruebas de mutación (Domain y Application)
+python db/tools/check_schema.py              # Límites del esquema; con --live compara contra la base
 dotnet run --project src/VirGo.Api          # http://localhost:5080, usa la persistencia en memoria
 bash tests/smoke/smoke.sh https://<api-url>  # Pruebas de humo contra una URL desplegada
 ```
 
-Orden del pipeline de CI: `restore → build → unitarias → integración → seguridad → mutación`, en paralelo con `Gitleaks`, `dependency review`, `IaC (sam validate, cfn-lint, Checkov)` y `CodeQL`. El despliegue es **manual** con *Run workflow* en `api-deploy.yml`.
+Orden del pipeline de CI: `restore → build → unitarias → integración → seguridad → esquema`, en paralelo con `Semgrep`, `SonarCloud`, `OWASP ZAP`, `CodeQL`, `Gitleaks`, `dependency review` e `IaC (sam validate, cfn-lint, Checkov)`. La mutación corre cada noche. El despliegue es **manual** con *Run workflow* en `api-deploy.yml`.
 
 ## Flujo de trabajo SDD (obligatorio)
 

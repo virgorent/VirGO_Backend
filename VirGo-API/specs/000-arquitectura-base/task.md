@@ -25,7 +25,7 @@
 | T002 | ➡️ Movida a `002-pipeline-cicd` como **T207** (ruleset `main-protection`) | — | — | — | ➡️ |
 | T003 | [P] Crear `.editorconfig` y `Directory.Build.props` (net10.0, `Nullable`, `AnalysisLevel=latest-recommended`, advertencias de seguridad como error) | T001 | `dev-dotnet` | Los archivos existen y la compilación los aplica (T006) | ⏳ |
 | T004 | [P] Revisar la alineación de `constitution.md`, `AGENTS.md`, subagentes, skills y specs con la skill `verificar-constitucion` | — | `arquitecto` | Tabla de resultados «Alineado» registrada en `memoria.md` | ⏳ |
-| T005 | [P] Agregar en la raíz del repositorio `.github/pull_request_template.md` (lista con el ID de tarea y los artículos revisados) y `.github/dependabot.yml` (NuGet semanal, Actions mensual) | T001 | `devops-aws` | Archivos en el repositorio; Dependabot aparece activo en GitHub | ⏳ |
+| T005 | [P] Agregar en la raíz del repositorio `.github/PULL_REQUEST_TEMPLATE.md` (lista con el ID de tarea y los artículos revisados) y `.github/dependabot.yml` (NuGet semanal, Actions mensual) | T001 | `devops-aws` | Archivos en el repositorio; Dependabot aparece activo en GitHub | ⏳ |
 
 ## F1 · Solución y capas
 
@@ -90,7 +90,8 @@
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
 | T034 | ➡️ Movida a `001-infraestructura-iac` como **T108** (prueba de borrado) | — | — | — | ➡️ |
-| T035 | Completar `check.md`; verificación final con `verificar-constitucion`; marcar el spec, el plan y las tareas como *Cerrado*; entrada de cierre en `memoria.md` | T001–T027, `001`: T109, `002`: T211 | `qa` + `arquitecto` | Resultado «Alineado» y todos los criterios de aceptación con evidencia | ⏳ |
+| T036 | Regla global de longitudes: atributos de longitud en todos los DTO con los límites de `db/schema/`, y 400 en Problem Details al superarlos | T012 | `dev-dotnet` | Prueba de seguridad: un campo de 1500 caracteres recibe 400 | ⏳ |
+| T035 | Completar `check.md`; verificación final con `verificar-constitucion`; marcar el spec, el plan y las tareas como *Cerrado*; entrada de cierre en `memoria.md` | T001–T027, T036, `001`: T109, `002`: T211, `007`: T706 | `qa` + `arquitecto` | Resultado «Alineado» y todos los criterios de aceptación con evidencia | ⏳ |
 
 ---
 
@@ -115,6 +116,7 @@ Los IDs con prefijo `001:` o `002:` están en esos módulos.
 | RF-13 CD y URL HTTPS ➡️ | `002`:T208, `002`:T209 |
 | RF-14 Infraestructura como código ➡️ | `001`:T102, `001`:T103, `001`:T108 |
 | RF-15 Alerta de presupuesto ➡️ | `001`:T102, `001`:T107 |
+| RF-16 Longitudes | T036, `007`:T702 |
 | RNF-01 Costo $0 | `001`:T103, `001`:T104, `002`:T209 |
 | RNF-02 Seguridad | `002`:T207, T014, T016, `001`:T105, `002`:T205, `001`:T107 |
 | RNF-03 Arranque < 3 s | `002`:T209 |

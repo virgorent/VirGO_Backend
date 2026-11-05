@@ -29,6 +29,8 @@ description: Revisa que un spec, plan, task.md, PR o archivo del backend de VirG
    - Cada RF y cada CA del spec tenga al menos una tarea.
    - Las rutas, nombres de proyectos y servicios coincidan en el spec, el plan, el `task.md` y `AGENTS.md`.
    - Exista el `check.md` y tenga una fila por cada CA y por cada tipo de prueba.
+   - Ningún campo de texto quede sin longitud máxima (en el backend, `python db/tools/check_schema.py`).
+   - Lo que se afirma se haya comprobado contra la realidad: base, repositorio y paquetes, no solo contra otro documento.
    - Los MCP de `opencode.json` sean los mismos de la tabla «Servidores MCP» de `AGENTS.md`.
 5. **Resultado:** *Alineado* si no hay ningún ❌, o *No alineado* con la lista de correcciones necesarias.
 6. Registra el resultado con la skill `registrar-memoria`.

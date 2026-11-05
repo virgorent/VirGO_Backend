@@ -1,0 +1,118 @@
+{
+  "collection": "reviews",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$and": [
+      {
+        "$jsonSchema": {
+          "bsonType": "object",
+          "title": "reviews",
+          "required": [
+            "_id",
+            "targetType",
+            "targetId",
+            "authorId",
+            "authorName",
+            "stars",
+            "text",
+            "createdAt"
+          ],
+          "properties": {
+            "_id": {
+              "bsonType": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "targetType": {
+              "bsonType": "string",
+              "enum": [
+                "venue",
+                "provider"
+              ]
+            },
+            "targetId": {
+              "bsonType": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "authorId": {
+              "bsonType": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "authorName": {
+              "bsonType": "string",
+              "maxLength": 100
+            },
+            "stars": {
+              "bsonType": "int",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "text": {
+              "bsonType": "string",
+              "maxLength": 1000
+            },
+            "bookingId": {
+              "bsonType": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "reply": {
+              "bsonType": "object",
+              "properties": {
+                "text": {
+                  "bsonType": "string",
+                  "maxLength": 1000
+                },
+                "at": {
+                  "bsonType": "date"
+                }
+              },
+              "required": [
+                "text",
+                "at"
+              ]
+            },
+            "createdAt": {
+              "bsonType": "date"
+            }
+          }
+        }
+      },
+      {
+        "$or": [
+          {
+            "targetType": "venue",
+            "bookingId": {
+              "$exists": true,
+              "$type": "string"
+            }
+          },
+          {
+            "targetType": "provider"
+          }
+        ]
+      }
+    ]
+  },
+  "indexes": [
+    {
+      "name": "targetType_1_targetId_1_createdAt_-1",
+      "key": {
+        "targetType": 1,
+        "targetId": 1,
+        "createdAt": -1
+      },
+      "options": {}
+    },
+    {
+      "name": "targetType_1_targetId_1_authorId_1_unique",
+      "key": {
+        "targetType": 1,
+        "targetId": 1,
+        "authorId": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  ]
+}

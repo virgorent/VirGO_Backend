@@ -11,9 +11,10 @@
 
 ## 1. Resumen técnico
 
-Cuatro workflows de GitHub Actions y un ruleset, todos en `.github/` de la **raíz** de `virgorent/virGO_App` (GitHub ignora `.github/` en subcarpetas) y compartidos con Móvil:
+Cinco workflows de GitHub Actions y un ruleset, todos en `.github/` de la **raíz** de `virgorent/virGO_App` (GitHub ignora `.github/` en subcarpetas) y compartidos con Móvil:
 
-- `api-ci.yml` (PR y *push* a `main`): compilación, pruebas, mutación e IaC.
+- `api-ci.yml` (PR y *push* a `main`): compilación, pruebas, Semgrep, SonarCloud, OWASP ZAP, IaC, esquema y comentario de calidad.
+- `api-mutation-nightly.yml` (cada noche y `workflow_dispatch`): Stryker.
 - `security.yml` (común, todos los PR): secretos y dependencias.
 - `api-codeql.yml` (PR, *push* a `main` y semanal): análisis de C#.
 - `api-deploy.yml` (**solo `workflow_dispatch`**, botón *Run workflow*): OIDC, `sam build`/`sam deploy`, humo y URL en el resumen.
@@ -26,6 +27,8 @@ Cuatro workflows de GitHub Actions y un ruleset, todos en `.github/` de la **ra�
 | Plataforma | GitHub Actions, `ubuntu-latest` |
 | .NET | `actions/setup-dotnet` con SDK 10.0.x y caché de NuGet |
 | Mutación | Stryker.NET como *dotnet tool* local (`.config/dotnet-tools.json`) |
+| SAST y calidad | Semgrep (`.semgrep/semgrep.yaml`, reglas propias y `p/csharp`), SonarCloud con quality gate y cobertura |
+| DAST | OWASP ZAP en modo *baseline* contra la API levantada en el runner |
 | Secretos | Gitleaks (CLI) sobre el diff del PR y el historial completo en `main` |
 | Dependencias | `actions/dependency-review-action` y Dependabot |
 | IaC | `sam validate --lint`, `cfn-lint`, Checkov |
@@ -60,11 +63,13 @@ virGO_App/                           # Raíz del repositorio
 │   │   ├── api-ci.yml
 │   │   ├── api-codeql.yml
 │   │   ├── api-deploy.yml
+│   │   ├── api-mutation-nightly.yml
 │   │   └── security.yml             # Común con Móvil
 │   ├── rulesets/main-protection.json
 │   ├── dependabot.yml               # Un bloque por carpeta
-│   └── pull_request_template.md
+│   └── PULL_REQUEST_TEMPLATE.md
 ├── .gitleaks.toml                   # Reglas extra y rutas permitidas
+├── .semgrep/semgrep.yaml
 └── VirGo-API/
     ├── .config/dotnet-tools.json    # dotnet-stryker
     ├── stryker-config.json
@@ -81,9 +86,11 @@ virGO_App/                           # Raíz del repositorio
 |---|---|---|---|
 | ADR-09 | **CD manual** con `workflow_dispatch` y *environment* `production` | Despliegue automático en cada *merge* | Indicación del curso; la persona decide cuándo sale una versión |
 | ADR-10 | **Ruleset** de GitHub en lugar de la protección de rama clásica | Branch protection rules | Los rulesets son el mecanismo actual, se pueden exportar a JSON y versionar |
-| ADR-14 | **Stryker.NET** para mutación, primero en modo reporte | Sin pruebas de mutación | Mide la calidad real de las pruebas; el umbral se fija después de medir (Art. VI.4) |
+| ADR-14 | **Stryker.NET** para mutación, cada noche y primero en modo reporte | Sin pruebas de mutación | Mide la calidad real de las pruebas; el umbral se fija después de medir (Art. VI.4) |
 | ADR-15 | **Gitleaks + dependency review** | Solo el *secret scanning* de GitHub | Funcionan en repositorios privados sin GitHub Advanced Security |
 | ADR-16 | Proyecto **`VirGo.SecurityTests`** separado | Mezclar en integración | Se puede ejecutar y reportar como check independiente |
+| ADR-30 | **Semgrep, SonarCloud y OWASP ZAP** en cada PR | Solo CodeQL | Lo pidió la clase del 2026-11-04 y lo usa la referencia; SonarCloud es gratis en repositorio público |
+| ADR-31 | **Mutación nocturna**, fuera de los checks requeridos | Mutación en cada PR | Mantiene el CI bajo 15 minutos, como la referencia |
 | ADR-26 | **Un solo repositorio** con carpetas `VirGo-API/` y `VirGo-Movil/`; job `changes` en lugar de filtros `paths` | Dos repositorios; un proyecto por rama | Decisión del equipo. Un job omitido por `if` cuenta como exitoso; un workflow omitido por `paths` deja el check requerido pendiente y bloquea el PR |
 
 ## 6. Diseño
@@ -94,7 +101,11 @@ virGO_App/                           # Raíz del repositorio
 |---|---|---|
 | `changes` | Detecta si el PR toca `VirGo-API/**` o el propio workflow; los demás jobs usan `needs: changes` e `if` | — |
 | `api-build-test` | restore → build (`-warnaserror` para seguridad) → `VirGo.UnitTests` → `VirGo.IntegrationTests` (incluye los repositorios de MongoDB con Testcontainers; el runner trae Docker) → `VirGo.SecurityTests` → cobertura como artefacto | ✅ |
-| `api-mutation` | `dotnet tool restore` → `dotnet stryker` sobre `VirGo.Domain` y `VirGo.Application` → reporte HTML como artefacto. `break` en 0 hasta medir; después se fija el umbral | ✅ |
+| `api-semgrep` | Semgrep con `.semgrep/semgrep.yaml` y `p/csharp` | ✅ |
+| `api-sonarcloud` | Análisis, cobertura y quality gate | ✅ |
+| `api-zap` | Levanta la API con persistencia en memoria y ejecuta ZAP *baseline* | ✅ |
+| `api-schema` | `python db/tools/check_schema.py` | ✅ |
+| `pr-quality-gate` | Con `if: always()`, comenta en el PR qué job falló y el comando para reproducirlo; el agente corrige sobre el mismo spec y rama | — |
 | `api-iac` | `sam validate --lint` → `cfn-lint infra/*.yaml` → `checkov -d infra` | ✅ |
 
 Todos con `defaults.run.working-directory: VirGo-API`, `permissions: contents: read` y `concurrency` para cancelar ejecuciones obsoletas.
@@ -135,14 +146,14 @@ JWT con `alg: none`, firma inválida, expirado, emisor o audiencia incorrectos �
 
 ### 6.5 Ruleset `main-protection`
 
-Objetivo: rama por defecto. Reglas: *Restrict deletions*, *Block force pushes*, *Require a pull request* (1 aprobación, descartar aprobaciones al subir cambios, resolver conversaciones), *Require status checks* (`api-build-test`, `api-mutation`, `api-iac`, `api-codeql`, `secrets`, `dependency-review` y los de Móvil: `movil-build-test` y `movil-codeql`). Se exporta a `.github/rulesets/main-protection.json` como evidencia.
+Objetivo: rama por defecto. Reglas: *Restrict deletions*, *Block force pushes*, *Require a pull request* (1 aprobación, descartar aprobaciones al subir cambios, resolver conversaciones), *Require status checks* (`api-build-test`, `api-semgrep`, `api-sonarcloud`, `api-zap`, `api-iac`, `api-schema`, `api-codeql`, `secrets`, `dependency-review` y los de Móvil: `movil-build-test` y `movil-codeql`). Se exporta a `.github/rulesets/main-protection.json` como evidencia.
 
 ## 7. Costo
 
 | Servicio | Costo |
 |---|---|
 | GitHub Actions | $0 (2 000 min/mes en privado; ilimitado en público). Un CI estimado de 8–12 min |
-| Herramientas | $0 (Stryker, Gitleaks, Checkov, cfn-lint y CodeQL son gratuitas para este uso) |
+| Herramientas | $0 (Stryker, Semgrep, ZAP, Gitleaks, Checkov, cfn-lint y CodeQL son gratuitas para este uso; SonarCloud lo es en repositorios públicos) |
 
 ## 8. Estrategia de pruebas del pipeline
 
@@ -157,7 +168,7 @@ Objetivo: rama por defecto. Reglas: *Restrict deletions*, *Block force pushes*, 
 
 | Riesgo | Mitigación |
 |---|---|
-| Stryker tarda demasiado | Solo `Domain` y `Application`; en PR, modo `--since main` (solo lo cambiado) |
+| Stryker tarda demasiado | Solo `Domain` y `Application`, y corre de noche |
 | Al ser público, un secreto subido por error queda expuesto de inmediato | Gitleaks en cada PR, protección de push activa y rotar de inmediato cualquier secreto filtrado |
 | Un check requerido queda pendiente en un PR que solo toca la otra carpeta | Job `changes` con `if`, nunca `paths` a nivel de workflow (ADR-26) |
 | Una acción de terceros comprometida | Fijada por SHA y actualizada por Dependabot |
@@ -172,4 +183,5 @@ Objetivo: rama por defecto. Reglas: *Restrict deletions*, *Block force pushes*, 
 | F2 | CI y análisis de seguridad | T204–T206 |
 | F3 | Ruleset | T207 |
 | F4 | CD manual y humo | T208–T210 |
-| F5 | Cierre | T211 |
+| F5 | Análisis extendido | T212–T216 |
+| F6 | Cierre | T211 |

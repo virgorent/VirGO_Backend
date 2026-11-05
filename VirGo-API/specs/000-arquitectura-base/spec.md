@@ -53,6 +53,7 @@ El objetivo de este módulo es que, al terminarlo, exista una API **vacía de fu
 | RF-13 ➡️ `002` | Un despliegue manual desde `main` verifica el chequeo de salud y publica la URL HTTPS resultante. |
 | RF-14 ➡️ `001` | La infraestructura completa está descrita como código y se puede crear y borrar con un solo comando. |
 | RF-15 ➡️ `001` | Existe una alerta de presupuesto que avisa por correo si el gasto mensual supera $1 USD. |
+| RF-16 | Todo texto de entrada tiene longitud máxima, y superar ese límite responde 400 en Problem Details. |
 
 ## 4. Requerimientos no funcionales
 
