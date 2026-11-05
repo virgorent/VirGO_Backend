@@ -51,6 +51,15 @@ Resources:
       DefaultRouteSettings:
         ThrottlingBurstLimit: 40
         ThrottlingRateLimit: 20
+      AccessLogSettings:
+        DestinationArn: !GetAtt VirGoHttpApiAccessLogGroup.Arn
+        Format: '{"requestId":"$context.requestId","sourceIp":"$context.identity.sourceIp","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","routeKey":"$context.routeKey","status":"$context.status","protocol":"$context.protocol","responseLength":"$context.responseLength"}'
+
+  VirGoHttpApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/apigateway/virgo-api-prod
+      RetentionInDays: 7
 
   VirGoApiFunction:
     Type: AWS::Serverless::Function
@@ -58,19 +67,13 @@ Resources:
       FunctionName: virgo-api-prod
       CodeUri: ../src/VirGo.Api/
       Handler: VirGo.Api
+      ReservedConcurrentExecutions: 10
+      KmsKeyArn: !Sub arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/lambda
       Events:
         Api:
           Type: HttpApi
           Properties:
             ApiId: !Ref VirGoHttpApi
-      Policies:
-        - Statement:
-            - Effect: Allow
-              Action:
-                - ssm:GetParameter
-              Resource:
-                - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/virgo/prod/jwt-signing-key
-                - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/virgo/prod/mongo-uri
 
   VirGoApiLogGroup:
     Type: AWS::Logs::LogGroup
@@ -82,6 +85,7 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: virgo-alerts
+      KmsMasterKeyId: alias/aws/sns
 
   VirGoAlertSubscription:
     Type: AWS::SNS::Subscription

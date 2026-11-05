@@ -55,10 +55,16 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:CreateBucket
+                Resource: !Sub arn:${AWS::Partition}:s3:::aws-sam-cli-managed-default-samclisourcebucket-*
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub arn:${AWS::Partition}:s3:::aws-sam-cli-managed-default-samclisourcebucket-*
+              - Effect: Allow
+                Action:
                   - s3:GetObject
                   - s3:PutObject
-                  - s3:ListBucket
-                Resource: '*'
+                Resource: !Sub arn:${AWS::Partition}:s3:::aws-sam-cli-managed-default-samclisourcebucket-*/*
               - Effect: Allow
                 Action:
                   - lambda:CreateFunction
@@ -76,7 +82,7 @@ Resources:
                   - apigateway:PATCH
                   - apigateway:DELETE
                   - apigateway:PUT
-                Resource: '*'
+                Resource: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}::/apis/*
               - Effect: Allow
                 Action:
                   - iam:PassRole
