@@ -5,7 +5,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | Campo | Valor |
 |---|---|
 | Módulo | `002-pipeline-cicd` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; ejecución en GitHub pendiente |
 | Revisó | — |
 | Fecha de cierre | — |
 
@@ -24,7 +24,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | CA-01 *Push* directo rechazado | Salida de `git push` rechazado | ⏳ |
 | CA-02 PR con prueba en rojo bloqueado | Enlace al PR de prueba | ⏳ |
 | CA-03 Secreto detectado | Enlace al job `secrets` fallido | ⏳ |
-| CA-04 Todos los checks y reporte de mutación | Captura de los checks y artefacto de Stryker | ⏳ |
+| CA-04 Todos los checks y reporte de mutación | Workflows creados; ejecución de GitHub pendiente; Stryker local 36.36 % | 🔄 |
 | CA-05 Despliegue manual con URL `https://` | Enlace a la ejecución de `api-deploy.yml` | ⏳ |
 | CA-06 Despliegue desde otra rama se niega | Enlace a la ejecución omitida | ⏳ |
 | CA-07 Humo fallido deja el workflow en rojo | Ejecución de prueba o salida local de `smoke.sh` contra una URL inválida | ⏳ |
@@ -36,8 +36,8 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 |---|---|---|
 | Unitarias | Job `build-test` en verde | ⏳ |
 | Integración | Job `build-test` en verde | ⏳ |
-| Seguridad | `VirGo.SecurityTests` en verde; CodeQL, Gitleaks, *dependency review* y Checkov sin hallazgos altos | ⏳ |
-| Mutación | Puntaje base: — % · Umbral fijado: — % | ⏳ |
+| Seguridad | `VirGo.SecurityTests` 3 pruebas en verde; CodeQL, Gitleaks, *dependency review* y Checkov pendientes de GitHub | 🔄 |
+| Mutación | Puntaje base: 36.36 % · Umbral provisional: 0 % | 🔄 |
 | Humo | `smoke.sh` en verde contra producción | ⏳ |
 
 ## 4. PR e integración continua

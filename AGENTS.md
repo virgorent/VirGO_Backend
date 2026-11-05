@@ -6,8 +6,8 @@
 ## 1. Forma de trabajo
 
 - **Metodología**: Spec-Driven Development (SDD)
-- **Fase actual**: Solo arquitectura base SDD. **Sin funcionalidad específica, sin CRUDs, sin entidades de negocio.**
-- **Principio**: `spec → plan → task`. No ejecutar tareas aún.
+- **Fase actual**: implementación local de la arquitectura base, IaC, CI/CD y autenticación; sin CRUDs ni entidades de negocio.
+- **Principio**: `spec → plan → task → implementación → check`.
 - **Todo debe alinearse** a `constitution.md`
 
 ## 2. Estructura obligatoria
@@ -38,7 +38,7 @@
 - **Archivos**: Markdown bien formateado
 - **Specs**: Siempre `spec.md`, `plan.md`, `task.md` por fase
 - **Alineación**: Todos los archivos deben ser coherentes con `constitution.md`
-- **Sin funcionalidad**: No crear código de negocio en esta fase
+- **Sin CRUDs de negocio**: la autenticación transversal sí está implementada; los módulos funcionales restantes siguen sujetos a sus specs.
 
 **Ramas:** `rama-backend` y `rama-movil` entran a `main` por PR. Dentro de una carpeta de proyecto, sigue el `AGENTS.md` de esa carpeta.
 

@@ -1,5 +1,7 @@
 # Modelo de datos NoSQL de VirGo (MongoDB)
 
+> **Nota de autoridad:** este archivo es contexto histórico. Para implementar la API, la fuente de verdad vigente es `API-HANDOFF.md` y el contrato ejecutable del repositorio `VirGo-Database`.
+
 Campos necesarios para crear la base de datos **no relacional** de VirGo. Se dedujeron del `Checklist VirGo.md` (73 pantallas) y de los datos que ya guarda la maqueta funcional.
 
 - **Versión:** borrador 3 · 2026-11-03 (reemplaza el borrador 2 para DynamoDB)
@@ -30,7 +32,7 @@ Campos necesarios para crear la base de datos **no relacional** de VirGo. Se ded
 | Dinero | `Decimal128` en MXN |
 | Ubicación | GeoJSON `{ type: "Point", coordinates: [lng, lat] }` con índice `2dsphere` |
 | Auditoría | Las colecciones principales tienen `createdAt` y `updatedAt` |
-| Validación | Cada colección tiene un `$jsonSchema` con los campos obligatorios; lo crea la API al arrancar, junto con los índices |
+| Validación | Cada colección tiene un `$jsonSchema` con los campos obligatorios; `VirGo-Database` administra el esquema y los índices antes de que la API se conecte |
 | Espacio | M0 da **512 MB**. Las colecciones temporales tienen índice TTL y las imágenes van a un almacenamiento de archivos (solo se guarda su URL) |
 
 **Columna «Req.»:** ✅ obligatorio · ➖ opcional.
@@ -91,8 +93,6 @@ Cada consulta se resuelve con **una** lectura que usa un índice.
 | `defaultGuests` | int | ➖ | Preferencia de invitados |
 | `providerId` | UUID | ➖ | Si el rol es proveedor, el id de su perfil |
 | `unreadNotices` | int | ✅ | Contador de la campana (`$inc` atómico) |
-| `failedLoginCount` | int | ✅ | Intentos fallidos seguidos (spec `003`) |
-| `lockoutEndsAt` | Date | ➖ | Bloqueo de 15 min tras 5 fallos (spec `003`) |
 | `createdAt` / `updatedAt` | Date | ✅ | |
 
 **Índices:** `{ email: 1 }` único.
@@ -114,9 +114,7 @@ Cada consulta se resuelve con **una** lectura que usa un índice.
 | `_id` | UUID | Es el `sid` del JWT (spec `003`) |
 | `userId` | UUID | Dueño de la sesión |
 | `tokenHash` | string | SHA-256 del token de sesión; **índice único** |
-| `device` | string | «Android 14 · Pixel 7» |
 | `expiresAt` | Date | 30 días |
-| `revokedAt` | Date | ➖ Al cerrar sesión (spec `004`) |
 | `purgeAt` | Date | `expiresAt` + 7 días; **índice TTL** |
 | `createdAt` | Date | |
 
@@ -396,7 +394,7 @@ Se validan con `enum` en el `$jsonSchema` de cada colección y en los DTO de la 
 
 ## 7. Orden sugerido para crearla (por módulos funcionales)
 
-Las colecciones, sus índices y su `$jsonSchema` los crea la API al arrancar (`MongoIndexInitializer`), cuando se implementa el spec que las usa. No se crean a mano.
+Las colecciones, sus índices y su `$jsonSchema` los administra `VirGo-Database` mediante sus comandos de inicialización y verificación. La API solo consume el contrato existente; no crea ni modifica la estructura al arrancar.
 
 1. **Cuentas:** `users`, `sessions` (specs `003` y `004`), `passwordResets` y `paymentCards`.
 2. **Catálogo:** `venues`, `venueDates` y `providers`.

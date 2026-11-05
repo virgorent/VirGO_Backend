@@ -1,0 +1,10 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Development-only placeholders and generated build output"
+paths = [
+  '''(^|/)bin/''',
+  '''(^|/)obj/''',
+  '''appsettings\.json$'''
+]

@@ -6,22 +6,28 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 | Campo | Valor |
 |---|---|
-| Constitución | v1.1.0 **propuesta** (pendiente de aprobación del equipo) |
-| Módulo en curso | `000-arquitectura-base` en revisión; `001`–`004` en borrador. Ninguna tarea ejecutada |
-| Tareas | 0 hechas (`000`: 22 vigentes · `001`: 11 · `002`: 12 · `003`: 13 · `004`: 9) |
+| Constitución | v1.2.0 ratificada por el equipo |
+| Fuente de datos | `API-HANDOFF.md` + `VirGo-Database`; el modelo raíz queda como contexto histórico |
+| Módulo en curso | Implementación local de `000`–`004`; cierre externo pendiente |
+| Tareas | Base local implementada; ver estados detallados en cada `task.md` |
 | URL de producción | Pendiente (se obtiene en `002`: T209) |
 | Costo acumulado en AWS | $0 USD (todavía no se crea ningún recurso) |
-| Siguiente paso | Evaluación del 2026-11-04: aprobar la enmienda v1.1.0 y los specs `000`–`004` |
+| Siguiente paso | Validar IaC en CI, configurar GitHub/AWS/Atlas con autorización y completar `check.md` |
 
 ## Módulos
 
 | Módulo | Estado | Notas |
 |---|---|---|
-| `000-arquitectura-base` | 📝 En revisión | Base técnica sin funcionalidad del negocio; infraestructura y CI/CD se movieron a `001` y `002` |
-| `001-infraestructura-iac` | ✏️ Borrador | 12 servicios de AWS, HTTPS, $0, Checkov |
-| `002-pipeline-cicd` | ✏️ Borrador | Ruleset, CI con 5 tipos de prueba y DevSecOps, CD manual, humo |
-| `003-auth-login` | ✏️ Borrador | `POST /api/v1/auth/login`; espera a `000`–`002` |
-| `004-auth-logout` | ✏️ Borrador | `POST /api/v1/auth/logout`; espera a `003` |
+| `000-arquitectura-base` | 🔄 Implementación local | Base técnica, seguridad transversal y persistencia abstracta |
+| `001-infraestructura-iac` | 🔄 Validación pendiente | SAM, CloudFormation, Atlas documentado, HTTPS y alertas |
+| `002-pipeline-cicd` | 🔄 Validación pendiente | Ruleset, CI/CD, DevSecOps y humo |
+| `003-auth-login` | 🔄 Implementación local | `POST /api/v1/auth/login`; pruebas de integración |
+| `004-auth-logout` | 🔄 Implementación local | `POST /api/v1/auth/logout`; pruebas de integración |
+| `005-auth-register` | 🔄 Implementación local | `POST /api/v1/auth/register`; alta de cliente |
+| `006-users-me` | 🔄 Implementación local | `GET /api/v1/users/me`; perfil propio |
+| `007-venues-catalog` | 🔄 Implementación local | `GET /api/v1/venues`; catálogo publicado |
+| `008-quotes-create` | 🔄 Implementación local | `POST /api/v1/quotes`; cotización para venue publicado |
+| `009-bookings-create` | 🔄 Implementación local | `POST /api/v1/bookings`; reservación pending_payment |
 | `005-auth-registro`, `006-auth-renovar-sesion` | 💡 Propuestos | Salieron del alcance de `003` y `004` |
 
 ## Decisiones (ADR)
@@ -173,3 +179,59 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje:** al ser público, todo lo que se suba es visible; Gitleaks y la protección de push son prioritarios.
 - **Pendiente:** crear el ruleset (`002`: T207) y aclarar `002` P-03 (`rama-apis`).
+
+### 2026-11-04 · Inicio de `000-arquitectura-base`
+
+- **Autor:** equipo + OpenCode (`dev-dotnet`)
+- **Módulo / tareas:** `000-arquitectura-base` · T003, T006–T016 y T026 iniciadas; T017–T019 siguen en curso o pendientes.
+- **Qué se hizo:** se alinearon el modelo de datos y los specs con `API-HANDOFF.md`: `VirGo-Database` administra colecciones, validadores e índices; la API no ejecuta DDL; logout elimina la sesión; login usa rate limiting por IP y no persiste campos de bloqueo inexistentes. Se creó `VirGo.slnx` con las cuatro capas, proyectos de pruebas, configuración de opciones, JWT, CORS, rate limiting, Problem Details, correlación, encabezados de seguridad, `/health`, OpenAPI y cliente MongoDB sin inicializador de índices.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release` sin errores; `dotnet test VirGo.slnx -c Release` con 2 pruebas unitarias, 7 de integración y 2 de seguridad en verde; arranque manual con `curl /health` = 200 y `/openapi/v1.json` = 200; llave JWT corta rechazada por `OptionsValidationException`.
+- **Decisiones:** el contrato de `VirGo-Database` prevalece para la persistencia. La enmienda constitucional 1.2.0 fue aprobada por el equipo y establece que la API no ejecuta DDL ni modifica la estructura de MongoDB.
+- **Costo:** $0; no se crearon recursos externos.
+- **Aprendizaje:** `MapHealthChecks` devuelve texto plano por defecto y los errores de estado requieren escribir explícitamente `application/problem+json`; ambos casos quedaron cubiertos por pruebas de integración.
+- **Pendiente:** validar la conexión real del repository MongoDB contra un ambiente autorizado, ampliar `VirGo.SecurityTests` y continuar con `001`/`002` después de cerrar la base.
+
+### 2026-11-05 · IaC, CI/CD y autenticación inicial
+
+- **Autor:** equipo + OpenCode (`dev-dotnet`, `devops-aws`, `qa`)
+- **Módulo / tareas:** `000`–`004` · arquitectura, IaC, pipeline y vertical slice de autenticación
+- **Qué se hizo:** se crearon las plantillas SAM/CloudFormation, documentación de Atlas, configuración de Checkov, workflows de CI, CodeQL, seguridad y despliegue manual, ruleset exportado, Gitleaks, Stryker y smoke tests. Se implementaron `POST /api/v1/auth/login` y `POST /api/v1/auth/logout` con JWT de 15 minutos, token de sesión de 30 días, hash de token, validación de sesión por `sid`, eliminación de sesión al cerrar y adaptadores en memoria/MongoDB sin DDL.
+- **Evidencia:** `dotnet test VirGo.slnx -c Release` con 2 unitarias, 12 integración y 3 seguridad en verde. Stryker terminó con línea base de 36.36% sobre Application; el umbral permanece en 0 hasta ampliar cobertura.
+- **Decisiones:** no se desplegaron recursos; Atlas y AWS requieren credenciales, MCP y confirmación humana.
+- **Costo:** $0; solo se agregaron archivos y paquetes locales.
+- **Aprendizaje:** Stryker 5 requiere un objeto raíz `stryker-config` y la ruta de mutación debe ser relativa al proyecto mutado.
+- **Pendiente:** validar SAM/CloudFormation/Checkov cuando estén disponibles, ejecutar workflows en GitHub, completar cobertura de login/logout y definir los módulos funcionales restantes.
+
+### 2026-11-05 · Validación local final de la sesión
+
+- **Evidencia:** `dotnet build VirGo.slnx -c Release` terminó sin advertencias ni errores; `dotnet test VirGo.slnx -c Release` terminó con 2 unitarias, 18 integración y 3 seguridad aprobadas; `dotnet list VirGo.slnx package --vulnerable --include-transitive` no reportó vulnerabilidades.
+- **Limitación:** no están disponibles AWS SAM CLI, `cfn-lint`, Checkov ni Ruby; Docker está instalado pero su daemon no está iniciado. El ejecutable `python` disponible es un alias de Windows sin runtime verificable. Por eso los YAML/IaC no pudieron validarse localmente con esas herramientas. No se ejecutó ningún despliegue.
+
+### 2026-11-05 · Correcciones de CI, alertas y gobernanza
+
+- **Qué se hizo:** el job `changes` ahora compara todo el rango del PR o push, no solo el último commit; el despliegue exige `vars.ALERT_EMAIL`; la suscripción SNS ya no es opcional; se documentaron las alertas externas de Atlas; `AGENTS.md` y esta tabla reflejan la implementación existente.
+- **Pendiente:** configurar `ALERT_EMAIL` en el environment `production`, ejecutar el workflow de CI y validar SAM/CloudFormation/Checkov en GitHub.
+
+### 2026-11-05 · API-HANDOFF establecido como fuente de verdad
+
+- **Qué se hizo:** se inspeccionó `C:\Users\Kansj\Downloads\API-HANDOFF.md` completo. El handoff define el contrato de datos y propuestas de endpoints, pero no aprueba una lista fija de siete APIs. `VirGo-Database` manda sobre colecciones, campos, validadores e índices; el modelo raíz queda como contexto histórico.
+- **Decisión:** se conserva la Constitución API para gobernanza HTTP y seguridad; los campos y reglas de persistencia se toman del handoff. No se inventan endpoints, campos ni estados no autorizados.
+- **Resultado:** la selección se resolvió en el vertical slice registrado en la entrada siguiente y sus specs atómicos `005`–`009`.
+
+### 2026-11-05 · Primer vertical slice de siete endpoints
+
+- **Qué se hizo:** se fijó el primer corte funcional con `POST /auth/register`, `POST /auth/login`, `POST /auth/logout`, `GET /users/me`, `GET /venues`, `POST /quotes` y `POST /bookings`. Se agregaron modelos, repositorios en memoria/MongoDB, registro, perfil, catálogo, cotización y reservación pendiente de pago.
+- **Evidencia:** `dotnet test VirGo.slnx -c Release` con 2 unitarias, 18 integración y 3 seguridad aprobadas.
+- **Decisiones:** el catálogo filtra solo `published`; las cotizaciones usan el objeto `target` del handoff; las reservaciones generan folios mediante contador atómico en MongoDB y no bloquean fecha mientras están en `pending_payment`.
+- **Pendiente:** idempotencia obligatoria de reservaciones, pruebas de concurrencia, validación real contra `VirGo-Database`, usuario de humo y despliegue HTTPS.
+
+### 2026-11-04 · Aprobación de ownership de MongoDB
+
+- **Autor:** equipo + OpenCode (`arquitecto`)
+- **Módulo / tareas:** gobernanza · enmienda constitucional 1.2.0
+- **Qué se hizo:** el equipo aprobó que `VirGo-Database` sea la autoridad de colecciones, validadores e índices. Se actualizó el Artículo III.4 y se eliminó el estado pendiente de la versión 1.1.0.
+- **Evidencia:** aprobación explícita del equipo en la sesión de trabajo; `constitution.md` versión 1.2.0.
+- **Decisiones:** la API usa el esquema existente y no crea ni modifica DDL durante el arranque.
+- **Costo:** $0; no se crearon recursos externos.
+- **Aprendizaje:** el handoff de datos debe mantenerse como contrato de integración entre ambos repositorios.
+- **Pendiente:** completar T019 y cerrar las evidencias restantes del módulo `000`.

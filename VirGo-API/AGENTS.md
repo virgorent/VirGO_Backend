@@ -6,7 +6,8 @@ Guía base para los agentes de IA y las personas que trabajan en este proyecto (
 
 - **Qué es:** la API REST de VirGo. La consume la app móvil Android (`VirGo-Movil`).
 - **Stack:** .NET 10, ASP.NET Core Web API, AWS Lambda, API Gateway (HTTP API), MongoDB Atlas M0, AWS SAM y GitHub Actions.
-- **Estado actual:** fase de especificación. Están redactados `000-arquitectura-base`, `001-infraestructura-iac`, `002-pipeline-cicd`, `003-auth-login` y `004-auth-logout`. Todavía **no hay código**: no ejecutes tareas hasta que el `task.md` esté aprobado, y las de `003` en adelante esperan a que `000`–`002` estén cerrados (Art. II.2).
+- **Fuente de datos:** `API-HANDOFF.md` entregado por el equipo y el repositorio `VirGo-Database` mandan sobre colecciones, campos, validadores, índices y reglas de persistencia. `Modelo de datos VirGo.md` queda como contexto histórico hasta sincronizar una copia versionada.
+- **Estado actual:** implementación local parcial. Existen la base `000`, las plantillas de `001`, los workflows de `002` y los endpoints de autenticación de `003`/`004`; quedan pendientes las validaciones externas, el despliegue y el cierre formal de los specs.
 
 ## Estructura del proyecto
 
@@ -29,22 +30,22 @@ VirGo-API/
 │   ├── 002-pipeline-cicd/
 │   ├── 003-auth-login/
 │   └── 004-auth-logout/
-├── src/                     # (pendiente) VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
-├── tests/                   # (pendiente) VirGo.UnitTests, VirGo.IntegrationTests, VirGo.SecurityTests, smoke/
-├── infra/                   # (pendiente) template.yaml (SAM), bootstrap.yaml
-└── (sin .github aquí)        # GitHub solo lee `.github/` de la raíz del repositorio
+├── src/                     # VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
+├── tests/                   # UnitTests, IntegrationTests, SecurityTests, smoke/
+├── infra/                   # template.yaml (SAM), bootstrap.yaml
+└── (sin .github aquí)       # GitHub solo lee `.github/` de la raíz del repositorio
 ```
 
-En la raíz del repositorio están `.github/` (pendiente: `api-ci.yml`, `api-codeql.yml`, `api-deploy.yml`, `security.yml`, `rulesets/`), la gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`) y `Modelo de datos VirGo.md`. Todos los comandos de abajo se ejecutan dentro de `VirGo-API/`.
+En la raíz del repositorio están `.github/` con los workflows y el ruleset exportado, la gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`) y `Modelo de datos VirGo.md` como contexto histórico. Todos los comandos de abajo se ejecutan dentro de `VirGo-API/`.
 
 ## Comandos
 
-Estos comandos estarán disponibles al terminar las tareas de la arquitectura base:
+Comandos de verificación local:
 
 ```powershell
 dotnet restore
-dotnet build -c Release --no-restore
-dotnet test -c Release --no-build            # Unitarias, integración y seguridad
+dotnet build VirGo.slnx -c Release --no-restore
+dotnet test VirGo.slnx -c Release --no-build # Unitarias, integración y seguridad
 dotnet tool restore && dotnet stryker        # Pruebas de mutación (Domain y Application)
 dotnet run --project src/VirGo.Api          # http://localhost:5080, usa la persistencia en memoria
 bash tests/smoke/smoke.sh https://<api-url>  # Pruebas de humo contra una URL desplegada

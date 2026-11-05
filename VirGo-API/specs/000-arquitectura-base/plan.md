@@ -7,7 +7,7 @@
 | Estado | En revisión |
 | Fecha | 2026-10-29 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
-| Constitución | v1.1.0 |
+| Constitución | v1.2.0 |
 
 ## 1. Resumen técnico
 
@@ -78,11 +78,12 @@ VirGo-API/
 │   │   └── Common/                 # Entity base, value objects comunes
 │   └── VirGo.Infrastructure/       # Infraestructura
 │       ├── Persistence/InMemory/   # Implementación en memoria
-│       ├── Persistence/MongoDb/    # MongoClient único, opciones, inicializador de índices
+│       ├── Persistence/MongoDb/    # MongoClient único, opciones y repositorios del contrato existente
 │       └── DependencyInjection.cs  # AddInfrastructure(config)
 ├── tests/
 │   ├── VirGo.UnitTests/
-│   └── VirGo.IntegrationTests/
+│   ├── VirGo.IntegrationTests/
+│   └── VirGo.SecurityTests/          # Controles base de seguridad; se amplía en 002
 ├── infra/
 │   ├── bootstrap.yaml              # Una sola vez: OIDC, rol de despliegue y presupuesto de $1
 │   └── template.yaml               # SAM: HTTP API, Lambda, parámetros SSM y LogGroup
@@ -141,7 +142,7 @@ VirGo-API/
 
 - Clúster Atlas M0 `virgo-cluster`, base `virgo` (producción) y `virgo_dev` (desarrollo).
 - Un `MongoClient` único por proceso (singleton), creado fuera del manejador para reutilizar conexiones entre invocaciones de Lambda, con `maxPoolSize` de 10 (M0 admite 500 conexiones).
-- `MongoIndexInitializer` crea de forma idempotente los índices que declara cada módulo al arrancar. Así, al ejecutar el primer *task* de usuarios, la base y sus colecciones se crean solas.
+- `VirGo-Database` es responsable de las colecciones, validadores e índices. La API crea un `MongoClient` singleton y consume el contrato existente; no ejecuta DDL ni inicializa índices al arrancar.
 - Documentos con `_id` UUID (representación estándar), nombres de campo en `camelCase` inglés y fechas en UTC.
 
 La base no define entidades: los módulos funcionales documentan sus patrones de llave en su propio plan.

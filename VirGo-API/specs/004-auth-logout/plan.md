@@ -4,17 +4,17 @@
 |---|---|
 | Módulo | `004-auth-logout` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-03 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
-| Constitución | v1.1.0 |
+| Constitución | v1.2.0 |
 
 ## 1. Resumen técnico
 
 Dos piezas:
 
-1. **Endpoint** `AuthController.Logout` (`[Authorize]`) que llama a `LogoutHandler`: lee `sub` y `sid` del JWT y marca `revokedAt` en la sesión.
-2. **Validación de sesión en cada ruta protegida**: en `JwtBearerEvents.OnTokenValidated` se busca en `sessions` el documento `{ _id: sid, userId: sub }`; si no existe, está revocado o expiró, la autenticación falla con 401. Esto vuelve efectivo el logout en todas las instancias de Lambda (RF-03).
+1. **Endpoint** `AuthController.Logout` (`[Authorize]`) que llama a `LogoutHandler`: lee `sub` y `sid` del JWT y elimina únicamente el documento de sesión correspondiente.
+2. **Validación de sesión en cada ruta protegida**: en `JwtBearerEvents.OnTokenValidated` se busca en `sessions` el documento `{ _id: sid, userId: sub }`; si no existe o expiró, la autenticación falla con 401. Esto vuelve efectivo el logout en todas las instancias de Lambda (RF-03).
 
 ## 2. Contexto técnico
 
@@ -23,7 +23,7 @@ Dos piezas:
 | Capas | `Api/Controllers/AuthController` · `Application/Auth/Logout` · `Application/Auth/SessionValidator` · `Infrastructure/Persistence` |
 | Lectura de la sesión | `Find` por `_id` y `userId` en el primario (lectura consistente) por solicitud protegida |
 | Respuesta | 204 `NoContent` |
-| MCP | `mongodb` (ver `revokedAt` en `virgo_dev`) y `github` |
+| MCP | `mongodb` (verificar la eliminación de la sesión en `virgo_dev`) y `github` |
 
 ## 3. Constitution Check
 
@@ -47,7 +47,7 @@ Dos piezas:
 ```text
 src/VirGo.Application/Auth/Logout/LogoutCommand.cs, LogoutHandler.cs
 src/VirGo.Application/Auth/SessionValidator.cs
-src/VirGo.Domain/Sessions/Session.cs           # método Revoke(now)
+src/VirGo.Domain/Sessions/Session.cs           # identidad y expiración de la sesión
 src/VirGo.Api/Controllers/AuthController.cs     # acción Logout
 src/VirGo.Api/Security/JwtSessionEvents.cs      # OnTokenValidated
 tests/VirGo.UnitTests/Auth/Logout…  tests/VirGo.IntegrationTests/Auth/LogoutTests.cs
@@ -86,14 +86,14 @@ Sin cuerpo.
 ### 6.2 `LogoutHandler`
 
 1. `GetAsync(userId = sub, sessionId = sid)`.
-2. Si no existe o ya está revocada → `Unauthorized` (en la práctica ya lo detecta el paso de autenticación).
-3. `session.Revoke(clock.UtcNow)` y `UpdateOneAsync` con el filtro `{ _id: sid, userId: sub, revokedAt: null }` y `$set: { revokedAt }`.
+2. Si no existe → `Unauthorized` (en la práctica ya lo detecta el paso de autenticación).
+3. `DeleteOneAsync` con el filtro `{ _id: sid, userId: sub }`; una eliminación de cero documentos se trata como sesión inválida.
 4. Devolver éxito.
 
 ### 6.3 `SessionValidator` en `OnTokenValidated`
 
 1. Leer `sub` y `sid`. Si falta `sid` → `context.Fail("missing sid")`.
-2. Buscar la sesión. Si no existe, `revokedAt != null` o `expiresAt <= now` → `context.Fail(...)`.
+2. Buscar la sesión. Si no existe o `expiresAt <= now` → `context.Fail(...)`.
 3. El 401 resultante sale en Problem Details por el manejador de `000`.
 
 Las rutas anónimas (`/health`, `/openapi/v1.json`, `POST /auth/login`) no hacen esta lectura.
@@ -106,10 +106,10 @@ Cada solicitud protegida: 1 lectura por `_id` (índice por defecto), un document
 
 | Tipo | Casos |
 |---|---|
-| Unitarias | `Session.Revoke` fija `revokedAt` y no la cambia si ya estaba; `LogoutHandler` revoca solo la sesión indicada; `SessionValidator` rechaza sesión inexistente, revocada, expirada y sin `sid` |
-| Integración | `UpdateOneAsync` condicional contra Testcontainers; login → logout = 204 sin cuerpo; el mismo token en logout y en la ruta de diagnóstico = 401; dos sesiones, se cierra una y la otra sigue en 200 |
+| Unitarias | `LogoutHandler` elimina solo la sesión indicada; `SessionValidator` rechaza sesión inexistente, expirada y sin `sid` |
+| Integración | `DeleteOneAsync` contra Testcontainers; login → logout = 204 sin cuerpo; el mismo token en logout y en la ruta de diagnóstico = 401; dos sesiones, se cierra una y la otra sigue en 200 |
 | Seguridad | Sin token, token con firma inválida, token sin `sid` y token con `sid` de otra persona → 401; logs sin tokens; el JWT revocado no sirve aunque falten 14 min para expirar |
-| Mutación | Stryker sobre `LogoutHandler`, `SessionValidator` y `Session.Revoke`; sin sobrevivientes en las condiciones de revocación y expiración |
+| Mutación | Stryker sobre `LogoutHandler` y `SessionValidator`; sin sobrevivientes en las condiciones de eliminación y expiración |
 | Humo | `POST {ApiUrl}/api/v1/auth/logout` sin token → 401 `application/problem+json` |
 
 ## 9. Riesgos y mitigaciones

@@ -1,0 +1,3 @@
+skip-check:
+  - CKV_AWS_111 # API Gateway throttling is configured at the HTTP API stage.
+  - CKV_AWS_116 # Lambda reserved concurrency is intentionally left to the free-tier deployment plan.

@@ -5,12 +5,12 @@
 | Módulo | `003-auth-login` |
 | Endpoint | `POST /api/v1/auth/login` |
 | Versión | 1.0.0 |
-| Estado | Borrador. **Se redacta para dar contexto; no se ejecuta hasta cerrar `000`, `001` y `002` (Art. II.2).** |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-03 |
-| Constitución | v1.1.0. Aplica sobre todo IV, V y VI |
+| Constitución | v1.2.0. Aplica sobre todo IV, V y VI |
 | Plan | [plan.md](plan.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
 | Pantallas | A4 «Iniciar sesión» y A5 (sesión persistente) del checklist de VirGo |
-| Datos | Colecciones `users` y `sessions` de *Modelo de datos VirGo.md* (sección 4.1, MongoDB) |
+| Datos | Colecciones `users` y `sessions` del contrato `API-HANDOFF.md` (secciones 4.4 y 9.2); `VirGo-Database` es la autoridad ejecutable |
 
 ## 1. Contexto y objetivo
 
@@ -33,9 +33,9 @@ El objetivo es que una persona registrada pueda iniciar sesión de forma segura,
 |---|---|
 | RF-01 | La persona envía su correo y su contraseña; el correo se compara sin distinguir mayúsculas ni espacios al inicio o al final. |
 | RF-02 | Si los datos son correctos, la respuesta incluye una credencial de acceso de 15 minutos, una credencial de sesión de 30 días y los datos básicos de la persona (identificador, nombre, correo y rol). |
-| RF-03 | Cada inicio de sesión crea una sesión nueva asociada al dispositivo que la persona indique (opcional). |
+| RF-03 | Cada inicio de sesión crea una sesión nueva asociada a la persona autenticada. |
 | RF-04 | Si el correo no existe o la contraseña es incorrecta, la respuesta es **la misma** en ambos casos: «Correo o contraseña incorrectos.» |
-| RF-05 | Tras 5 intentos fallidos seguidos, la cuenta se bloquea 15 minutos; durante el bloqueo, la respuesta indica que hay demasiados intentos. Un inicio de sesión correcto reinicia el contador. |
+| RF-05 | El endpoint aplica el límite de solicitudes por IP configurado para login y devuelve 429 cuando se supera. El bloqueo persistente por cuenta queda fuera de este módulo porque el esquema existente no guarda contadores de intentos. |
 | RF-06 | Si el correo tiene un formato inválido o falta algún dato, la respuesta enumera los errores de cada campo. |
 | RF-07 | La credencial de sesión nunca se guarda tal cual: se guarda una huella irreversible. |
 | RF-08 | El endpoint se publica en el documento OpenAPI con ejemplos de petición y respuesta. |
@@ -48,7 +48,7 @@ El objetivo es que una persona registrada pueda iniciar sesión de forma segura,
 | RNF-02 | **Privacidad:** los registros no contienen el correo completo ni las credenciales. |
 | RNF-03 | **Anti-enumeración:** un correo inexistente y una contraseña incorrecta tardan un tiempo similar en responder. |
 | RNF-04 | **Rendimiento:** responde en menos de 1 s con la instancia ya iniciada. |
-| RNF-05 | **Abuso:** además del bloqueo por cuenta, hay un límite de solicitudes por dirección IP. |
+| RNF-05 | **Abuso:** el endpoint aplica un límite de solicitudes por dirección IP. |
 
 ## 5. Criterios de aceptación
 
@@ -58,7 +58,7 @@ El objetivo es que una persona registrada pueda iniciar sesión de forma segura,
 | CA-02 | **Dado** una persona registrada, **cuando** escribe su correo con mayúsculas o espacios, **entonces** también entra. |
 | CA-03 | **Dado** una contraseña incorrecta, **cuando** intenta entrar, **entonces** recibe 401 en Problem Details con el mensaje genérico. |
 | CA-04 | **Dado** un correo no registrado, **cuando** intenta entrar, **entonces** recibe exactamente el mismo 401 que en CA-03. |
-| CA-05 | **Dado** 5 intentos fallidos seguidos, **cuando** intenta por sexta vez, aunque sea con la contraseña correcta, **entonces** recibe 429 en Problem Details hasta que pasen 15 minutos. |
+| CA-05 | **Dado** que una dirección IP supera el límite configurado para login, **cuando** envía otra solicitud, **entonces** recibe 429 en Problem Details. |
 | CA-06 | **Dado** un correo con formato inválido o una contraseña vacía, **cuando** intenta entrar, **entonces** recibe 400 en Problem Details con los errores por campo. |
 | CA-07 | **Dado** un inicio de sesión exitoso, **cuando** reviso la base de datos, **entonces** existe una sesión nueva y la credencial de sesión no aparece en texto plano. |
 | CA-08 | **Dado** cualquier intento, **cuando** reviso los registros, **entonces** no aparecen la contraseña, las credenciales ni el correo completo. |
@@ -80,4 +80,3 @@ El objetivo es que una persona registrada pueda iniciar sesión de forma segura,
 | # | Pregunta | Responsable |
 |---|---|---|
 | P-01 | ¿El bloqueo de 15 minutos tras 5 intentos es aceptable para el equipo de producto? | Equipo |
-| P-02 | `failedLoginCount` y `lockoutEndsAt` ya se agregaron a `users` en el modelo de datos (borrador 3). ¿El equipo lo confirma? | Equipo |
