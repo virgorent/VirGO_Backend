@@ -4,7 +4,7 @@
 |---|---|
 | Módulo | `000-arquitectura-base` |
 | Versión | 1.1.0 |
-| Estado | Aprobado. 3/39 tareas hechas. |
+| Estado | Aprobado. 7/39 tareas hechas. |
 | Fecha | 2026-10-29 |
 | Spec / Plan / Check | [spec.md](spec.md) · [plan.md](plan.md) · [check.md](check.md) |
 | Constitución | v1.1.0 |
@@ -34,10 +34,10 @@
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
 | T005 | Crear el proyecto (wrapper de Gradle, `settings.gradle.kts`, `gradle/libs.versions.toml`) con versiones **estables y compatibles** de Kotlin, AGP, KSP, Compose BOM y Hilt; registrar las versiones en `memoria.md` | T001 | `dev-android` | `./gradlew help` sin errores; tabla de versiones en la memoria | ✅ |
-| T006 | *Convention plugins* en `build-logic/convention`: `virgo.android.application`, `virgo.android.library`, `virgo.android.compose`, `virgo.hilt` y `virgo.jvm.library` (SDK 26/36, JDK 17) | T005 | `dev-android` | Un módulo de prueba aplica los plugins y compila | ⏳ |
-| T007 | Crear `:app` (`mx.virgo.app`) y `:core:designsystem`, `:core:common`, `:core:domain` (JVM puro), `:core:network`, `:core:data`, `:core:datastore` y `:core:testing`, respetando las dependencias permitidas del plan (sección 4) | T006 | `dev-android` | `./gradlew assembleDebug` OK; `:core:domain` sin dependencias de Android | ⏳ |
-| T008 | [P] Configurar ktlint y detekt (`config/detekt.yml`) sin *baseline* de errores | T007 | `dev-android` | `./gradlew ktlintCheck detekt` en verde | ⏳ |
-| T009 | [P] Configurar Hilt: `VirGoApplication` (`@HiltAndroidApp`), `MainActivity` (`@AndroidEntryPoint`) y un módulo de *dispatchers* en `:core:common` | T007 | `dev-android` | La app arranca en el emulador sin errores de Hilt | ⏳ |
+| T006 | *Convention plugins* en `build-logic/convention`: `virgo.android.application`, `virgo.android.library`, `virgo.android.compose`, `virgo.hilt` y `virgo.jvm.library` (SDK 26/36, JDK 17) | T005 | `dev-android` | Un módulo de prueba aplica los plugins y compila | ✅ |
+| T007 | Crear `:app` (`mx.virgo.app`) y `:core:designsystem`, `:core:common`, `:core:domain` (JVM puro), `:core:network`, `:core:data`, `:core:datastore` y `:core:testing`, respetando las dependencias permitidas del plan (sección 4) | T006 | `dev-android` | `./gradlew assembleDebug` OK; `:core:domain` sin dependencias de Android | ✅ |
+| T008 | [P] Configurar ktlint y detekt (`config/detekt.yml`) sin *baseline* de errores | T007 | `dev-android` | `./gradlew ktlintCheck detekt` en verde | ✅ |
+| T009 | [P] Configurar Hilt: `VirGoApplication` (`@HiltAndroidApp`), `MainActivity` (`@AndroidEntryPoint`) y un módulo de *dispatchers* en `:core:common` | T007 | `dev-android` | La app arranca en el emulador sin errores de Hilt | ✅ |
 
 ## F2 · Sistema de diseño
 

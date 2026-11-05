@@ -7,8 +7,8 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | Campo | Valor |
 |---|---|
 | Constitución | v1.1.0 aprobada por el equipo el 2026-11-05 |
-| Módulo en curso | `000-arquitectura-base`: aprobado; T001, T003 y T005 hechas |
-| Tareas | 3 / 39 hechas (T037 bloqueada por MCP) |
+| Módulo en curso | `000-arquitectura-base`: T001, T003, T005, T006, T007, T008, T009 hechas |
+| Tareas | 7 / 39 hechas (T037 bloqueada por MCP) |
 | `API_BASE_URL` de *release* | Pendiente (la entrega `VirGo-API` en `002`: T210) |
 | Última versión publicada | Ninguna |
 | Siguiente paso | Ejecutar T006 y T007; desbloquear T037; resolver P-01/P-02 |
@@ -170,3 +170,19 @@ Versiones fijadas en T005 y verificadas con `./gradlew help`.
 - **Costo:** $0.
 - **Aprendizaje:** con AGP 9 el proyecto no debe declarar `kotlin-android`; el wrapper de Gradle 9.8.2 funciona con el JDK 25 local, aunque el CI mantiene JDK 17.
 - **Pendiente:** T006 (convention plugins), T007 (módulos), T037 (Figma devuelve HTTP 405 y GitHub sigue deshabilitado), P-01 y P-02.
+
+### 2026-11-05 · T006, T007, T008 y T009: convention plugins, estructura modular y herramientas de calidad
+
+- **Autor:** equipo + opencode (`dev-android` / `seguridad-ci`)
+- **Módulo / tareas:** `000-arquitectura-base` · T006, T007, T008 y T009 hechas
+- **Qué se hizo:**
+  - T006: Se implementaron los *convention plugins* en `build-logic/convention`: `virgo.android.application`, `virgo.android.library`, `virgo.android.compose`, `virgo.hilt` y `virgo.jvm.library`.
+  - T007: Se crearon e integraron en `settings.gradle.kts` los módulos `:app` y la capa `:core:*` (`:core:designsystem`, `:core:common`, `:core:domain`, `:core:network`, `:core:data`, `:core:datastore`, `:core:testing`).
+  - T008: Se configuraron Ktlint y Detekt en `build.gradle.kts` y `config/detekt.yml` ajustando `jvmTarget = "17"` para compatibilidad con la Toolchain de Kotlin y JDK local.
+  - T009: Configuración básica de Hilt en `VirGoApplication`, `MainActivity` y el módulo de dispatchers en `:core:common`.
+- **Evidencia:** `./gradlew ktlintCheck detekt assembleDebug` finaliza con `BUILD SUCCESSFUL`.
+- **Decisiones:** Se fuerza `jvmTarget = "17"` en las tareas de Kotlin y Detekt para alinearse con el JDK 17 exigido por la constitución.
+- **Costo:** $0.
+- **Aprendizaje:** Detekt requiere la especificación explícita de `jvmTarget` cuando la JVM de ejecución difiere de la JVM objetivo del proyecto.
+- **Pendiente:** Fase 2 (Sistema de diseño en `:core:designsystem`: T010-T014).
+
