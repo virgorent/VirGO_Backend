@@ -42,7 +42,7 @@ VirGo-API/
 ├── specs/            # One folder per module: spec.md, plan.md, task.md, check.md
 ├── src/              # (planned) VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
 ├── tests/            # (planned) Unit, Integration, Security, smoke
-├── db/               # MongoDB schema (source of truth) and check tool
+├── db/               # Generated copy of the MongoDB schema and check tool
 ├── infra/            # (planned) SAM template and bootstrap stack
 ```
 
@@ -59,7 +59,7 @@ The project follows **Spec-Driven Development**: no code without an approved spe
 | [`002-pipeline-cicd`](specs/002-pipeline-cicd/spec.md) | CI with DevSecOps checks, rulesets, manual CD, smoke tests | Draft |
 | [`003-auth-login`](specs/003-auth-login/spec.md) | `POST /api/v1/auth/login` | Draft |
 | [`004-auth-logout`](specs/004-auth-logout/spec.md) | `POST /api/v1/auth/logout` | Draft |
-| [`007-esquema-mongodb`](specs/007-esquema-mongodb/spec.md) | MongoDB schema as the single source of truth | Draft |
+| [`010-contrato-datos`](specs/010-contrato-datos/spec.md) | Data contract with `VirGo-Database` | Draft |
 
 ## Getting started
 

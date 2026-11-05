@@ -29,8 +29,8 @@ VirGo-API/
 │   ├── 002-pipeline-cicd/
 │   ├── 003-auth-login/
 │   ├── 004-auth-logout/
-│   └── 007-esquema-mongodb/
-├── db/                      # schema/ (fuente de verdad) y tools/check_schema.py
+│   └── 010-contrato-datos/
+├── db/                      # schema/ (copia generada desde VirGo-Database) y tools/check_schema.py
 ├── src/                     # (pendiente) VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
 ├── tests/                   # (pendiente) VirGo.UnitTests, VirGo.IntegrationTests, VirGo.SecurityTests, smoke/
 ├── infra/                   # (pendiente) template.yaml (SAM), bootstrap.yaml

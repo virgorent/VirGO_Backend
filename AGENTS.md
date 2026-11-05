@@ -28,6 +28,7 @@
 | Scripts de apoyo | `scripts/` | Automatizaciones locales (README) |
 | Backend | `VirGo-API/` | Gobernanza y specs `NNN-…` propios |
 | Móvil | `VirGo-Movil/` | Gobernanza y specs `NNN-…` propios |
+| Base de datos | `VirGo-Database/` | Catálogo de MongoDB; specs `NNN-…` propios |
 | Datos | `Modelo de datos VirGo.md` | Modelo de MongoDB compartido |
 
 ## 3. Fases

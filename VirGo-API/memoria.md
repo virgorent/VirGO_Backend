@@ -8,7 +8,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 |---|---|
 | Constitución | v1.1.0 **propuesta** (pendiente de aprobación del equipo) |
 | Módulo en curso | `000-arquitectura-base` en revisión; `001`–`004` en borrador. Ninguna tarea ejecutada |
-| Tareas | 0 hechas (`000`: 23 vigentes · `001`: 11 · `002`: 17 · `003`: 13 · `004`: 9 · `007`: 2 de 7) |
+| Tareas | 0 hechas (`000`: 23 vigentes · `001`: 11 · `002`: 17 · `003`: 13 · `004`: 9 · `010`: 2 de 6) |
 | URL de producción | Pendiente (se obtiene en `002`: T209) |
 | Costo acumulado en AWS | $0 USD (todavía no se crea ningún recurso) |
 | Siguiente paso | Evaluación del 2026-11-04: aprobar la enmienda v1.1.0 y los specs `000`–`004` |
@@ -22,7 +22,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | `002-pipeline-cicd` | ✏️ Borrador | Ruleset, CI con 5 tipos de prueba y DevSecOps, CD manual, humo |
 | `003-auth-login` | ✏️ Borrador | `POST /api/v1/auth/login`; espera a `000`–`002` |
 | `004-auth-logout` | ✏️ Borrador | `POST /api/v1/auth/logout`; espera a `003` |
-| `007-esquema-mongodb` | ✏️ Borrador | Fuente de verdad del esquema; debe cerrarse antes de `003` |
+| `010-contrato-datos` | ✏️ Borrador | Antes `007-esquema-mongodb`; alinea la API con `VirGo-Database` |
 | `005-auth-registro`, `006-auth-renovar-sesion` | 💡 Propuestos | Salieron del alcance de `003` y `004` |
 
 ## Decisiones (ADR)
@@ -56,11 +56,13 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-24 | 2026-11-03 | Atlas con lista de acceso `0.0.0.0/0` y controles compensatorios | Lambda no tiene IP fija sin NAT (prohibido); M0 no admite *private endpoint* |
 | ADR-25 | 2026-11-03 | **Testcontainers** para probar los repositorios de MongoDB en el CI | Gratis en GitHub Actions; local sigue sin Docker (en memoria) |
 | ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/virGO_App` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
-| ADR-27 | 2026-11-04 | **`db/schema/`** como fuente de verdad del esquema | Es lo único que una máquina puede comparar y aplicar |
-| ADR-28 | 2026-11-04 | `_id` y referencias como **texto UUID** (provisional) | Ya estaba así en `virgo_dev` |
+| ADR-27 | 2026-11-04 | ~~`db/schema/` como fuente de verdad~~ **Modificada por ADR-32:** es copia generada | `VirGo-Database` ya coincide con la base |
+| ADR-28 | 2026-11-04 | `_id` y referencias como **texto UUID** | Lo confirma `VirGo-Database` |
 | ADR-29 | 2026-11-04 | `monthlyStats._id` determinista | Permite el `upsert` con `$inc` |
 | ADR-30 | 2026-11-04 | **Semgrep, SonarCloud y OWASP ZAP** en cada PR | Clase del 2026-11-04 y proyecto de referencia |
 | ADR-31 | 2026-11-04 | **Mutación nocturna**, fuera de los checks requeridos | Mantiene el CI corto, como la referencia |
+| ADR-32 | 2026-11-05 | **`VirGo-Database` define la estructura**; la API no ejecuta DDL | Constitución v1.2.0 del PR #5 |
+| ADR-33 | 2026-11-05 | Testcontainers con los validadores reales | La persistencia en memoria no detecta rechazos |
 
 ## Cambios de contrato (compartidos con Móvil)
 
@@ -196,3 +198,17 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje (5 porqués):** la causa raíz fue que nada comparaba los documentos con la realidad; `verificar-constitucion` ahora lo exige.
 - **Pendiente:** `007` P-01 a P-05 (T701), T700 y T704; D5 (Redis y colas) y D6 (Pact y pruebas de base de datos) con el profesor; revisión de otra persona antes de aprobar v1.1.0.
+
+### 2026-11-05 · Contrato de datos con VirGo-Database
+
+- **Autor:** equipo + Claude Code (`arquitecto`)
+- **Módulo / tareas:** `010-contrato-datos` · `VirGo-Database` `000` y `001` · ninguna tarea de código
+- **Qué se hizo:**
+  - Se compararon en modo lectura la base, el catálogo de `VirGo-Database` y `db/schema/`: el catálogo coincide 22 de 22 con `virgo_dev`, y `db/schema/` difiere en 8 colecciones.
+  - `007-esquema-mongodb` pasó a `010-contrato-datos`, porque el PR #5 usa `007-venues-catalog`.
+  - Se redactaron los specs `000-base-datos` y `001-contrato-con-api` de `VirGo-Database`.
+- **Evidencia:** `check_schema.py --live`: 25 diferencias; comparación del catálogo: 22 de 22.
+- **Decisiones:** ADR-32 y ADR-33; ADR-27 modificada.
+- **Costo:** $0.
+- **Aprendizaje:** dos personas definieron el esquema por separado; la comparación contra la base lo reveló.
+- **Pendiente:** decidir `VirGo-Database` `001` P-01, P-02 y P-05, y aplicarlo antes de desplegar el PR #5.

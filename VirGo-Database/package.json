@@ -1,0 +1,29 @@
+{
+  "name": "virgo-database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Infraestructura de colecciones, validadores e indices MongoDB para VirGo",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "db:plan:dev": "node src/cli/init.js --env-file .env.development --mode plan",
+    "db:validate:dev": "node src/cli/init.js --env-file .env.development --mode validate",
+    "db:init:dev": "node src/cli/init.js --env-file .env.development --mode apply",
+    "db:plan:prod": "node src/cli/init.js --env-file .env.production --mode plan",
+    "db:validate:prod": "node src/cli/init.js --env-file .env.production --mode validate",
+    "db:init:prod": "node src/cli/init.js --env-file .env.production --mode apply --confirm-production",
+    "db:verify:dev": "node src/cli/verify.js --env-file .env.development",
+    "db:verify:prod": "node src/cli/verify.js --env-file .env.production",
+    "db:inspect:dev": "node src/cli/inspect.js --env-file .env.development",
+    "db:inspect:prod": "node src/cli/inspect.js --env-file .env.production",
+    "test": "node --test \"tests/unit/*.test.js\"",
+    "test:integration": "node --test \"tests/integration/*.test.js\"",
+    "test:all": "node --test \"tests/**/*.test.js\""
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "mongodb": "^7.8.0"
+  }
+}
