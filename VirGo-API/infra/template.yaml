@@ -35,9 +35,10 @@ Resources:
       CorsConfiguration:
         AllowCredentials: false
         AllowHeaders:
-          - content-type
-          - authorization
-          - x-correlation-id
+           - content-type
+           - authorization
+           - x-correlation-id
+           - idempotency-key
         AllowMethods:
           - GET
           - POST

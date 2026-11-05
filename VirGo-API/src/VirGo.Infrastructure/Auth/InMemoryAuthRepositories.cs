@@ -67,6 +67,51 @@ public sealed class InMemoryUserRepository : IUserRepository
         users[user.Email] = user;
         return Task.CompletedTask;
     }
+
+    public Task<User?> RecordFailedLoginAsync(
+        string userId,
+        DateTime now,
+        int lockoutThreshold,
+        TimeSpan lockoutDuration,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var user = users.Values.FirstOrDefault(candidate => candidate.Id == userId);
+        if (user is null)
+        {
+            return Task.FromResult<User?>(null);
+        }
+
+        lock (user)
+        {
+            user.FailedLoginCount++;
+            if (user.FailedLoginCount >= lockoutThreshold)
+            {
+                user.LockoutEndsAt = now.Add(lockoutDuration);
+            }
+
+            user.UpdatedAt = now;
+        }
+
+        return Task.FromResult<User?>(user);
+    }
+
+    public Task ResetLoginFailuresAsync(string userId, DateTime now, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var user = users.Values.FirstOrDefault(candidate => candidate.Id == userId);
+        if (user is not null)
+        {
+            lock (user)
+            {
+                user.FailedLoginCount = 0;
+                user.LockoutEndsAt = null;
+                user.UpdatedAt = now;
+            }
+        }
+
+        return Task.CompletedTask;
+    }
 }
 
 public sealed class InMemorySessionRepository : ISessionRepository

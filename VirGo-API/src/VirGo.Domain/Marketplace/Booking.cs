@@ -4,6 +4,7 @@ public sealed class Booking
 {
     public required string Id { get; init; }
     public required string ClientId { get; init; }
+    public required string IdempotencyKey { get; init; }
     public required string ClientName { get; init; }
     public string? QuoteId { get; init; }
     public string? EventId { get; init; }

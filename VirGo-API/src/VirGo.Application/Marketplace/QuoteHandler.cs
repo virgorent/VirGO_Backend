@@ -9,7 +9,11 @@ public sealed class QuoteHandler(IVenueRepository venues, IQuoteRepository quote
     public async Task<Quote?> HandleAsync(CreateQuoteCommand command, CancellationToken cancellationToken = default)
     {
         if (!string.Equals(command.TargetType, "venue", StringComparison.OrdinalIgnoreCase)
+            || !Guid.TryParse(command.TargetId, out _)
             || command.Guests < 1
+            || !AllowedEventTypes.Contains(command.EventType, StringComparer.Ordinal)
+            || command.RequestedServices.Any(service => service.Length > 100)
+            || command.Message is not null && command.Message.Length > 2000
             || command.EventDate < DateOnly.FromDateTime(clock.UtcNow))
         {
             return null;
@@ -43,4 +47,6 @@ public sealed class QuoteHandler(IVenueRepository venues, IQuoteRepository quote
         await quotes.AddAsync(quote, cancellationToken);
         return quote;
     }
+
+    private static readonly string[] AllowedEventTypes = ["Boda", "XV años", "Cumpleaños", "Corporativo", "Otro"];
 }

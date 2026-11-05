@@ -10,5 +10,6 @@ public sealed class RateLimitFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.UseSetting("RateLimiting:PermitLimit", "1");
         builder.UseSetting("RateLimiting:WindowSeconds", "60");
+        builder.UseSetting("Jwt:SigningKey", "TestingOnlySigningKeyMustBeAtLeast32Characters");
     }
 }

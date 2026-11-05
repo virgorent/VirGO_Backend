@@ -2,6 +2,13 @@ using VirGo.Domain.Marketplace;
 
 namespace VirGo.Application.Marketplace;
 
+public sealed class DuplicateBookingIdempotencyException : Exception
+{
+    public DuplicateBookingIdempotencyException() : base("The booking idempotency key already exists.")
+    {
+    }
+}
+
 public interface IVenueRepository
 {
     Task<IReadOnlyList<Venue>> ListPublishedAsync(string? zone, string? category, CancellationToken cancellationToken = default);
@@ -15,6 +22,7 @@ public interface IQuoteRepository
 
 public interface IBookingRepository
 {
+    Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default);
     Task<string> NextFolioAsync(int year, CancellationToken cancellationToken = default);
     Task AddAsync(Booking booking, CancellationToken cancellationToken = default);
 }

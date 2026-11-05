@@ -36,7 +36,7 @@ jobs:
       - name: Deploy SAM application
         env:
           ALERT_EMAIL: ${{ vars.ALERT_EMAIL }}
-        run: sam deploy --config-file infra/samconfig.toml --parameter-overrides "AlertEmail=${ALERT_EMAIL}" --no-confirm-changeset --no-fail-on-empty-changeset
+        run: sam deploy --template-file .aws-sam/build/template.yaml --config-file infra/samconfig.toml --parameter-overrides "AlertEmail=${ALERT_EMAIL}" --no-confirm-changeset --no-fail-on-empty-changeset
       - name: Read API URL
         id: stack
         run: |

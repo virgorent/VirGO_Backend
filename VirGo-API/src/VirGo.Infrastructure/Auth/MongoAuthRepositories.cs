@@ -58,6 +58,50 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
         await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
     }
 
+    public async Task<User?> RecordFailedLoginAsync(
+        string userId,
+        DateTime now,
+        int lockoutThreshold,
+        TimeSpan lockoutDuration,
+        CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", userId);
+        var update = Builders<BsonDocument>.Update
+            .Inc("failedLoginCount", 1)
+            .Set("updatedAt", new BsonDateTime(now));
+        var options = new FindOneAndUpdateOptions<BsonDocument>
+        {
+            ReturnDocument = ReturnDocument.After
+        };
+        var document = await users.FindOneAndUpdateAsync(filter, update, options, cancellationToken);
+        if (document is null)
+        {
+            return null;
+        }
+
+        if (document.GetValue("failedLoginCount").ToInt32() >= lockoutThreshold)
+        {
+            var lockoutEndsAt = now.Add(lockoutDuration);
+            await users.UpdateOneAsync(
+                filter,
+                Builders<BsonDocument>.Update.Set("lockoutEndsAt", new BsonDateTime(lockoutEndsAt)),
+                cancellationToken: cancellationToken);
+            document["lockoutEndsAt"] = new BsonDateTime(lockoutEndsAt);
+        }
+
+        return Map(document);
+    }
+
+    public Task ResetLoginFailuresAsync(string userId, DateTime now, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", userId);
+        var update = Builders<BsonDocument>.Update
+            .Set("failedLoginCount", 0)
+            .Set("lockoutEndsAt", BsonNull.Value)
+            .Set("updatedAt", new BsonDateTime(now));
+        return users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+    }
+
     private static User Map(BsonDocument document)
     {
         return new User

@@ -63,7 +63,18 @@ public sealed class InMemoryBookingRepository : IBookingRepository
 {
     private readonly List<Booking> bookings = [];
     private readonly Dictionary<int, int> folios = [];
+    private readonly Dictionary<string, Booking> idempotentBookings = new(StringComparer.Ordinal);
     private readonly Lock gate = new();
+
+    public Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            idempotentBookings.TryGetValue(Key(clientId, idempotencyKey), out var booking);
+            return Task.FromResult(booking);
+        }
+    }
 
     public Task<string> NextFolioAsync(int year, CancellationToken cancellationToken = default)
     {
@@ -80,11 +91,19 @@ public sealed class InMemoryBookingRepository : IBookingRepository
         cancellationToken.ThrowIfCancellationRequested();
         lock (gate)
         {
+            if (idempotentBookings.ContainsKey(Key(booking.ClientId, booking.IdempotencyKey)))
+            {
+                throw new DuplicateBookingIdempotencyException();
+            }
+
             bookings.Add(booking);
+            idempotentBookings[Key(booking.ClientId, booking.IdempotencyKey)] = booking;
         }
 
         return Task.CompletedTask;
     }
+
+    private static string Key(string clientId, string idempotencyKey) => $"{clientId}\u001f{idempotencyKey}";
 }
 
 public sealed class MongoVenueRepository(IMongoDatabase database) : IVenueRepository
@@ -183,6 +202,15 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
     private readonly IMongoCollection<BsonDocument> bookings = database.GetCollection<BsonDocument>("bookings");
     private readonly IMongoCollection<BsonDocument> counters = database.GetCollection<BsonDocument>("counters");
 
+    public async Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("clientId", clientId),
+            Builders<BsonDocument>.Filter.Eq("idempotencyKey", idempotencyKey));
+        var document = await bookings.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
     public async Task<string> NextFolioAsync(int year, CancellationToken cancellationToken = default)
     {
         var counterId = $"folio-{year:D4}";
@@ -199,13 +227,14 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
         return $"VG-{year:D4}-{counter["next"].ToInt32():D4}";
     }
 
-    public Task AddAsync(Booking booking, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Booking booking, CancellationToken cancellationToken = default)
     {
         var document = new BsonDocument
         {
             ["_id"] = booking.Id,
             ["folio"] = booking.Folio,
             ["clientId"] = booking.ClientId,
+            ["idempotencyKey"] = booking.IdempotencyKey,
             ["clientName"] = booking.ClientName,
             ["venue"] = new BsonDocument
             {
@@ -231,6 +260,33 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
             document["eventId"] = booking.EventId;
         }
 
-        return bookings.InsertOneAsync(document, cancellationToken: cancellationToken);
+        try
+        {
+            await bookings.InsertOneAsync(document, cancellationToken: cancellationToken);
+        }
+        catch (MongoWriteException exception) when (exception.WriteError?.Code == 11000)
+        {
+            throw new DuplicateBookingIdempotencyException();
+        }
     }
+
+    private static Booking Map(BsonDocument document) => new()
+    {
+        Id = document.GetValue("_id").AsString,
+        ClientId = document.GetValue("clientId").AsString,
+        IdempotencyKey = document.GetValue("idempotencyKey").AsString,
+        ClientName = document.GetValue("clientName").AsString,
+        QuoteId = document.TryGetValue("quoteId", out var quoteId) && quoteId.IsString ? quoteId.AsString : null,
+        EventId = document.TryGetValue("eventId", out var eventId) && eventId.IsString ? eventId.AsString : null,
+        VenueId = document["venue"].AsBsonDocument["venueId"].AsString,
+        VenueName = document["venue"].AsBsonDocument["name"].AsString,
+        Date = document.GetValue("date").AsString,
+        Hours = document.GetValue("hours").ToInt32(),
+        Total = document.GetValue("total").ToDecimal(),
+        Deposit = document.GetValue("deposit").ToDecimal(),
+        Folio = document.GetValue("folio").AsString,
+        Status = document.GetValue("status").AsString,
+        CreatedAt = document.GetValue("createdAt").AsBsonDateTime.ToUniversalTime(),
+        UpdatedAt = document.GetValue("updatedAt").AsBsonDateTime.ToUniversalTime()
+    };
 }

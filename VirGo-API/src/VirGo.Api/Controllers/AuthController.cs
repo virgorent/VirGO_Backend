@@ -17,21 +17,23 @@ public sealed class AuthController(
     public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
     {
         var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
-        if (string.IsNullOrWhiteSpace(request.Name))
+        if (string.IsNullOrWhiteSpace(request.Name) || request.Name.Trim().Length > 100)
         {
-            errors["name"] = ["El nombre es obligatorio."];
+            errors["name"] = ["El nombre es obligatorio y no puede superar 100 caracteres."];
         }
-        if (string.IsNullOrWhiteSpace(request.Email) || !new EmailAddressAttribute().IsValid(request.Email.Trim()))
+        if (string.IsNullOrWhiteSpace(request.Email)
+            || request.Email.Trim().Length > 150
+            || !new EmailAddressAttribute().IsValid(request.Email.Trim()))
         {
-            errors["email"] = ["El correo debe tener un formato válido."];
+            errors["email"] = ["El correo debe tener un formato válido y no puede superar 150 caracteres."];
         }
         if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 8 || request.Password.Length > 128)
         {
             errors["password"] = ["La contraseña debe tener entre 8 y 128 caracteres."];
         }
-        if (string.IsNullOrWhiteSpace(request.Phone))
+        if (string.IsNullOrWhiteSpace(request.Phone) || request.Phone.Trim().Length > 16)
         {
-            errors["phone"] = ["El teléfono es obligatorio."];
+            errors["phone"] = ["El teléfono es obligatorio y no puede superar 16 caracteres."];
         }
         if (errors.Count > 0)
         {
@@ -79,6 +81,12 @@ public sealed class AuthController(
         var outcome = await loginHandler.HandleAsync(
             new LoginCommand(request.Email!.Trim(), request.Password!),
             cancellationToken);
+        if (outcome.Failure == LoginFailure.LockedOut)
+        {
+            Response.Headers.RetryAfter = (outcome.RetryAfterSeconds ?? 900).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return Problem(statusCode: StatusCodes.Status429TooManyRequests, title: "Demasiados intentos. Intenta de nuevo más tarde.");
+        }
+
         if (!outcome.IsSuccess)
         {
             return InvalidCredentials();

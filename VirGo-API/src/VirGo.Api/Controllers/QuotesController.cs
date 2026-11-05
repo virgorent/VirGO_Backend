@@ -14,18 +14,24 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
     [HttpPost]
     public async Task<IActionResult> Create(CreateQuoteRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Target?.Id)
-            || string.IsNullOrWhiteSpace(request.EventType)
-            || request.Guests < 1
-            || !DateOnly.TryParseExact(request.EventDate, "yyyy-MM-dd", out var eventDate))
-        {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de cotización es inválida.");
-        }
-
         var user = await GetCurrentUser(cancellationToken);
         if (user is null)
         {
             return Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Target?.Id)
+            || !Guid.TryParse(request.Target.Id, out _)
+            || !string.Equals(request.Target.Type, "venue", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(request.EventType)
+            || !AllowedEventTypes.Contains(request.EventType, StringComparer.Ordinal)
+            || request.Guests < 1
+            || !DateOnly.TryParseExact(request.EventDate, "yyyy-MM-dd", out var eventDate)
+            || request.EventId is not null && !Guid.TryParse(request.EventId, out _)
+            || request.RequestedServices is not null && request.RequestedServices.Any(service => service.Length > 100)
+            || request.Message is not null && request.Message.Length > 2000)
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de cotización es inválida.");
         }
 
         var quote = await handler.HandleAsync(new CreateQuoteCommand(
@@ -46,6 +52,8 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
 
     private Task<VirGo.Domain.Auth.User?> GetCurrentUser(CancellationToken cancellationToken) =>
         users.FindByIdAsync(User.FindFirstValue("sub")!, cancellationToken);
+
+    private static readonly string[] AllowedEventTypes = ["Boda", "XV años", "Cumpleaños", "Corporativo", "Otro"];
 }
 
 public sealed record CreateQuoteRequest(

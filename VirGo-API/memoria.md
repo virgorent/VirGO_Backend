@@ -208,3 +208,15 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore -warnaserror` sin advertencias; `dotnet test VirGo.slnx -c Release --no-build`: 23 pruebas aprobadas (2 unitarias, 18 integración, 3 seguridad).
 - **Costo:** $0; no se crearon recursos AWS ni Atlas.
 - **Pendiente:** ejecutar `db/tools/check_schema.py` cuando Python esté disponible; validar SAM/Checkov/cfn-lint en CI; finalizar la configuración autorizada de AWS, Atlas y OIDC antes del despliegue.
+
+### 2026-11-05 · Revisión del PR y corrección de bloqueos
+
+- **Autor:** equipo + OpenCode (`qa`, `seguridad`)
+- **Módulo / tareas:** `003`, `009`, `002` · PR #5
+- **Qué se corrigió:**
+  - Se implementó idempotencia persistida para reservaciones mediante `idempotencyKey` y un índice único por cliente.
+  - Se agregó bloqueo de cuenta tras cinco fallos consecutivos, con respuesta 429 y `Retry-After` en el siguiente intento.
+  - Se alinearon validaciones de entrada con los límites de `db/schema/`, se eliminó la clave JWT de `appsettings.json` y se corrigió la validación de sesión/correlación señalada por CodeQL.
+  - Se corrigieron CloudFormation, CORS, la ruta del template generado en el despliegue y los gates de esquema/dependencias del CI.
+- **Evidencia local:** build estricto sin advertencias; 19 pruebas de integración, 2 unitarias y 3 de seguridad aprobadas.
+- **Pendiente:** confirmar los nuevos checks remotos de CodeQL, IaC, esquema y seguridad; no hacer merge sin aprobación humana.

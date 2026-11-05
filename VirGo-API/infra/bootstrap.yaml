@@ -99,17 +99,17 @@ Resources:
           IncludeTax: true
           IncludeSubscription: true
           IncludeSupport: true
-          IncludeDiscount: true
-          UseBlended: false
-        NotificationsWithSubscribers:
-          - Notification:
-              NotificationType: ACTUAL
-              ComparisonOperator: GREATER_THAN
-              Threshold: 100
-              ThresholdType: PERCENTAGE
-            Subscribers:
-              - Address: !Ref AlertEmail
-                SubscriptionType: EMAIL
+        IncludeDiscount: true
+        UseBlended: false
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - Address: !Ref AlertEmail
+              SubscriptionType: EMAIL
 
 Outputs:
   GitHubDeployRoleArn:

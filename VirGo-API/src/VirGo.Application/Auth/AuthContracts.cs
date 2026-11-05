@@ -13,10 +13,11 @@ public sealed record LoginResult(
 public enum LoginFailure
 {
     InvalidRequest,
-    InvalidCredentials
+    InvalidCredentials,
+    LockedOut
 }
 
-public sealed record LoginOutcome(LoginResult? Result, LoginFailure? Failure)
+public sealed record LoginOutcome(LoginResult? Result, LoginFailure? Failure, int? RetryAfterSeconds = null)
 {
     public bool IsSuccess => Result is not null;
 }

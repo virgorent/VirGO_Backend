@@ -14,9 +14,13 @@ public sealed class RegisterHandler(
     {
         var email = command.Email.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(command.Name)
+            || command.Name.Trim().Length > 100
             || string.IsNullOrWhiteSpace(email)
+            || email.Length > 150
             || string.IsNullOrWhiteSpace(command.Password)
-            || string.IsNullOrWhiteSpace(command.Phone))
+            || command.Password.Length > 128
+            || string.IsNullOrWhiteSpace(command.Phone)
+            || command.Phone.Trim().Length > 16)
         {
             return new(null, RegisterFailure.InvalidRequest);
         }

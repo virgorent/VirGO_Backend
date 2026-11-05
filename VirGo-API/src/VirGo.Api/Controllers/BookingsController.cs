@@ -13,19 +13,6 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
     [HttpPost]
     public async Task<IActionResult> Create(CreateBookingRequest request, CancellationToken cancellationToken)
     {
-        if (!Request.Headers.TryGetValue("Idempotency-Key", out var idempotencyKey)
-            || string.IsNullOrWhiteSpace(idempotencyKey.ToString()))
-        {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Idempotency-Key es obligatorio.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.VenueId)
-            || string.IsNullOrWhiteSpace(request.Date)
-            || request.Hours < 1)
-        {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de reservación es inválida.");
-        }
-
         var userId = User.FindFirst("sub")?.Value;
         var user = string.IsNullOrWhiteSpace(userId) ? null : await users.FindByIdAsync(userId, cancellationToken);
         if (user is null)
@@ -33,8 +20,27 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
             return Unauthorized();
         }
 
+        if (!Request.Headers.TryGetValue("Idempotency-Key", out var idempotencyKey)
+            || string.IsNullOrWhiteSpace(idempotencyKey.ToString())
+            || idempotencyKey.ToString().Length > 128)
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Idempotency-Key es obligatorio.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.VenueId)
+            || !Guid.TryParse(request.VenueId, out _)
+            || string.IsNullOrWhiteSpace(request.Date)
+            || !DateOnly.TryParseExact(request.Date, "yyyy-MM-dd", out _)
+            || request.QuoteId is not null && !Guid.TryParse(request.QuoteId, out _)
+            || request.EventId is not null && !Guid.TryParse(request.EventId, out _)
+            || request.Hours < 1)
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de reservación es inválida.");
+        }
+
         var booking = await handler.HandleAsync(new CreateBookingCommand(
             user.Id,
+            idempotencyKey.ToString().Trim(),
             user.Name,
             request.QuoteId,
             request.EventId,

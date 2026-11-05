@@ -77,6 +77,13 @@ dotnet test -c Release --no-build
 dotnet run --project src/VirGo.Api     # http://localhost:5080, in-memory persistence, no AWS needed
 ```
 
+For local execution, provide a development-only JWT signing key through the environment; production reads it from SSM:
+
+```powershell
+$env:Jwt__SigningKey = "set-a-local-value-with-at-least-32-characters"
+dotnet run --project src/VirGo.Api
+```
+
 Mutation tests: `dotnet tool restore && dotnet stryker`.
 
 ## API contract

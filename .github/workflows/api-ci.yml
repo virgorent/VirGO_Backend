@@ -113,3 +113,16 @@ jobs:
         run: cfn-lint infra/bootstrap.yaml infra/template.yaml
       - name: Checkov
         run: checkov -d infra --config-file infra/.checkov.yaml
+
+  api-schema:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: VirGo-API
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Validate schema files
+        run: python db/tools/check_schema.py

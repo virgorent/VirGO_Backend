@@ -14,6 +14,7 @@ public sealed record CreateQuoteCommand(
 
 public sealed record CreateBookingCommand(
     string ClientId,
+    string IdempotencyKey,
     string ClientName,
     string? QuoteId,
     string? EventId,

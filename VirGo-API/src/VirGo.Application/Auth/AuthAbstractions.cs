@@ -18,6 +18,15 @@ public interface IUserRepository
     Task AddAsync(User user, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+
+    Task<User?> RecordFailedLoginAsync(
+        string userId,
+        DateTime now,
+        int lockoutThreshold,
+        TimeSpan lockoutDuration,
+        CancellationToken cancellationToken = default);
+
+    Task ResetLoginFailuresAsync(string userId, DateTime now, CancellationToken cancellationToken = default);
 }
 
 public interface ISessionRepository

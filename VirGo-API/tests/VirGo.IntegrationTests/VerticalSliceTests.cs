@@ -108,7 +108,52 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         using var bookingResponse = await client.SendAsync(bookingRequest);
         Assert.Equal(HttpStatusCode.Created, bookingResponse.StatusCode);
         using var bookingJson = JsonDocument.Parse(await bookingResponse.Content.ReadAsStringAsync());
+        var bookingId = bookingJson.RootElement.GetProperty("id").GetString();
         Assert.Equal("pending_payment", bookingJson.RootElement.GetProperty("status").GetString());
+
+        using var replayRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/bookings")
+        {
+            Content = JsonContent.Create(new
+            {
+                quoteId = Guid.NewGuid().ToString("D"),
+                eventId = "22222222-2222-4222-8222-222222222222",
+                venueId = "11111111-1111-4111-8111-111111111111",
+                date = "2027-05-15",
+                hours = 1,
+                deposit = 1000
+            })
+        };
+        replayRequest.Headers.Add("Idempotency-Key", bookingRequest.Headers.GetValues("Idempotency-Key").Single());
+        using var replayResponse = await client.SendAsync(replayRequest);
+        Assert.Equal(HttpStatusCode.Created, replayResponse.StatusCode);
+        using var replayJson = JsonDocument.Parse(await replayResponse.Content.ReadAsStringAsync());
+        Assert.Equal(bookingId, replayJson.RootElement.GetProperty("id").GetString());
+    }
+
+    [Fact]
+    public async Task LoginLocksAnAccountAfterFiveFailedAttempts()
+    {
+        using var client = factory.CreateClient();
+        var email = $"lockout-{Guid.NewGuid():N}@virgo.mx";
+        var password = "Strong-password-123";
+
+        Assert.Equal(HttpStatusCode.Created, (await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            name = "Cuenta bloqueable",
+            email,
+            password,
+            phone = "+525500000000"
+        })).StatusCode);
+
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            using var failed = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "wrong-password" });
+            Assert.Equal(HttpStatusCode.Unauthorized, failed.StatusCode);
+        }
+
+        using var locked = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
+        Assert.Equal(HttpStatusCode.TooManyRequests, locked.StatusCode);
+        Assert.True(locked.Headers.Contains("Retry-After"));
     }
 
     [Fact]

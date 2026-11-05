@@ -4,7 +4,7 @@ public sealed class CorrelationIdMiddleware(RequestDelegate next)
 {
     private const string HeaderName = "X-Correlation-Id";
 
-    public async Task InvokeAsync(HttpContext context, ILogger<CorrelationIdMiddleware> logger)
+    public async Task InvokeAsync(HttpContext context)
     {
         var correlationId = context.Request.Headers[HeaderName].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(correlationId) || correlationId.Length > 100)
@@ -19,9 +19,6 @@ public sealed class CorrelationIdMiddleware(RequestDelegate next)
             return Task.CompletedTask;
         });
 
-        using (logger.BeginScope(new Dictionary<string, object> { ["correlationId"] = correlationId }))
-        {
-            await next(context);
-        }
+        await next(context);
     }
 }
