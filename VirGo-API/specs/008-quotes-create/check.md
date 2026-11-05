@@ -3,6 +3,6 @@
 | Evidencia | Estado |
 |---|---|
 | Creacion autenticada en integracion | ✅ |
-| Rechazo sin auth, destino privado y fecha invalida | ⏳ |
+| Sin auth, venue inexistente, fecha pasada y servicio nulo | ✅ |
 | Persistencia contra Atlas | ⏳ |
 | Humo HTTPS | ⏳ |

@@ -4,5 +4,5 @@
 |---|---|
 | Creacion autenticada en integracion | ✅ |
 | Folio atomico contra MongoDB | ⏳ |
-| Idempotencia y concurrencia | ✅ `VerticalSliceTests.AuthenticatedClientCanCreateQuoteAndBooking` repite la clave y recibe el mismo `id` |
+| Idempotencia y concurrencia | ✅ `VerticalSliceTests` repite la clave secuencial y con `Task.WhenAll`; recibe un `id` y folio |
 | Humo HTTPS | ⏳ |

@@ -48,6 +48,23 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task RegisterRejectsInvalidInputAsProblemDetails()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            name = "",
+            email = "not-an-email",
+            password = "short",
+            phone = ""
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
     public async Task AuthenticatedUserCanReadOwnProfile()
     {
         using var client = factory.CreateClient();
@@ -62,6 +79,17 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task ProfileRejectsAnInvalidToken()
+    {
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "invalid-token");
+
+        using var response = await client.GetAsync("/api/v1/users/me");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
     public async Task PublicVenueCatalogReturnsPublishedVenues()
     {
         using var client = factory.CreateClient();
@@ -71,6 +99,105 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         Assert.NotEmpty(json.RootElement.GetProperty("data").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task PublicVenueCatalogFiltersBySchemaCategory()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("/api/v1/venues?category=Salon");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.NotEmpty(json.RootElement.GetProperty("data").EnumerateArray());
+        Assert.DoesNotContain("ownerId", json.RootElement.GetProperty("data")[0].EnumerateObject().Select(property => property.Name));
+    }
+
+    [Fact]
+    public async Task PublicVenueCatalogReturnsNoResultsForUnknownCategory()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("/api/v1/venues?category=Rooftop");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Empty(json.RootElement.GetProperty("data").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task QuoteRejectsNullRequestedService()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await client.PostAsJsonAsync("/api/v1/quotes", new
+        {
+            target = new { type = "venue", id = "11111111-1111-4111-8111-111111111111" },
+            eventType = "Boda",
+            eventDate = "2027-05-15",
+            guests = 150,
+            requestedServices = new string?[] { null }
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task QuoteRequiresAuthentication()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.PostAsJsonAsync("/api/v1/quotes", new
+        {
+            target = new { type = "venue", id = "11111111-1111-4111-8111-111111111111" },
+            eventType = "Boda",
+            eventDate = "2027-05-15",
+            guests = 150,
+            requestedServices = RequestedServices
+        });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task QuoteRejectsPastEventDate()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await client.PostAsJsonAsync("/api/v1/quotes", new
+        {
+            target = new { type = "venue", id = "11111111-1111-4111-8111-111111111111" },
+            eventType = "Boda",
+            eventDate = "2020-01-01",
+            guests = 150,
+            requestedServices = RequestedServices
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task QuoteReturnsNotFoundForUnknownVenue()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await client.PostAsJsonAsync("/api/v1/quotes", new
+        {
+            target = new { type = "venue", id = "99999999-9999-4999-8999-999999999999" },
+            eventType = "Boda",
+            eventDate = "2027-05-15",
+            guests = 150,
+            requestedServices = RequestedServices
+        });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -128,6 +255,97 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         Assert.Equal(HttpStatusCode.Created, replayResponse.StatusCode);
         using var replayJson = JsonDocument.Parse(await replayResponse.Content.ReadAsStringAsync());
         Assert.Equal(bookingId, replayJson.RootElement.GetProperty("id").GetString());
+    }
+
+    [Fact]
+    public async Task BookingRejectsDepositAboveCalculatedTotal()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/bookings")
+        {
+            Content = JsonContent.Create(new
+            {
+                venueId = "11111111-1111-4111-8111-111111111111",
+                date = "2027-05-15",
+                hours = 1,
+                deposit = 45001
+            })
+        };
+        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString("D"));
+
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task BookingCalculatesDayPriceAndDefaultDeposit()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/bookings")
+        {
+            Content = JsonContent.Create(new
+            {
+                venueId = "11111111-1111-4111-8111-111111111111",
+                date = "2027-05-15",
+                hours = 25
+            })
+        };
+        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString("D"));
+
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal(90000, json.RootElement.GetProperty("total").GetDecimal());
+        Assert.Equal(27000, json.RootElement.GetProperty("deposit").GetDecimal());
+    }
+
+    [Fact]
+    public async Task ConcurrentBookingRequestsWithTheSameKeyReturnOneBooking()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var idempotencyKey = Guid.NewGuid().ToString("D");
+
+        var responses = await Task.WhenAll(Enumerable.Range(0, 8).Select(async _ =>
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/bookings")
+            {
+                Content = JsonContent.Create(new
+                {
+                    venueId = "11111111-1111-4111-8111-111111111111",
+                    date = "2027-05-15",
+                    hours = 1,
+                    deposit = 1000
+                })
+            };
+            request.Headers.Add("Idempotency-Key", idempotencyKey);
+            return await client.SendAsync(request);
+        }));
+
+        Assert.All(responses, response => Assert.Equal(HttpStatusCode.Created, response.StatusCode));
+        var payloads = await Task.WhenAll(responses.Select(async response =>
+        {
+            using (response)
+            {
+                using var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                return (
+                    Id: payload.RootElement.GetProperty("id").GetString(),
+                    Folio: payload.RootElement.GetProperty("folio").GetString());
+            }
+        }));
+        var bookingIds = payloads.Select(payload => payload.Id).Distinct().ToArray();
+        var folios = payloads.Select(payload => payload.Folio).Distinct().ToArray();
+        Assert.Single(bookingIds);
+        Assert.Single(folios);
     }
 
     [Fact]

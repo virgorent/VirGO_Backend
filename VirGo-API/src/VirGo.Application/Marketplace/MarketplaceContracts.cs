@@ -1,3 +1,5 @@
+using VirGo.Domain.Marketplace;
+
 namespace VirGo.Application.Marketplace;
 
 public sealed record CreateQuoteCommand(
@@ -12,6 +14,8 @@ public sealed record CreateQuoteCommand(
     string[] RequestedServices,
     string? Message);
 
+public sealed record QuoteCreationResult(Quote? Quote, bool InvalidInput);
+
 public sealed record CreateBookingCommand(
     string ClientId,
     string IdempotencyKey,
@@ -22,3 +26,5 @@ public sealed record CreateBookingCommand(
     string Date,
     int Hours,
     decimal? Deposit);
+
+public sealed record BookingCreationResult(Booking? Booking, bool InvalidInput);

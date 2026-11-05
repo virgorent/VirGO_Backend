@@ -16,7 +16,7 @@ REST API for **VirGo**, a platform that connects people organizing an event with
 | Infrastructure as Code | AWS SAM / CloudFormation |
 | CI/CD | GitHub Actions with OIDC to AWS: CI on every PR, manual deploy |
 | Security (DevSecOps) | CodeQL, Semgrep, SonarCloud, OWASP ZAP, Dependabot, dependency review, Gitleaks, Checkov, GitHub rulesets |
-| Tests | xUnit (unit, integration, security), Testcontainers for MongoDB repositories, Stryker.NET (mutation), smoke tests after deploy |
+| Tests | xUnit (unit, integration, security), Stryker.NET (mutation), smoke tests after deploy |
 
 ## Architecture
 
@@ -37,6 +37,7 @@ VirGo-API/
 ├── constitution.md   # Project rules (Spanish). Everything else must align with it
 ├── AGENTS.md         # Guide for AI agents and contributors
 ├── memoria.md        # Project log: decisions (ADR), costs, contract changes
+├── API-HANDOFF.md      # Versioned API and persistence contract snapshot
 ├── opencode.json     # Approved MCP servers
 ├── .opencode/        # Sub-agents and internal skills
 ├── specs/            # One folder per module: spec.md, plan.md, task.md, check.md
@@ -68,7 +69,7 @@ The project follows **Spec-Driven Development**: no code without an approved spe
 
 ## Getting started
 
-These commands will work once module `000` is implemented:
+Run these commands from `VirGo-API/`:
 
 ```bash
 dotnet restore

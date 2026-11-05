@@ -19,6 +19,7 @@ VirGo-API/
 ├── constitution.md          # Reglas globales del proyecto
 ├── AGENTS.md                # Este archivo
 ├── memoria.md               # Bitácora de actividades y decisiones
+├── API-HANDOFF.md           # Contrato versionado de API y persistencia
 ├── opencode.json            # Servidores MCP permitidos
 ├── .opencode/
 │   ├── agents/              # Subagentes del proyecto
@@ -29,6 +30,7 @@ VirGo-API/
 │   ├── 002-pipeline-cicd/
 │   ├── 003-auth-login/
 │   ├── 004-auth-logout/
+│   ├── 005-auth-register/ through 009-bookings-create/ # Vertical slice
 │   └── 007-esquema-mongodb/
 ├── db/                      # schema/ (fuente de verdad) y tools/check_schema.py
 ├── src/                     # VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
@@ -41,7 +43,7 @@ En la raíz del repositorio están `.github/` con los workflows y el ruleset, la
 
 ## Comandos
 
-Estos comandos estarán disponibles al terminar las tareas de la arquitectura base:
+Estos comandos están disponibles para la implementación local; Python, Atlas y AWS siguen siendo dependencias externas:
 
 ```powershell
 dotnet restore

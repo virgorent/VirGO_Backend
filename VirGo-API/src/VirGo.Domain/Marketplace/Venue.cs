@@ -12,6 +12,7 @@ public sealed class Venue
     public required int Capacity { get; init; }
     public required decimal BasePrice { get; init; }
     public required string PriceUnit { get; init; }
+    public required int MinimumHours { get; init; }
     public required string[] Categories { get; init; }
     public required string[] Amenities { get; init; }
     public required string[] Photos { get; init; }

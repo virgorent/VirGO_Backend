@@ -28,13 +28,13 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
             || request.Guests < 1
             || !DateOnly.TryParseExact(request.EventDate, "yyyy-MM-dd", out var eventDate)
             || request.EventId is not null && !Guid.TryParse(request.EventId, out _)
-            || request.RequestedServices is not null && request.RequestedServices.Any(service => service.Length > 100)
+            || request.RequestedServices is not null && request.RequestedServices.Any(service => string.IsNullOrWhiteSpace(service) || service.Length > 100)
             || request.Message is not null && request.Message.Length > 2000)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de cotización es inválida.");
         }
 
-        var quote = await handler.HandleAsync(new CreateQuoteCommand(
+        var result = await handler.HandleAsync(new CreateQuoteCommand(
             user.Id,
             user.Name,
             request.Target.Type ?? "venue",
@@ -45,9 +45,14 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
             request.Guests,
             request.RequestedServices ?? [],
             request.Message), cancellationToken);
-        return quote is null
+        if (result.InvalidInput)
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de cotización es inválida.");
+        }
+
+        return result.Quote is null
             ? NotFound()
-            : Created($"/api/v1/quotes/{quote.Id}", quote);
+            : Created($"/api/v1/quotes/{result.Quote.Id}", result.Quote);
     }
 
     private Task<VirGo.Domain.Auth.User?> GetCurrentUser(CancellationToken cancellationToken) =>

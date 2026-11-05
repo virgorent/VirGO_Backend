@@ -38,7 +38,7 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de reservación es inválida.");
         }
 
-        var booking = await handler.HandleAsync(new CreateBookingCommand(
+        var result = await handler.HandleAsync(new CreateBookingCommand(
             user.Id,
             idempotencyKey.ToString().Trim(),
             user.Name,
@@ -48,9 +48,14 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
             request.Date,
             request.Hours,
             request.Deposit), cancellationToken);
-        return booking is null
+        if (result.InvalidInput)
+        {
+            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de reservación es inválida.");
+        }
+
+        return result.Booking is null
             ? NotFound()
-            : Created($"/api/v1/bookings/{booking.Id}", booking);
+            : Created($"/api/v1/bookings/{result.Booking.Id}", result.Booking);
     }
 }
 

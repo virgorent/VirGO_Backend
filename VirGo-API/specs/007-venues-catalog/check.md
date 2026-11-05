@@ -2,7 +2,7 @@
 
 | Evidencia | Estado |
 |---|---|
-| `PublicVenueCatalogReturnsPublishedVenues` | ✅ |
-| Filtro sin resultados y paginacion | ⏳ |
+| Catalogo publicado y categoria valida en `VerticalSliceTests` | ✅ |
+| Filtro sin resultados en `VerticalSliceTests` | ✅ |
 | Validacion contra Atlas | ⏳ |
 | Humo HTTPS | ⏳ |

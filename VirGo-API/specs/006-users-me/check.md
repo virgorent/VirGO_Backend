@@ -3,6 +3,6 @@
 | Evidencia | Estado |
 |---|---|
 | `AuthenticatedUserCanReadOwnProfile` | ✅ |
-| Sin token y acceso cruzado | ⏳ |
+| Token invalido rechazado en `VerticalSliceTests` | ✅ |
 | MongoDB Atlas | ⏳ |
 | Humo HTTPS | ⏳ |
