@@ -3,7 +3,7 @@
   "mcp": {
     "aws-docs": {
       "type": "local",
-      "command": ["uvx", "awslabs.aws-documentation-mcp-server@latest"],
+      "command": ["uvx", "awslabs.aws-documentation-mcp-server@1.2.4"],
       "environment": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -11,7 +11,7 @@
     },
     "mongodb": {
       "type": "local",
-      "command": ["npx", "-y", "mongodb-mcp-server@latest"],
+      "command": ["npx", "-y", "mongodb-mcp-server@3.2.2", "--readOnly"],
       "environment": {
         "MDB_MCP_CONNECTION_STRING": "{env:VIRGO_MONGO_MCP_URI}",
         "MDB_MCP_READ_ONLY": "true"

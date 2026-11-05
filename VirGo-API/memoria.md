@@ -8,7 +8,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 |---|---|
 | Constitución | v1.1.0 **propuesta** (pendiente de aprobación del equipo) |
 | Módulo en curso | `000-arquitectura-base` en revisión; `001`–`004` en borrador. Ninguna tarea ejecutada |
-| Tareas | 0 hechas (`000`: 22 vigentes · `001`: 11 · `002`: 12 · `003`: 13 · `004`: 9) |
+| Tareas | 0 hechas (`000`: 23 vigentes · `001`: 11 · `002`: 17 · `003`: 13 · `004`: 9 · `007`: 2 de 7) |
 | URL de producción | Pendiente (se obtiene en `002`: T209) |
 | Costo acumulado en AWS | $0 USD (todavía no se crea ningún recurso) |
 | Siguiente paso | Evaluación del 2026-11-04: aprobar la enmienda v1.1.0 y los specs `000`–`004` |
@@ -22,6 +22,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | `002-pipeline-cicd` | ✏️ Borrador | Ruleset, CI con 5 tipos de prueba y DevSecOps, CD manual, humo |
 | `003-auth-login` | ✏️ Borrador | `POST /api/v1/auth/login`; espera a `000`–`002` |
 | `004-auth-logout` | ✏️ Borrador | `POST /api/v1/auth/logout`; espera a `003` |
+| `007-esquema-mongodb` | ✏️ Borrador | Fuente de verdad del esquema; debe cerrarse antes de `003` |
 | `005-auth-registro`, `006-auth-renovar-sesion` | 💡 Propuestos | Salieron del alcance de `003` y `004` |
 
 ## Decisiones (ADR)
@@ -55,6 +56,11 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-24 | 2026-11-03 | Atlas con lista de acceso `0.0.0.0/0` y controles compensatorios | Lambda no tiene IP fija sin NAT (prohibido); M0 no admite *private endpoint* |
 | ADR-25 | 2026-11-03 | **Testcontainers** para probar los repositorios de MongoDB en el CI | Gratis en GitHub Actions; local sigue sin Docker (en memoria) |
 | ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/virGO_App` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
+| ADR-27 | 2026-11-04 | **`db/schema/`** como fuente de verdad del esquema | Es lo único que una máquina puede comparar y aplicar |
+| ADR-28 | 2026-11-04 | `_id` y referencias como **texto UUID** (provisional) | Ya estaba así en `virgo_dev` |
+| ADR-29 | 2026-11-04 | `monthlyStats._id` determinista | Permite el `upsert` con `$inc` |
+| ADR-30 | 2026-11-04 | **Semgrep, SonarCloud y OWASP ZAP** en cada PR | Clase del 2026-11-04 y proyecto de referencia |
+| ADR-31 | 2026-11-04 | **Mutación nocturna**, fuera de los checks requeridos | Mantiene el CI corto, como la referencia |
 
 ## Cambios de contrato (compartidos con Móvil)
 
@@ -173,3 +179,20 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje:** al ser público, todo lo que se suba es visible; Gitleaks y la protección de push son prioritarios.
 - **Pendiente:** crear el ruleset (`002`: T207) y aclarar `002` P-03 (`rama-apis`).
+
+### 2026-11-04 · Saneamiento tras la clase: esquema, pipeline y validaciones
+
+- **Autor:** equipo + Claude Code (`arquitecto`)
+- **Módulo / tareas:** `007`: T702 y T703 · `000`, `002`, `003`, `004` actualizados
+- **Qué se hizo:**
+  - Se revisó `virgo_dev` en modo lectura: 22 colecciones y 59 índices, pero contradecía al modelo, y 0 de 77 campos de texto libre tenían `maxLength`.
+  - Se creó `db/schema/` y `db/tools/check_schema.py`, con correcciones y longitudes. **Todavía no se aplica a la base** (T704).
+  - `002` suma Semgrep, SonarCloud, OWASP ZAP, comentario de calidad en el PR y mutación nocturna: 13 herramientas.
+  - Se agregó la regla «ningún campo sin límite» (Art. VI.6, RF-16, T036).
+  - Se crearon la plantilla de PR, `CHECKLIST_PR.md`, Dependabot, el ruleset exportado, `.editorconfig`, `Directory.Build.props`, `appsettings.Example.json` y `.specify/templates/`.
+  - Se comprobó que existen los paquetes de los MCP y se fijaron sus versiones: `mongodb-mcp-server@3.2.2 --readOnly` y `awslabs.aws-documentation-mcp-server@1.2.4`. Falta instalarlos y probarlos (T100).
+- **Evidencia:** `check_schema.py`: 0 diferencias sin credenciales; `--live`: 25 diferencias, pendientes de T704.
+- **Decisiones:** ADR-27 a ADR-31.
+- **Costo:** $0.
+- **Aprendizaje (5 porqués):** la causa raíz fue que nada comparaba los documentos con la realidad; `verificar-constitucion` ahora lo exige.
+- **Pendiente:** `007` P-01 a P-05 (T701), T700 y T704; D5 (Redis y colas) y D6 (Pact y pruebas de base de datos) con el profesor; revisión de otra persona antes de aprobar v1.1.0.

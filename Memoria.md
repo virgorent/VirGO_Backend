@@ -23,6 +23,7 @@
 | 2026-11-04 | Plantillas SDD en `.specify/templates/` y `.specify/memory/` | Evitar specs ad hoc y asegurar controles de seguridad desde el diseño |
 | 2026-11-04 | Baseline DevSecOps en `.github/` | Gitleaks, dependency review, Dependabot y ruleset compartidos por ambos proyectos |
 | 2026-11-04 | Cerrar `nv-02` como Cumplido con pendientes operativos | La gobernanza, plantillas y baseline están verificados; faltan aplicar el ruleset de `main` y habilitar Dependency graph |
+| 2026-11-04 | `VirGo-API/db/schema/` es la fuente de verdad del esquema de MongoDB | La base y el modelo se contradecían; ver `VirGo-API/memoria.md` |
 
 ## Errores a evitar
 

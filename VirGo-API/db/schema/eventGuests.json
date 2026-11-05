@@ -1,0 +1,63 @@
+{
+  "collection": "eventGuests",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "eventGuests",
+      "required": [
+        "_id",
+        "eventId",
+        "name",
+        "phone",
+        "companions",
+        "status"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "eventId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "name": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "phone": {
+          "bsonType": "string",
+          "maxLength": 16
+        },
+        "companions": {
+          "bsonType": "int",
+          "minimum": 0
+        },
+        "status": {
+          "bsonType": "string",
+          "enum": [
+            "confirmed",
+            "pending",
+            "declined"
+          ]
+        },
+        "table": {
+          "bsonType": "string",
+          "maxLength": 20
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "eventId_1_status_1",
+      "key": {
+        "eventId": 1,
+        "status": 1
+      },
+      "options": {}
+    }
+  ]
+}

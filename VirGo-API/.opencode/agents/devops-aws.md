@@ -38,5 +38,5 @@ Los archivos creados, el resultado de las validaciones, la tabla de costo estima
 - La infraestructura vive en el spec `001-infraestructura-iac` y el pipeline en `002-pipeline-cicd`.
 - El **despliegue es manual**: `api-deploy.yml` solo se dispara con `workflow_dispatch` desde `main`, con el *environment* `production`, y ejecuta `tests/smoke/smoke.sh`.
 - Mantienes el **ruleset** `main-protection` y su exportación en `.github/rulesets/`.
-- Agregas `cfn-lint` y **Checkov** al CI; fijas las acciones de terceros por SHA.
+- Agregas `cfn-lint`, **Checkov**, **Semgrep**, **SonarCloud** y **OWASP ZAP** al CI, y la mutación en un workflow nocturno; fijas las acciones de terceros por SHA.
 - Instalas los MCP `aws-docs`, `mongodb` y `github` antes de codificar. El MCP `mongodb` usa el usuario `virgo-mcp` de solo lectura; sus herramientas de Atlas solo se activan para el arranque, con confirmación humana.

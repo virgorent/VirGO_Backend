@@ -70,7 +70,7 @@ VirGo-API/
 │   │   ├── Controllers/            # (vacío; lo llenan los módulos funcionales)
 │   │   ├── Middleware/             # CorrelationId, SecurityHeaders
 │   │   ├── Errors/                 # Manejo global de excepciones a Problem Details
-│   │   └── appsettings*.json       # Sin secretos
+│   │   └── appsettings.Example.json # Plantilla; appsettings.json no se sube
 │   ├── VirGo.Application/          # Aplicación
 │   │   ├── Abstractions/           # IRepository<T>, IClock, IUnitOfWork (si aplica)
 │   │   └── Common/                 # Result<T>, errores de aplicación, paginación
@@ -139,10 +139,11 @@ VirGo-API/
 
 ### 6.4 Base de datos MongoDB (solo la estructura)
 
-- Clúster Atlas M0 `virgo-cluster`, base `virgo` (producción) y `virgo_dev` (desarrollo).
+- Clúster Atlas M0 `virgo-dev`, base `virgo` (producción) y `virgo_dev` (desarrollo).
 - Un `MongoClient` único por proceso (singleton), creado fuera del manejador para reutilizar conexiones entre invocaciones de Lambda, con `maxPoolSize` de 10 (M0 admite 500 conexiones).
-- `MongoIndexInitializer` crea de forma idempotente los índices que declara cada módulo al arrancar. Así, al ejecutar el primer *task* de usuarios, la base y sus colecciones se crean solas.
-- Documentos con `_id` UUID (representación estándar), nombres de campo en `camelCase` inglés y fechas en UTC.
+- `MongoIndexInitializer` crea de forma idempotente validadores e índices desde `db/schema/` al arrancar. Así, al ejecutar el primer *task* de usuarios, la base y sus colecciones se crean solas.
+- Documentos con `_id` y referencias como texto UUID (`BsonRepresentation(BsonType.String)`, ADR-28), nombres de campo en `camelCase` inglés y fechas en UTC.
+- La fuente de verdad son los archivos de `db/schema/` (`007-esquema-mongodb`): el inicializador los aplica tal cual.
 
 La base no define entidades: los módulos funcionales documentan sus patrones de llave en su propio plan.
 

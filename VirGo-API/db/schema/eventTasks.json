@@ -1,0 +1,53 @@
+{
+  "collection": "eventTasks",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "eventTasks",
+      "required": [
+        "_id",
+        "eventId",
+        "title",
+        "dueDate",
+        "done",
+        "suggested"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "eventId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "title": {
+          "bsonType": "string",
+          "maxLength": 150
+        },
+        "dueDate": {
+          "bsonType": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "done": {
+          "bsonType": "bool"
+        },
+        "suggested": {
+          "bsonType": "bool"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "eventId_1_dueDate_1",
+      "key": {
+        "eventId": 1,
+        "dueDate": 1
+      },
+      "options": {}
+    }
+  ]
+}

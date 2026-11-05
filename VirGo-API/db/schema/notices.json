@@ -1,0 +1,83 @@
+{
+  "collection": "notices",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "notices",
+      "required": [
+        "_id",
+        "userId",
+        "kind",
+        "title",
+        "body",
+        "link",
+        "read",
+        "createdAt",
+        "purgeAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "userId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "kind": {
+          "bsonType": "string",
+          "enum": [
+            "booking",
+            "payment",
+            "cancellation",
+            "quote",
+            "message",
+            "reminder"
+          ]
+        },
+        "title": {
+          "bsonType": "string",
+          "maxLength": 150
+        },
+        "body": {
+          "bsonType": "string",
+          "maxLength": 500
+        },
+        "link": {
+          "bsonType": "string",
+          "maxLength": 500
+        },
+        "read": {
+          "bsonType": "bool"
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "purgeAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "userId_1_createdAt_-1",
+      "key": {
+        "userId": 1,
+        "createdAt": -1
+      },
+      "options": {}
+    },
+    {
+      "name": "purgeAt_ttl",
+      "key": {
+        "purgeAt": 1
+      },
+      "options": {
+        "expireAfterSeconds": 0
+      }
+    }
+  ]
+}

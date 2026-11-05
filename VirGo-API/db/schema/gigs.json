@@ -1,0 +1,73 @@
+{
+  "collection": "gigs",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "gigs",
+      "required": [
+        "_id",
+        "providerId",
+        "eventName",
+        "clientName",
+        "place",
+        "date",
+        "start",
+        "end"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "providerId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "eventName": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "clientName": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "place": {
+          "bsonType": "string",
+          "maxLength": 200
+        },
+        "date": {
+          "bsonType": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "start": {
+          "bsonType": "string",
+          "maxLength": 5
+        },
+        "end": {
+          "bsonType": "string",
+          "maxLength": 5
+        },
+        "amount": {
+          "bsonType": "decimal"
+        },
+        "quoteId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "providerId_1_date_1_start_1",
+      "key": {
+        "providerId": 1,
+        "date": 1,
+        "start": 1
+      },
+      "options": {}
+    }
+  ]
+}

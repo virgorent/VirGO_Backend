@@ -2,7 +2,8 @@
 
 Campos necesarios para crear la base de datos **no relacional** de VirGo. Se dedujeron del `Checklist VirGo.md` (73 pantallas) y de los datos que ya guarda la maqueta funcional.
 
-- **Versión:** borrador 3 · 2026-11-03 (reemplaza el borrador 2 para DynamoDB)
+- **Versión:** borrador 4 · 2026-11-04 (alineado con `VirGo-API/db/schema/`)
+- **Fuente de verdad:** `VirGo-API/db/schema/*.json`. Si este documento y esos archivos difieren, mandan los archivos.
 - **Motor:** MongoDB Atlas M0, según la decisión ADR-23 del backend (`VirGo-API`)
 - **Base de datos:** `virgo` (producción) y `virgo_dev` (desarrollo)
 - **Uso:** insumo para los specs funcionales del backend (`003-auth-login` en adelante)
@@ -23,7 +24,8 @@ Campos necesarios para crear la base de datos **no relacional** de VirGo. Se ded
 
 | Elemento | Regla |
 |---|---|
-| `_id` | UUID (representación estándar), salvo en `counters` |
+| `_id` y referencias | Texto con formato UUID, salvo en `counters` y `monthlyStats` |
+| Longitudes | Todo texto libre tiene `maxLength`; ver la sección 8 |
 | Nombres | Colecciones y campos en inglés y `camelCase` (Art. XII), igual que el JSON de la API |
 | Fechas con hora | Tipo `Date` en UTC (`createdAt`, `updatedAt`, `expiresAt`) |
 | Fechas de calendario | Texto `AAAA-MM-DD` (fecha del evento, día ocupado) |
@@ -91,6 +93,7 @@ Cada consulta se resuelve con **una** lectura que usa un índice.
 | `defaultGuests` | int | ➖ | Preferencia de invitados |
 | `providerId` | UUID | ➖ | Si el rol es proveedor, el id de su perfil |
 | `unreadNotices` | int | ✅ | Contador de la campana (`$inc` atómico) |
+| `isVerified` | bool | ✅ | Correo verificado |
 | `failedLoginCount` | int | ✅ | Intentos fallidos seguidos (spec `003`) |
 | `lockoutEndsAt` | Date | ➖ | Bloqueo de 15 min tras 5 fallos (spec `003`) |
 | `createdAt` / `updatedAt` | Date | ✅ | |
@@ -126,7 +129,7 @@ Cada consulta se resuelve con **una** lectura que usa un índice.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
-| `_id`, `userId` | UUID | Índice `{ userId: 1 }` |
+| `_id`, `userId` | UUID | Índices `{ userId: 1 }` y `{ userId: 1 }` único parcial con `isDefault: true` (una sola predeterminada) |
 | `brand`, `last4`, `expMonth`, `expYear` | string/int | **Nunca** el número completo ni el CVV |
 | `gatewayToken` | string | Referencia de la pasarela de pago |
 | `isDefault` | bool | Predeterminada |
@@ -227,7 +230,7 @@ Un documento por día ocupado. Sirve para el calendario del cliente y del propie
 | `reply` | objeto | ➖ `{ text, at }`: respuesta editable del propietario o proveedor |
 | `createdAt` | Date | |
 
-**Índices:** `{ targetType: 1, targetId: 1, createdAt: -1 }` · `{ authorId: 1, targetId: 1 }` único (una reseña por persona y salón o proveedor).
+**Índices:** `{ targetType: 1, targetId: 1, createdAt: -1 }` · `{ targetType: 1, targetId: 1, authorId: 1 }` único (una reseña por persona y salón o proveedor).
 
 > Al guardar una reseña, una **transacción** actualiza también `rating.average` y `rating.count` del salón o proveedor.
 
@@ -235,6 +238,7 @@ Un documento por día ocupado. Sirve para el calendario del cliente y del propie
 
 | Campo | Tipo | Descripción |
 |---|---|---|
+| `_id` | string | `<targetType>:<targetId>:<AAAA-MM>`, para que el `upsert` funcione |
 | `targetType` / `targetId` / `month` | string / UUID / string | `month` = `AAAA-MM` |
 | `visits`, `requests`, `bookings` | int | Contadores con `$inc` y `upsert` |
 
@@ -350,7 +354,7 @@ La solicitud del cliente y la respuesta viven en **el mismo documento**.
 | Colección | Campos | Índices |
 |---|---|---|
 | `favorites` | `_id`, `userId`, `targetType` (`venue` o `provider`), `targetId`, `name`, `photoUrl`, `rating` (copiados para la lista), `createdAt` | `{ userId: 1, targetType: 1, targetId: 1 }` único |
-| `conversations` | `_id`, `clientId`, `target { type, id, name }`, `targetUserId`, `quoteId` ➖, `lastMessage`, `lastAt` | `{ clientId: 1, lastAt: -1 }` · `{ targetUserId: 1, lastAt: -1 }` |
+| `conversations` | `_id`, `clientId`, `target { type, id, name }`, `targetUserId`, `quoteId` ➖, `lastMessage`, `lastAt` | `{ clientId: 1, lastAt: -1 }` · `{ targetUserId: 1, lastAt: -1 }` · `{ clientId: 1, "target.type": 1, "target.id": 1 }` único |
 | `messages` | `_id`, `conversationId`, `senderId`, `text`, `sentAt`, `readAt` ➖ | `{ conversationId: 1, sentAt: 1 }` |
 | `notices` | `_id`, `userId`, `kind` (`booking`, `payment`, `cancellation`, `quote`, `message` o `reminder`), `title`, `body`, `link`, `read`, `createdAt`, `purgeAt` | `{ userId: 1, createdAt: -1 }` · `{ purgeAt: 1 }` TTL (90 días) |
 | `assistantMessages` | `_id`, `userId`, `role` (`user` o `assistant`), `text`, `createdAt`, `purgeAt` | `{ userId: 1, createdAt: 1 }` · `{ purgeAt: 1 }` TTL (30 días) |
@@ -396,7 +400,7 @@ Se validan con `enum` en el `$jsonSchema` de cada colección y en los DTO de la 
 
 ## 7. Orden sugerido para crearla (por módulos funcionales)
 
-Las colecciones, sus índices y su `$jsonSchema` los crea la API al arrancar (`MongoIndexInitializer`), cuando se implementa el spec que las usa. No se crean a mano.
+Las 22 colecciones ya existen en `virgo_dev`. La API las crea o actualiza al arrancar desde `db/schema/` (`MongoIndexInitializer`); no se cambian a mano.
 
 1. **Cuentas:** `users`, `sessions` (specs `003` y `004`), `passwordResets` y `paymentCards`.
 2. **Catálogo:** `venues`, `venueDates` y `providers`.
@@ -404,3 +408,26 @@ Las colecciones, sus índices y su `$jsonSchema` los crea la API al arrancar (`M
 4. **Transacciones:** `quotes`, `bookings` y `counters`.
 5. **Interacción:** `reviews`, `conversations`, `messages` y `notices`.
 6. **Apoyo:** `gigs`, `monthlyStats`, `assistantMessages`, `contactMessages` y `config`.
+
+## 8. Longitudes máximas
+
+Propuesta pendiente de confirmar (`007-esquema-mongodb` P-05). Los campos con formato fijo (UUID, fechas) y los enumerados ya se validan con `pattern` o `enum`.
+
+| Máximo | Campos |
+|---|---|
+| 5 | `gigs.end`, `gigs.start` |
+| 10 | `bookings.rescheduledFrom` |
+| 16 | `eventGuests.phone`, `users.phone` |
+| 20 | `eventGuests.table`, `paymentCards.brand`, `venues.shortName` |
+| 36 | `bookings.payments[].paymentId`, `events.externalPayments[].id`, `events.reminders[].id`, `events.vendors[].id`, `providers.packages[].id` |
+| 50 | `events.invitation.template`, `events.vendors[].category`, `providers.responseTime`, `providers.zones[]` |
+| 80 | `users.city` |
+| 88 | `sessions.tokenHash` |
+| 100 | `bookings.clientName`, `bookings.extras[].name`, `bookings.payments[].reference`, `bookings.venue.name`, `contactMessages.name`, `conversations.target.name`, `eventGuests.name`, `events.collaborators[].name`, `events.name`, `events.vendors[].name`, `events.vendors[].package`, `events.venue.name`, `favorites.name`, `gigs.clientName`, `gigs.eventName`, `providers.businessName`, `providers.packages[].name`, `quotes.clientName`, `quotes.requestedServices[]`, `quotes.target.name`, `reviews.authorName`, `sessions.device`, `users.name`, `venues.allies[].name`, `venues.name`, `venues.services[].name` |
+| 150 | `bookings.payments[].concept`, `contactMessages.email`, `eventTasks.title`, `events.collaborators[].email`, `events.externalPayments[].concept`, `events.reminders[].title`, `notices.title`, `quotes.response.items[].concept`, `users.email` |
+| 200 | `conversations.lastMessage`, `gigs.place`, `providers.packages[].includes[]`, `venueDates.note`, `venues.address` |
+| 255 | `passwordResets.codeHash`, `paymentCards.gatewayToken`, `users.passwordHash` |
+| 500 | `bookings.venue.photoUrl`, `events.venue.photoUrl`, `favorites.photoUrl`, `notices.body`, `notices.link`, `providers.coverUrl`, `providers.gallery[].url`, `venues.floorPlanUrl`, `venues.photos[].url`, `venues.tour360Url` |
+| 1000 | `events.invitation.message`, `quotes.response.note`, `reviews.reply.text`, `reviews.text` |
+| 2000 | `contactMessages.message`, `messages.text`, `providers.description`, `quotes.message`, `venues.description` |
+| 4000 | `assistantMessages.text` |

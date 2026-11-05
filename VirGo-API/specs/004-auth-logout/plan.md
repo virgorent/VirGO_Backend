@@ -109,6 +109,7 @@ Cada solicitud protegida: 1 lectura por `_id` (índice por defecto), un document
 | Unitarias | `Session.Revoke` fija `revokedAt` y no la cambia si ya estaba; `LogoutHandler` revoca solo la sesión indicada; `SessionValidator` rechaza sesión inexistente, revocada, expirada y sin `sid` |
 | Integración | `UpdateOneAsync` condicional contra Testcontainers; login → logout = 204 sin cuerpo; el mismo token en logout y en la ruta de diagnóstico = 401; dos sesiones, se cierra una y la otra sigue en 200 |
 | Seguridad | Sin token, token con firma inválida, token sin `sid` y token con `sid` de otra persona → 401; logs sin tokens; el JWT revocado no sirve aunque falten 14 min para expirar |
+| Longitudes | ➖ El endpoint no recibe cuerpo; un encabezado `Authorization` de 1500 caracteres da 401 |
 | Mutación | Stryker sobre `LogoutHandler`, `SessionValidator` y `Session.Revoke`; sin sobrevivientes en las condiciones de revocación y expiración |
 | Humo | `POST {ApiUrl}/api/v1/auth/logout` sin token → 401 `application/problem+json` |
 

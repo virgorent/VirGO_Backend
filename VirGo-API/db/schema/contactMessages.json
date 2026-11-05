@@ -1,0 +1,53 @@
+{
+  "collection": "contactMessages",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "contactMessages",
+      "required": [
+        "_id",
+        "name",
+        "email",
+        "message",
+        "createdAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "userId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "name": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "bsonType": "string",
+          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+          "maxLength": 150
+        },
+        "message": {
+          "bsonType": "string",
+          "maxLength": 2000
+        },
+        "createdAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "createdAt_-1",
+      "key": {
+        "createdAt": -1
+      },
+      "options": {}
+    }
+  ]
+}

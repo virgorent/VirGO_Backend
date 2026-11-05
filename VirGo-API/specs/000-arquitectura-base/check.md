@@ -42,6 +42,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | Mutación | Stryker sobre `Domain` y `Application` (`002`: T203) · puntaje: — % | ⏳ |
 | Humo | `smoke.sh` tras el primer despliegue (`002`: T209) | ⏳ |
 | Arquitectura | Prueba de dependencias de `VirGo.Domain` (T010) | ⏳ |
+| Validación de longitudes | Regla global en DTO y `db/schema/` (T036) | ⏳ |
 
 ## 4. PR e integración continua
 

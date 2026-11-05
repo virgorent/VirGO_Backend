@@ -1,0 +1,52 @@
+{
+  "collection": "messages",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "messages",
+      "required": [
+        "_id",
+        "conversationId",
+        "senderId",
+        "text",
+        "sentAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "conversationId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "senderId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "text": {
+          "bsonType": "string",
+          "maxLength": 2000
+        },
+        "sentAt": {
+          "bsonType": "date"
+        },
+        "readAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "conversationId_1_sentAt_1",
+      "key": {
+        "conversationId": 1,
+        "sentAt": 1
+      },
+      "options": {}
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "collection": "paymentCards",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "paymentCards",
+      "required": [
+        "_id",
+        "userId",
+        "brand",
+        "last4",
+        "expMonth",
+        "expYear",
+        "gatewayToken",
+        "isDefault"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "userId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "brand": {
+          "bsonType": "string",
+          "maxLength": 20
+        },
+        "last4": {
+          "bsonType": "string",
+          "pattern": "^\\d{4}$"
+        },
+        "expMonth": {
+          "bsonType": "int",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "expYear": {
+          "bsonType": "int",
+          "minimum": 2000
+        },
+        "gatewayToken": {
+          "bsonType": "string",
+          "maxLength": 255
+        },
+        "isDefault": {
+          "bsonType": "bool"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "indexes": [
+    {
+      "name": "userId_1",
+      "key": {
+        "userId": 1
+      },
+      "options": {}
+    },
+    {
+      "name": "userId_1_default_unique",
+      "key": {
+        "userId": 1
+      },
+      "options": {
+        "unique": true,
+        "partialFilterExpression": {
+          "isDefault": true
+        }
+      }
+    }
+  ]
+}

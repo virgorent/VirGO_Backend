@@ -80,4 +80,4 @@ El objetivo es que una persona registrada pueda iniciar sesión de forma segura,
 | # | Pregunta | Responsable |
 |---|---|---|
 | P-01 | ¿El bloqueo de 15 minutos tras 5 intentos es aceptable para el equipo de producto? | Equipo |
-| P-02 | `failedLoginCount` y `lockoutEndsAt` ya se agregaron a `users` en el modelo de datos (borrador 3). ¿El equipo lo confirma? | Equipo |
+| P-02 | `failedLoginCount` y `lockoutEndsAt` ya están en el modelo y en `db/schema/users.json`. ¿El equipo lo confirma? | Equipo |

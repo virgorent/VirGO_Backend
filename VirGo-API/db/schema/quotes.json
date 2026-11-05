@@ -1,0 +1,188 @@
+{
+  "collection": "quotes",
+  "validationLevel": "strict",
+  "validationAction": "error",
+  "validator": {
+    "$jsonSchema": {
+      "bsonType": "object",
+      "title": "quotes",
+      "required": [
+        "_id",
+        "clientId",
+        "clientName",
+        "target",
+        "eventType",
+        "eventDate",
+        "guests",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "_id": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "clientId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "clientName": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
+        "target": {
+          "bsonType": "object",
+          "properties": {
+            "type": {
+              "bsonType": "string",
+              "enum": [
+                "venue",
+                "provider"
+              ]
+            },
+            "id": {
+              "bsonType": "string",
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+            },
+            "name": {
+              "bsonType": "string",
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "type",
+            "id",
+            "name"
+          ]
+        },
+        "eventId": {
+          "bsonType": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "eventType": {
+          "bsonType": "string",
+          "enum": [
+            "Boda",
+            "XV años",
+            "Cumpleaños",
+            "Corporativo",
+            "Otro"
+          ]
+        },
+        "eventDate": {
+          "bsonType": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "guests": {
+          "bsonType": "int",
+          "minimum": 1
+        },
+        "requestedServices": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "maxLength": 100
+          }
+        },
+        "message": {
+          "bsonType": "string",
+          "maxLength": 2000
+        },
+        "status": {
+          "bsonType": "string",
+          "enum": [
+            "sent",
+            "answered",
+            "accepted",
+            "rejected",
+            "expired"
+          ]
+        },
+        "response": {
+          "bsonType": "object",
+          "properties": {
+            "items": {
+              "bsonType": "array",
+              "items": {
+                "bsonType": "object",
+                "properties": {
+                  "concept": {
+                    "bsonType": "string",
+                    "maxLength": 150
+                  },
+                  "qty": {
+                    "bsonType": "int",
+                    "minimum": 1
+                  },
+                  "unitPrice": {
+                    "bsonType": "decimal"
+                  }
+                },
+                "required": [
+                  "concept",
+                  "qty",
+                  "unitPrice"
+                ]
+              }
+            },
+            "note": {
+              "bsonType": "string",
+              "maxLength": 1000
+            },
+            "subtotal": {
+              "bsonType": "decimal"
+            },
+            "tax": {
+              "bsonType": "decimal"
+            },
+            "total": {
+              "bsonType": "decimal"
+            },
+            "validUntil": {
+              "bsonType": "date"
+            },
+            "answeredAt": {
+              "bsonType": "date"
+            }
+          },
+          "required": [
+            "items",
+            "note",
+            "subtotal",
+            "tax",
+            "total",
+            "validUntil",
+            "answeredAt"
+          ]
+        },
+        "createdAt": {
+          "bsonType": "date"
+        },
+        "updatedAt": {
+          "bsonType": "date"
+        }
+      }
+    }
+  },
+  "indexes": [
+    {
+      "name": "clientId_1_createdAt_-1",
+      "key": {
+        "clientId": 1,
+        "createdAt": -1
+      },
+      "options": {}
+    },
+    {
+      "name": "targetType_1_targetId_1_status_1_createdAt_-1",
+      "key": {
+        "target.type": 1,
+        "target.id": 1,
+        "status": 1,
+        "createdAt": -1
+      },
+      "options": {}
+    }
+  ]
+}

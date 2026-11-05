@@ -36,6 +36,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | Seguridad | Totales: — · Revisión de `seguridad` sin hallazgos altos | ⏳ |
 | Mutación | Puntaje: — % (umbral — %) | ⏳ |
 | Humo | Caso de logout en `smoke.sh` en verde | ⏳ |
+| Validación de longitudes | ➖ Sin cuerpo; `Authorization` de 1500 caracteres da 401 | ⏳ |
 
 ## 4. PR e integración continua
 
