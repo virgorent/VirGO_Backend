@@ -7,3 +7,4 @@ Documentación transversal del monorepo que no pertenece a un proyecto concreto.
 - No guardar secretos, tokens ni datos personales.
 - La documentación de cada proyecto vive en su propia carpeta (`VirGo-API/`, `VirGo-Movil/`).
 - [`PRUEBAS.md`](PRUEBAS.md): estado y resultados de las pruebas de los tres proyectos.
+- [`ESTADO-PROYECTO.md`](ESTADO-PROYECTO.md): resumen del avance de los tres proyectos.

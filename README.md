@@ -13,3 +13,5 @@ Global SDD rules are in [`constitution.md`](constitution.md) and [`AGENTS.md`](A
 Security: report vulnerabilities privately via [`SECURITY.md`](.github/SECURITY.md). Shared DevSecOps gates live in [`.github/`](.github/README.md).
 
 Test status and results: [`docs/PRUEBAS.md`](docs/PRUEBAS.md).
+
+Project status: [`docs/ESTADO-PROYECTO.md`](docs/ESTADO-PROYECTO.md).
