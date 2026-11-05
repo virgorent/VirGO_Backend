@@ -67,7 +67,7 @@ virGO_App/                           # Raíz del repositorio
 │   │   └── security.yml             # Común con Móvil
 │   ├── rulesets/main-protection.json
 │   ├── dependabot.yml               # Un bloque por carpeta
-│   └── PULL_REQUEST_TEMPLATE.md
+│   └── pull_request_template.md
 ├── .gitleaks.toml                   # Reglas extra y rutas permitidas
 ├── .semgrep/semgrep.yaml
 └── VirGo-API/
@@ -110,7 +110,7 @@ virGO_App/                           # Raíz del repositorio
 
 Todos con `defaults.run.working-directory: VirGo-API`, `permissions: contents: read` y `concurrency` para cancelar ejecuciones obsoletas.
 
-`security.yml` corre siempre, sin depender de la carpeta, con los jobs `secrets` (Gitleaks sobre los commits del PR) y `dependency-review` (falla con vulnerabilidades altas o licencias no permitidas); ambos son requeridos.
+`security.yml` corre siempre, sin depender de la carpeta, con los jobs `gitleaks` (sobre los commits del PR) y `dependency review` (falla con vulnerabilidades altas o licencias no permitidas); ambos son requeridos.
 
 ### 6.2 `api-deploy.yml`
 
@@ -146,7 +146,7 @@ JWT con `alg: none`, firma inválida, expirado, emisor o audiencia incorrectos �
 
 ### 6.5 Ruleset `main-protection`
 
-Objetivo: rama por defecto. Reglas: *Restrict deletions*, *Block force pushes*, *Require a pull request* (1 aprobación, descartar aprobaciones al subir cambios, resolver conversaciones), *Require status checks* (`api-build-test`, `api-semgrep`, `api-sonarcloud`, `api-zap`, `api-iac`, `api-schema`, `api-codeql`, `secrets`, `dependency-review` y los de Móvil: `movil-build-test` y `movil-codeql`). Se exporta a `.github/rulesets/main-protection.json` como evidencia.
+Objetivo: rama por defecto. Reglas: *Restrict deletions*, *Block force pushes*, *Require a pull request* (1 aprobación, descartar aprobaciones al subir cambios, resolver conversaciones), *Require status checks* (`api-build-test`, `api-semgrep`, `api-sonarcloud`, `api-zap`, `api-iac`, `api-schema`, `api-codeql`, `gitleaks`, `dependency review` y los de Móvil: `movil-build-test` y `movil-codeql`). Se exporta a `.github/rulesets/main-protection.json` como evidencia.
 
 ## 7. Costo
 

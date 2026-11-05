@@ -1,21 +1,84 @@
-# Plan — NNN Nombre
+# Plan — NNN <nombre-del-módulo>
 
-## Resumen técnico
+| Campo | Valor |
+|---|---|
+| Módulo | `NNN-<nombre>` |
+| Versión | 0.1.0 |
+| Estado | Borrador |
+| Fecha | AAAA-MM-DD |
+| Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
+| Constitución | vX.Y.Z |
 
-## Contexto técnico
+## 1. Resumen técnico
 
-## Constitution Check
+<Cómo se implementará, en 3–6 viñetas.>
 
-## Estructura
+## 2. Contexto técnico
 
-## Decisiones técnicas (ADR)
+| Aspecto | Decisión |
+|---|---|
+| Lenguaje / framework | <...> |
+| Persistencia | <...> |
+| Seguridad | <...> |
+| CI/CD | <...> |
 
-## Diseño
+## 3. Constitution Check
 
-## Costo
+| Art. | Tema | Resultado | Cómo se cumple |
+|---|---|---|---|
+| <n> | <tema> | ✅ / ❌ | <...> |
 
-## Estrategia de pruebas
+> Un ❌ bloquea la aprobación del plan.
 
-## Riesgos y mitigaciones
+## 4. Estructura
 
-## Fases
+```text
+<árbol de carpetas y módulos>
+```
+
+## 5. Decisiones técnicas (ADR)
+
+| ADR | Decisión | Alternativas descartadas | Motivo |
+|---|---|---|---|
+| ADR-01 | <...> | <...> | <...> |
+
+## 6. Diseño
+
+### 6.1 <componente>
+
+<...>
+
+### 6.2 Seguridad
+
+<Controles: validación, autorización, secretos, cifrado y límites.>
+
+## 7. DevSecOps y CI/CD
+
+| Gate | Herramienta | Cuándo |
+|---|---|---|
+| Secretos | Gitleaks | PR y push a `main` |
+| Dependencias | Dependabot + dependency review | Semanal y PR |
+| SAST | CodeQL / linters | PR |
+| Pruebas | <...> | PR |
+| Release | <...> | Manual |
+
+## 8. Estrategia de pruebas
+
+| Nivel | Dónde | Qué cubre |
+|---|---|---|
+| Unitarias | <...> | <...> |
+| Integración | <...> | <...> |
+| Seguridad | <...> | <...> |
+| Humo | <...> | <...> |
+
+## 9. Riesgos y mitigaciones
+
+| Riesgo | Mitigación |
+|---|---|
+| <...> | <...> |
+
+## 10. Fases
+
+| Fase | Contenido | Tareas |
+|---|---|---|
+| F0 | <...> | T001–T00N |

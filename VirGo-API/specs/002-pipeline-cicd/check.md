@@ -23,7 +23,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 |---|---|---|
 | CA-01 *Push* directo rechazado | Salida de `git push` rechazado | ⏳ |
 | CA-02 PR con prueba en rojo bloqueado | Enlace al PR de prueba | ⏳ |
-| CA-03 Secreto detectado | Enlace al job `secrets` fallido | ⏳ |
+| CA-03 Secreto detectado | Enlace al job `gitleaks` fallido | ⏳ |
 | CA-04 Todos los checks | Captura de los checks | ⏳ |
 | CA-05 Despliegue manual con URL `https://` | Enlace a la ejecución de `api-deploy.yml` | ⏳ |
 | CA-06 Despliegue desde otra rama se niega | Enlace a la ejecución omitida | ⏳ |

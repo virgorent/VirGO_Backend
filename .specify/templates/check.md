@@ -1,13 +1,61 @@
-# Check — NNN Nombre
+# Check — NNN <nombre-del-módulo>
 
-## 1. Especificación
+Cada casilla lleva evidencia. El módulo se marca *Cerrado* solo con todo en ✅ o ➖ justificado.
+
+**Leyenda:** ✅ Cumple · ➖ No aplica (justificar) · ⏳ Pendiente
+
+| Campo | Valor |
+|---|---|
+| Módulo | `NNN-<nombre>` |
+| Estado del spec | Borrador / En revisión / Aprobado / Publicado / Cerrado |
+| Revisó | — |
+| Fecha de cierre | — |
+
+## 1. Especificación y gobernanza
+
+| Control | Evidencia | Estado |
+|---|---|---|
+| Spec, plan y tareas aprobados | <enlace o acta> | ⏳ |
+| Constitution Check sin ❌ | <enlace a plan.md> | ⏳ |
+| Sin secretos en el repositorio | <ejecución de Gitleaks> | ⏳ |
+| Preguntas abiertas respondidas | <...> | ⏳ |
 
 ## 2. Criterios de aceptación
 
-## 3. Pruebas (incluye validación de longitudes)
+| CA | Evidencia | Estado |
+|---|---|---|
+| CA-01 | <...> | ⏳ |
 
-## 4. PR e integración continua
+## 3. Pruebas
 
-## 5. Despliegue o release
+| Tipo | Evidencia | Estado |
+|---|---|---|
+| Unitarias | <comando> · totales: — | ⏳ |
+| Integración | <...> | ⏳ |
+| Seguridad | <...> | ⏳ |
+| Humo | <...> | ⏳ |
 
-## 6. Memoria y aprendizaje
+## 4. DevSecOps
+
+| Control | Evidencia | Estado |
+|---|---|---|
+| Gitleaks sin hallazgos | <enlace al check> | ⏳ |
+| Dependency review sin vulnerabilidades altas | <enlace al check> | ⏳ |
+| SAST (CodeQL / linters) en verde | <enlace al check> | ⏳ |
+| Workflows con permisos mínimos | <revisión de `permissions`> | ⏳ |
+| Sin credenciales en logs ni artefactos | <revisión> | ⏳ |
+
+## 5. PR e integración continua
+
+- [ ] PRs del módulo: enlaces —
+- [ ] Checks requeridos en verde y una revisión.
+
+## 6. Release
+
+- [ ] Versión y commit: —
+- [ ] Artefacto firmado y verificado: —
+
+## 7. Memoria y aprendizaje
+
+- [ ] Entrada de cierre en `memoria.md`.
+- [ ] Mejoras propuestas a la constitución, `AGENTS.md`, skills o subagentes (o «ninguna»).

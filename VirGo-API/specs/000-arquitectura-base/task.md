@@ -25,7 +25,7 @@
 | T002 | ➡️ Movida a `002-pipeline-cicd` como **T207** (ruleset `main-protection`) | — | — | — | ➡️ |
 | T003 | [P] Crear `.editorconfig` y `Directory.Build.props` (net10.0, `Nullable`, `AnalysisLevel=latest-recommended`, advertencias de seguridad como error) | T001 | `dev-dotnet` | Los archivos existen y la compilación los aplica (T006) | ⏳ |
 | T004 | [P] Revisar la alineación de `constitution.md`, `AGENTS.md`, subagentes, skills y specs con la skill `verificar-constitucion` | — | `arquitecto` | Tabla de resultados «Alineado» registrada en `memoria.md` | ⏳ |
-| T005 | [P] Agregar en la raíz del repositorio `.github/PULL_REQUEST_TEMPLATE.md` (lista con el ID de tarea y los artículos revisados) y `.github/dependabot.yml` (NuGet semanal, Actions mensual) | T001 | `devops-aws` | Archivos en el repositorio; Dependabot aparece activo en GitHub | ⏳ |
+| T005 | [P] Agregar en la raíz del repositorio `.github/pull_request_template.md` (lista con el ID de tarea y los artículos revisados) y `.github/dependabot.yml` (NuGet semanal, Actions mensual) | T001 | `devops-aws` | Archivos en el repositorio; Dependabot aparece activo en GitHub | ⏳ |
 
 ## F1 · Solución y capas
 

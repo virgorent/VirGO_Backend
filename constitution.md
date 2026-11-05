@@ -1,5 +1,12 @@
 # Constitución — virGO_APP
 
+| Campo | Valor |
+|---|---|
+| Versión | 1.0.0 |
+| Ratificada | 2026-11-04 |
+| Estado | Vigente |
+| Ámbito | Gobernanza global del monorepo `virgorent/virGO_App` |
+
 > Rector SDD. Ante conflicto con otro artefacto, **manda esta constitución**.
 > Filosofía madre: base SDD para proyecto Backend y Móvil, arquitectura ejecutable sin funcionalidad específica.
 > Fuera de alcance en esta etapa: funcionalidades de negocio, entidades CRUD específicas y la ejecución de hosting/CD (los proyectos los especifican, pero no se ejecutan hasta su aprobación).
@@ -31,7 +38,7 @@
 ## 4. Arquitectura
 
 - Estructura SDD obligatoria: `specs/`, `.opencode/`, `.specify/`.
-- Specs globales numeradas `nv-XX` con `spec.md`, `plan.md`, `task.md`. Los proyectos usan sus propios specs (sección 11).
+- Specs globales numeradas `nv-XX` con `spec.md`, `plan.md`, `task.md` y `check.md`. Los proyectos usan sus propios specs (sección 11).
 - Aprobación y trazabilidad obligatorias.
 - Sin duplicidad de información entre archivos.
 
@@ -42,11 +49,18 @@
 - Sin código muerto.
 - Sin secretos en Git.
 
-## 6. Seguridad
+## 6. Seguridad y DevSecOps
 
-- Sin secretos en código/logs/errores.
-- Archivos sensibles en `.gitignore`.
-- Principio de mínimo privilegio.
+- Sin secretos en código, logs, errores ni historial de Git. Los secretos viven en variables de entorno o GitHub Secrets.
+- Archivos sensibles en `.gitignore`; el escaneo de secretos (Gitleaks) es obligatorio en cada PR y push a `main`.
+- Principio de mínimo privilegio: permisos de workflows acotados (`contents: read` salvo lo estrictamente necesario); acceso a nube por OIDC, nunca con llaves de larga duración.
+- Denegar por defecto y validar en la frontera: entrada, contratos y permisos.
+- Dependencias y acciones de CI fijadas a versiones; Dependabot y revisión de dependencias en cada PR.
+- Gates de merge obligatorios cuando existan los workflows del proyecto: análisis estático (SAST), escaneo de secretos, revisión de dependencias y pruebas automatizadas.
+- `main` se protege con el ruleset de `.github/rulesets/main-protection.json`: PR obligatorio, al menos una revisión, checks requeridos, sin force push ni borrado. El ruleset requiere aplicación manual (ver `.github/README.md`).
+- Artefactos de release firmados y verificables; sin credenciales en los artefactos ni en los logs.
+- Los proyectos pueden endurecer estos controles, nunca relajarlos.
+- El baseline compartido (`.github/`) cubre secretos y dependencias; el análisis estático (SAST) y las pruebas los aportan los workflows de cada proyecto.
 
 ## 7. Testing y QA
 

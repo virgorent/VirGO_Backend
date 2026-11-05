@@ -22,7 +22,7 @@
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
 | T200 | Instalar y probar el MCP `github` de `opencode.json` con un token de grano fino (solo este repositorio; lectura de código, PRs y Actions) | — | `devops-aws` | `opencode mcp list` lo muestra conectado | ⏳ |
-| T201 | [P] Actualizar `.github/PULL_REQUEST_TEMPLATE.md` con el ID de tarea, el spec, los artículos revisados y el estado del `check.md` | `000`: T005 | `devops-aws` | La plantilla aparece al abrir un PR | ⏳ |
+| T201 | [P] Actualizar `.github/pull_request_template.md` con el ID de tarea, el spec, los artículos revisados y el estado del `check.md` | `000`: T005 | `devops-aws` | La plantilla aparece al abrir un PR | ⏳ |
 
 ## F1 · Pruebas de seguridad y mutación
 
@@ -35,9 +35,9 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T204 | En la raíz: `.github/workflows/api-ci.yml` con los jobs `changes`, `api-build-test`, `api-iac` y `api-schema`, y `security.yml` con `secrets` y `dependency-review` (sección 6.1 del plan) | T202, T203, `001`: T106 | `devops-aws` | PR de prueba con los 5 checks en verde (CA-04); un PR que solo toca `VirGo-Movil/` no queda pendiente | ⏳ |
+| T204 | En la raíz: `.github/workflows/api-ci.yml` con los jobs `changes`, `api-build-test`, `api-iac` y `api-schema`, sobre el `security.yml` que ya existe en la raíz (`gitleaks` y `dependency review`; sección 6.1 del plan) | T202, T203, `001`: T106 | `devops-aws` | PR de prueba con los 5 checks en verde (CA-04); un PR que solo toca `VirGo-Movil/` no queda pendiente | ⏳ |
 | T205 | [P] `.github/workflows/api-codeql.yml` para C# | T204 | `seguridad` | Check de CodeQL en el PR sin alertas altas | ⏳ |
-| T206 | [P] `.gitleaks.toml` y prueba con una llave falsa en un PR desechable | T204 | `seguridad` | El job `secrets` falla con la llave falsa (CA-03); PR cerrado sin fusionar | ⏳ |
+| T206 | [P] `.gitleaks.toml` y prueba con una llave falsa en un PR desechable | T204 | `seguridad` | El job `gitleaks` falla con la llave falsa (CA-03); PR cerrado sin fusionar | ⏳ |
 
 ## F3 · Ruleset
 
