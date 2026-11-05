@@ -24,6 +24,7 @@
 | 2026-11-04 | Baseline DevSecOps en `.github/` | Gitleaks, dependency review, Dependabot y ruleset compartidos por ambos proyectos |
 | 2026-11-04 | Cerrar `nv-02` como Cumplido con pendientes operativos | La gobernanza, plantillas y baseline están verificados; faltan aplicar el ruleset de `main` y habilitar Dependency graph |
 | 2026-11-04 | `VirGo-API/db/schema/` es la fuente de verdad del esquema de MongoDB | La base y el modelo se contradecían; ver `VirGo-API/memoria.md` |
+| 2026-11-05 | `VirGo-Database` es la fuente de verdad del esquema; `db/schema/` será una copia generada | Su catálogo coincide 22 de 22 con `virgo_dev`; ver `VirGo-API/specs/010-contrato-datos` |
 
 ## Errores a evitar
 

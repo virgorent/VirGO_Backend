@@ -21,7 +21,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T300 | Confirmar que los MCP `mongodb` y `github` responden y que P-01 y P-02 del spec están resueltas | `002`: T211, `007`: T706 | `arquitecto` | Respuestas en `memoria.md` | ⏳ |
+| T300 | Confirmar que los MCP `mongodb` y `github` responden y que P-01 y P-02 del spec están resueltas | `002`: T211, `010`: T1007 | `arquitecto` | Respuestas en `memoria.md` | ⏳ |
 
 ## F1 · Dominio y aplicación
 
