@@ -1,0 +1,14 @@
+plugins {
+    `kotlin-dsl`
+}
+
+group = "mx.virgo.buildlogic"
+version = "1.0.0"
+
+dependencies {
+    implementation(libs.android.gradle.plugin)
+    implementation(libs.kotlin.gradle.plugin)
+    implementation(libs.kotlin.compose.gradle.plugin)
+    implementation(libs.ksp.gradle.plugin)
+    implementation(libs.hilt.gradle.plugin)
+}
