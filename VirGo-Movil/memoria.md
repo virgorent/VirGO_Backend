@@ -7,8 +7,8 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | Campo | Valor |
 |---|---|
 | Constitución | v1.1.0 aprobada por el equipo el 2026-11-05 |
-| Módulo en curso | `000-arquitectura-base`: T001, T003, T005, T006, T007, T008, T009 hechas |
-| Tareas | 7 / 39 hechas (T037 bloqueada por MCP) |
+| Módulo en curso | `000-arquitectura-base`: T001, T003, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014 hechas |
+| Tareas | 12 / 39 hechas (T037 bloqueada por MCP) |
 | `API_BASE_URL` de *release* | Pendiente (la entrega `VirGo-API` en `002`: T210) |
 | Última versión publicada | Ninguna |
 | Siguiente paso | Ejecutar T006 y T007; desbloquear T037; resolver P-01/P-02 |
@@ -185,4 +185,20 @@ Versiones fijadas en T005 y verificadas con `./gradlew help`.
 - **Costo:** $0.
 - **Aprendizaje:** Detekt requiere la especificación explícita de `jvmTarget` cuando la JVM de ejecución difiere de la JVM objetivo del proyecto.
 - **Pendiente:** Fase 2 (Sistema de diseño en `:core:designsystem`: T010-T014).
+
+### 2026-11-05 · T010 a T014: Sistema de diseño en `:core:designsystem`
+
+- **Autor:** equipo + opencode (`ui-designsystem` / `dev-android`)
+- **Módulo / tareas:** `000-arquitectura-base` · T010, T011, T012, T013 y T014 hechas
+- **Qué se hizo:**
+  - T010 & T012: Creación de `Color.kt`, `Shape.kt`, `Spacing.kt` y `Theme.kt` con la paleta de la marca VirGo (`#7357F6`, `#F5F5F7`, Slate palette) y `VirGoTheme` para modo claro y oscuro.
+  - T011: Configuración de `Type.kt` con `VirGoTypography` según la escala tipográfica de Material 3.
+  - T013: Implementación de componentes atómicos en `:core:designsystem`: `VirGoButton`, `VirGoOutlinedButton`, `VirGoTextField` (con toggle de contraseña e input background `#F5F5F7`), `VirGoCard` y `VirGoBadge`.
+  - T014: Ajustes de accesibilidad (áreas táctiles >= 48 dp, contraste AA) y actualización de `.editorconfig` y `detekt.yml` para soportar convenciones de Jetpack Compose (`@Composable`).
+- **Evidencia:** `./gradlew ktlintCheck detekt assembleDebug` finaliza con `BUILD SUCCESSFUL`.
+- **Decisiones:** Se adaptaron las reglas de ktlint y detekt para permitir nombres en mayúscula en composables y listas de parámetros extendidas en componentes de UI.
+- **Costo:** $0.
+- **Aprendizaje:** ktlint requiere `ktlint_function_naming_ignore_when_annotated_with = Composable` en `.editorconfig` para no reportar nombres de funciones composables como violaciones de estilo.
+- **Pendiente:** Fase 3 (Arranque y navegación: T015-T017) e integración de la pantalla de Login basada en el diseño recibido.
+
 

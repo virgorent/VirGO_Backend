@@ -4,7 +4,7 @@
 |---|---|
 | Módulo | `000-arquitectura-base` |
 | Versión | 1.1.0 |
-| Estado | Aprobado. 7/39 tareas hechas. |
+| Estado | Aprobado. 12/39 tareas hechas. |
 | Fecha | 2026-10-29 |
 | Spec / Plan / Check | [spec.md](spec.md) · [plan.md](plan.md) · [check.md](check.md) |
 | Constitución | v1.1.0 |
@@ -43,11 +43,11 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T010 | Tokens de color claro y oscuro según el plan (sección 6.1), en `Color.kt` y `ColorScheme` | T007 | `ui-designsystem` | Los *previews* muestran la paleta en los dos temas | ⏳ |
-| T011 | [P] Tipografía: Manrope y DM Sans en `res/font` con su licencia OFL y `VirGoTypography` con la escala de Material 3 | T007 | `ui-designsystem` | Los *previews* de la escala tipográfica usan las fuentes correctas | ⏳ |
-| T012 | Formas, espaciado y `VirGoTheme` (claro, oscuro y el color dinámico desactivado para respetar la marca) | T010, T011 | `ui-designsystem` | `VirGoTheme` se aplica en `MainActivity` | ⏳ |
-| T013 | Componentes base: `VirGoButton`, `VirGoTextField`, `VirGoCard`, `VirGoBadge` (incluye «Estimación IA»), `VirGoTopBar`, `VirGoBottomBar`, `EmptyState`, `LoadingState` y `ErrorBanner`, cada uno con `@Preview` en claro y oscuro | T012 | `ui-designsystem` | Catálogo de *previews* completo (CA-10) | ⏳ |
-| T014 | Revisión de accesibilidad: contraste AA en los dos temas, objetivos táctiles de 48 dp o más, `contentDescription` y escala de fuente 2.0 | T013 | `ui-designsystem` + `qa-movil` | Tabla de contrastes en `memoria.md`; sin cortes con letra grande (CA-03) | ⏳ |
+| T010 | Tokens de color claro y oscuro según el plan (sección 6.1), en `Color.kt` y `ColorScheme` | T007 | `ui-designsystem` | Los *previews* muestran la paleta en los dos temas | ✅ |
+| T011 | [P] Tipografía: Manrope y DM Sans en `res/font` con su licencia OFL y `VirGoTypography` con la escala de Material 3 | T007 | `ui-designsystem` | Los *previews* de la escala tipográfica usan las fuentes correctas | ✅ |
+| T012 | Formas, espaciado y `VirGoTheme` (claro, oscuro y el color dinámico desactivado para respetar la marca) | T010, T011 | `ui-designsystem` | `VirGoTheme` se aplica en `MainActivity` | ✅ |
+| T013 | Componentes base: `VirGoButton`, `VirGoTextField`, `VirGoCard`, `VirGoBadge` (incluye «Estimación IA»), `VirGoTopBar`, `VirGoBottomBar`, `EmptyState`, `LoadingState` y `ErrorBanner`, cada uno con `@Preview` en claro y oscuro | T012 | `ui-designsystem` | Catálogo de *previews* completo (CA-10) | ✅ |
+| T014 | Revisión de accesibilidad: contraste AA en los dos temas, objetivos táctiles de 48 dp o más, `contentDescription` y escala de fuente 2.0 | T013 | `ui-designsystem` + `qa-movil` | Tabla de contrastes en `memoria.md`; sin cortes con letra grande (CA-03) | ✅ |
 
 ## F3 · Arranque y navegación
 

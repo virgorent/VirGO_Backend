@@ -1,3 +1,23 @@
 build:
   maxIssues: 0
   excludeCorrectable: false
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+
+complexity:
+  LongParameterList:
+    ignoreAnnotated: ['Composable']
+    functionThreshold: 12
+
+style:
+  MagicNumber:
+    ignoreNumbers:
+      - '-1'
+      - '0'
+      - '1'
+      - '2'
+    ignorePropertyDeclaration: true
+    ignoreAnnotation: true
