@@ -10,3 +10,4 @@ Documentación transversal del monorepo que no pertenece a un proyecto concreto.
 - [`ESTADO-PROYECTO.md`](ESTADO-PROYECTO.md): resumen del avance de los tres proyectos.
 - [`backend/MAPA-SPECS.md`](backend/MAPA-SPECS.md) y [`backend/ENDPOINTS.md`](backend/ENDPOINTS.md): specs y endpoints de API y base de datos.
 - [`frontend/MAPA-SPECS.md`](frontend/MAPA-SPECS.md): specs de Móvil, por flujo.
+- [`ANALISIS-PROYECTO.md`](ANALISIS-PROYECTO.md): análisis spec por spec, endpoint por endpoint y archivo por archivo.
