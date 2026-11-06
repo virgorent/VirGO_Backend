@@ -1,11 +1,15 @@
 # VirGo: estado del proyecto
 
-**Fecha:** 5 de noviembre de 2026
+**Fecha:** 6 de noviembre de 2026
 **Repositorio:** `virgorent/virGO_App`, con API, base de datos y app móvil.
+
+## Specs
+
+142 specs en borrador: 98 de API (94 de endpoints), 11 de base de datos, 30 de Móvil y 3 globales. El orden sigue lo que pidió el profesor: gobernanza, arquitectura base, endpoints, infraestructura y pipeline. Ver [`backend/MAPA-SPECS.md`](backend/MAPA-SPECS.md) y [`frontend/MAPA-SPECS.md`](frontend/MAPA-SPECS.md).
 
 ## API (.NET 10)
 
-- 7 endpoints implementados: `register`, `login`, `logout`, `users/me`, `venues`, `quotes` y `bookings`.
+- 94 endpoints especificados; 7 implementados: `register`, `login`, `logout`, `users/me`, `venues`, `quotes` y `bookings`.
 - Están en el PR #5, en revisión, con 35 pruebas aprobadas y CI en verde.
 - Infraestructura AWS con SAM, validada en CI; todavía sin desplegar.
 

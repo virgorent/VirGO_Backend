@@ -8,3 +8,5 @@ Documentación transversal del monorepo que no pertenece a un proyecto concreto.
 - La documentación de cada proyecto vive en su propia carpeta (`VirGo-API/`, `VirGo-Movil/`).
 - [`PRUEBAS.md`](PRUEBAS.md): estado y resultados de las pruebas de los tres proyectos.
 - [`ESTADO-PROYECTO.md`](ESTADO-PROYECTO.md): resumen del avance de los tres proyectos.
+- [`backend/MAPA-SPECS.md`](backend/MAPA-SPECS.md) y [`backend/ENDPOINTS.md`](backend/ENDPOINTS.md): specs y endpoints de API y base de datos.
+- [`frontend/MAPA-SPECS.md`](frontend/MAPA-SPECS.md): specs de Móvil, por flujo.

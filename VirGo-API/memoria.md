@@ -22,6 +22,8 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | `002-pipeline-cicd` | ✏️ Borrador | Ruleset, CI con 5 tipos de prueba y DevSecOps, CD manual, humo |
 | `003-auth-login` | ✏️ Borrador | `POST /api/v1/auth/login`; espera a `000`–`002` |
 | `004-auth-logout` | ✏️ Borrador | `POST /api/v1/auth/logout`; espera a `003` |
+| `011`–`097` | ✏️ Borrador | 87 specs, uno por endpoint; ver `docs/backend/ENDPOINTS.md` |
+| `900-infraestructura-iac`, `901-pipeline-cicd` | ✏️ Borrador | Antes `001` y `002`; van al final, como pidió el profesor |
 | `010-contrato-datos` | ✏️ Borrador | Antes `007-esquema-mongodb`; alinea la API con `VirGo-Database` |
 | `005-auth-registro`, `006-auth-renovar-sesion` | 💡 Propuestos | Salieron del alcance de `003` y `004` |
 
@@ -212,3 +214,17 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje:** dos personas definieron el esquema por separado; la comparación contra la base lo reveló.
 - **Pendiente:** decidir `VirGo-Database` `001` P-01, P-02 y P-05, y aplicarlo antes de desplegar el PR #5.
+
+### 2026-11-05 · Correcciones de la evaluación: bloques de specs
+
+- **Autor:** equipo + Claude Code (`arquitecto`)
+- **Módulo / tareas:** `011`–`097`, `900`, `901` · ninguna tarea de código
+- **Qué se hizo:**
+  - El profesor pidió el orden: gobernanza, arquitectura base, todos los endpoints, infraestructura y pipeline.
+  - Se inventariaron 94 endpoints, sin duplicados, y se redactó un spec por endpoint a partir de `API-HANDOFF.md` §9, el catálogo y el checklist.
+  - `001` y `002` pasaron a `900` y `901`, y se agregó el listado de servicios adaptado a costo cero.
+- **Evidencia:** `docs/backend/` y `docs/frontend/`.
+- **Decisiones:** un spec por endpoint (Art. I.5); backend y frontend se documentan por separado. Las tareas de `900` y `901` conservan sus IDs.
+- **Costo:** $0.
+- **Aprendizaje:** los specs se generaron desde datos estructurados; requieren revisión humana antes de aprobarse.
+- **Pendiente:** resolver las preguntas abiertas de cada spec y los 10 endpoints que requieren decisión; conseguir la URL.

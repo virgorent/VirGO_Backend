@@ -20,13 +20,13 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 3. Si durante la implementación aparece algo no previsto, se actualiza primero el spec o el plan y después el código.
 4. Las especificaciones viven en `specs/NNN-nombre-del-modulo/` con exactamente cuatro archivos: `spec.md`, `plan.md`, `task.md` y `check.md`. El `check.md` es la lista de verificación del módulo: reúne la evidencia de cada criterio de aceptación, de cada tipo de prueba, del PR, del despliegue y de la memoria.
 5. **Specs atómicos.** Cada spec cubre una sola capacidad: un endpoint o recurso (por ejemplo, `login` y `logout` van en specs separados), la infraestructura o el pipeline. Si un spec necesita «y además…», se divide.
-6. Los IDs de tarea llevan el número del módulo para no repetirse: el módulo `000` usa `T001…T099`, el `001` usa `T101…T199`, el `002` usa `T201…` y así sucesivamente.
+6. Los IDs de tarea llevan el número del módulo para no repetirse: el módulo `000` usa `T001…T099`, el `900` usa `T101…T199`, el `901` usa `T201…` y así sucesivamente.
 7. Un spec pasa por los estados *Borrador → En revisión → Aprobado → Desplegado → Cerrado*. Solo se marca *Cerrado* cuando su `check.md` está completo, su código está desplegado en la URL HTTPS y quedó registrado en `memoria.md`.
 
 ## Artículo II. Modularidad e iteraciones
 
 1. El módulo `000-arquitectura-base` se construye primero. No contiene funcionalidad del negocio: solo la estructura, la configuración, la seguridad base, la infraestructura y el despliegue.
-2. Los specs funcionales se pueden **redactar** (spec, plan, task y check) antes de terminar la base, porque alimentan el contexto de la arquitectura global y de los agentes. Sus tareas **no se ejecutan** hasta que `000-arquitectura-base`, `001-infraestructura-iac` y `002-pipeline-cicd` estén cerrados.
+2. Los specs funcionales se pueden **redactar** (spec, plan, task y check) antes de terminar la base, porque alimentan el contexto de la arquitectura global y de los agentes. Sus tareas **no se ejecutan** hasta que `000-arquitectura-base`, `900-infraestructura-iac` y `901-pipeline-cicd` estén cerrados.
 3. Cada módulo funcional define sus endpoints y declara qué subagentes y skills necesita.
 4. Un módulo se cierra solo cuando todas sus tareas están verificadas y quedaron registradas en `memoria.md`. Así no quedan brechas estructurales entre iteraciones.
 

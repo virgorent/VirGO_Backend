@@ -69,3 +69,7 @@ VirGo necesita una definición versionada de su base de datos, independiente de 
 |---|---|---|
 | P-01 | `docs/API-HANDOFF.zip` duplica `API-HANDOFF.md`. ¿Se quita del repositorio? | Esau |
 | P-02 | `API-HANDOFF.md` dice que no existe la API; ya existe en el PR #5. ¿Quién lo actualiza? | Esau |
+
+## 8. Specs por dominio
+
+Las colecciones se documentan en `002-cuentas` a `010-soporte`.
