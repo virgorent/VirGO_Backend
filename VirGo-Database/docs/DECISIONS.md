@@ -17,9 +17,19 @@
 - Usuario DDL separado del usuario runtime.
 - Guardas por `NODE_ENV` y nombre de base.
 
+### Fuente de verdad
+
+- `VirGo-Database/src/catalog` es la fuente de verdad de colecciones, validadores e indices.
+- `VirGo-API/db/schema` se genera con `npm run db:export:api`; no se edita a mano.
+- El exportador es determinista y `db:export:api:check` bloquea la deriva.
+
 ### Esquema
 
 - `quotes.updatedAt` obligatorio y BSON `Date`.
+- Todos los strings libres tienen `maxLength`.
+- `passwordResets` usa `codeHash` y `attempts`; `userId` es unico.
+- `providers` usa `pricing` y `responseTime`; `basePrice` no existe.
+- `monthlyStats._id` es determinista: `<targetType>:<targetId>:<AAAA-MM>`.
 - `reviews.bookingId` obligatorio solo para `targetType: venue`.
 - Indice unico de resenas por `targetType`, `targetId`, `authorId`.
 - Indice unico de conversaciones por `clientId`, `target.type`, `target.id`.
@@ -45,6 +55,8 @@
 - `venueDates` se inserta al confirmar.
 - La cancelacion elimina `venueDates` por `venueId`, `date` y `bookingId`; si no coincide exactamente, aborta.
 - `venueDates` no tiene TTL.
+- `bookings.idempotencyKey` es opcional, maximo 100 caracteres.
+- La idempotencia de reservas se garantiza con el indice unico parcial `clientId_1_idempotencyKey_1_unique`.
 
 ### Folios
 

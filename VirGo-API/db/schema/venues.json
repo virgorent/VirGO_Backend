@@ -278,15 +278,11 @@
               "category": {
                 "bsonType": "string",
                 "enum": [
-                  "Banquete",
-                  "Fotografía",
-                  "Video",
+                  "Catering",
                   "Música",
-                  "Flores",
-                  "Pastelería",
-                  "Mobiliario",
-                  "Animación",
-                  "Maquillaje"
+                  "Fotografía",
+                  "Decoración",
+                  "Mobiliario"
                 ]
               }
             },

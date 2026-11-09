@@ -43,7 +43,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | Infraestructura | `VirGo.Infrastructure` | Persistencia (MongoDB), servicios de AWS, implementaciones |
 
 3. **Inyección de dependencias** con el contenedor nativo de .NET. No se instancian servicios con `new` dentro de los controladores.
-4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. La fuente de verdad del esquema es `db/schema/`. Las colecciones, validadores e índices los crea la aplicación de forma idempotente al arrancar desde esos archivos; no se crean a mano.
+4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. La fuente de verdad del esquema es `VirGo-Database/src/catalog/`; `db/schema/` se genera desde ese catálogo con `npm run db:export:api`. Las colecciones, validadores e índices los crea la aplicación de forma idempotente al arrancar desde esos archivos; no se editan a mano.
 5. **Ejecución dual:** la misma aplicación corre localmente con Kestrel y en AWS Lambda. No se mantienen dos bases de código.
 
 ## Artículo IV. Contrato de la API (acuerdo con Móvil)

@@ -34,6 +34,18 @@ npm run db:verify:prod
 npm run db:inspect:prod
 ```
 
+## Exportacion a la API
+
+Despues de cambiar el catalogo:
+
+```powershell
+npm run db:export:api
+npm run db:export:api:check
+python ..\VirGo-API\db\tools\check_schema.py
+```
+
+`db:export:api` escribe los 22 archivos de `VirGo-API/db/schema`. `db:export:api:check` no escribe y falla si hay diferencias. No edite esos JSON a mano.
+
 ## MongoDB local para pruebas
 
 Inicio:
@@ -67,6 +79,10 @@ const folio = `VG-${year}-${String(counter.next).padStart(4, '0')}`;
 
 El indice unico de `bookings.folio` protege contra duplicados. La secuencia no garantiza ausencia de huecos.
 
+## Idempotencia de reservas
+
+La API puede enviar `bookings.idempotencyKey` (maximo 100 caracteres). El indice unico parcial `clientId_1_idempotencyKey_1_unique` rechaza repetir la misma clave para el mismo cliente. Si el documento no tiene clave, el indice no lo considera.
+
 ## Cancelacion de reservas
 
 La regla aprobada es transaccional:
@@ -81,7 +97,7 @@ La anomalia debe registrarse fuera de la transaccion. El repositorio no implemen
 
 ## TTL
 
-- `passwordResets.expiresAt`: fecha de expiracion del token.
+- `passwordResets.expiresAt`: fecha de expiracion del codigo de recuperacion.
 - `sessions.purgeAt`: fecha de purga de la sesion.
 - `notices.purgeAt`: `createdAt + 90 dias`.
 - `assistantMessages.purgeAt`: `createdAt + 30 dias`.

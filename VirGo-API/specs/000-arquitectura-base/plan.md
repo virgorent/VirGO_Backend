@@ -143,7 +143,7 @@ VirGo-API/
 - Un `MongoClient` único por proceso (singleton), creado fuera del manejador para reutilizar conexiones entre invocaciones de Lambda, con `maxPoolSize` de 10 (M0 admite 500 conexiones).
 - `MongoIndexInitializer` crea de forma idempotente validadores e índices desde `db/schema/` al arrancar. Así, al ejecutar el primer *task* de usuarios, la base y sus colecciones se crean solas.
 - Documentos con `_id` y referencias como texto UUID (`BsonRepresentation(BsonType.String)`, ADR-28), nombres de campo en `camelCase` inglés y fechas en UTC.
-- La fuente de verdad son los archivos de `db/schema/` (`007-esquema-mongodb`): el inicializador los aplica tal cual.
+- La fuente de verdad es `VirGo-Database/src/catalog/`; los archivos de `db/schema/` se generan desde ese catálogo (`007-esquema-mongodb`) y el inicializador los aplica tal cual.
 
 La base no define entidades: los módulos funcionales documentan sus patrones de llave en su propio plan.
 

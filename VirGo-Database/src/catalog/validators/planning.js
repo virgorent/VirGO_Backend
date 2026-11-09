@@ -27,7 +27,7 @@ import {
 export const eventsValidator = jsonSchema('events', {
   _id: uuid(),
   ownerId: uuid(),
-  name: string(),
+  name: string(100),
   eventType: enumOf(EVENT_TYPES),
   date: dateString(),
   guests: int(1),
@@ -35,8 +35,8 @@ export const eventsValidator = jsonSchema('events', {
   hours: int(1),
   venue: object({
     venueId: uuid(),
-    name: string(),
-    photoUrl: string()
+    name: string(100),
+    photoUrl: string(500)
   }, ['venueId', 'name', 'photoUrl']),
   design: object({
     theme: enumOf(DESIGN_THEMES),
@@ -52,36 +52,36 @@ export const eventsValidator = jsonSchema('events', {
     additionalProperties: money()
   },
   invitation: object({
-    template: string(),
-    message: string()
+    template: string(50),
+    message: string(1000)
   }, ['template', 'message']),
   reminders: arrayOf(object({
-    id: string(),
-    title: string(),
+    id: string(36),
+    title: string(150),
     date: dateString(),
     kind: enumOf(REMINDER_KINDS),
     auto: bool()
   }, ['id', 'title', 'date', 'kind', 'auto'])),
   vendors: arrayOf(object({
-    id: string(),
+    id: string(36),
     providerId: uuid(),
-    name: string(),
-    category: string(),
-    package: string(),
+    name: string(100),
+    category: string(50),
+    package: string(100),
     price: money(),
     paymentStatus: enumOf(VENDOR_PAYMENT_STATUSES)
   }, ['id', 'name', 'category', 'price', 'paymentStatus'])),
   externalPayments: arrayOf(object({
-    id: string(),
-    concept: string(),
+    id: string(36),
+    concept: string(150),
     amount: money(),
     status: enumOf(PAYMENT_STATUSES),
     paidAt: date()
   }, ['id', 'concept', 'amount', 'status'])),
   collaborators: arrayOf(object({
     userId: uuid(),
-    name: string(),
-    email: string(),
+    name: string(100),
+    email: string(150),
     permission: enumOf(COLLABORATOR_PERMISSIONS)
   }, ['userId', 'name', 'email', 'permission'])),
   createdAt: date(),
@@ -102,17 +102,17 @@ export const eventsValidator = jsonSchema('events', {
 export const eventGuestsValidator = jsonSchema('eventGuests', {
   _id: uuid(),
   eventId: uuid(),
-  name: string(),
-  phone: string(),
+  name: string(100),
+  phone: string(16),
   companions: int(0),
   status: enumOf(GUEST_STATUSES),
-  table: string()
+  table: string(20)
 }, ['_id', 'eventId', 'name', 'phone', 'companions', 'status']);
 
 export const eventTasksValidator = jsonSchema('eventTasks', {
   _id: uuid(),
   eventId: uuid(),
-  title: string(),
+  title: string(150),
   dueDate: dateString(),
   done: bool(),
   suggested: bool()
@@ -123,8 +123,8 @@ export const favoritesValidator = jsonSchema('favorites', {
   userId: uuid(),
   targetType: enumOf(FAVORITE_TARGET_TYPES),
   targetId: uuid(),
-  name: string(),
-  photoUrl: string(),
+  name: string(100),
+  photoUrl: string(500),
   rating: number(0, 5),
   createdAt: date()
 }, [

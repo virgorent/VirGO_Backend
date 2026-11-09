@@ -8,10 +8,10 @@ Este repositorio no contiene la API de VirGo. No crea ni modifica `VirGo-API`, n
 
 - 22 colecciones declaradas.
 - Validadores estrictos con `validationLevel: strict` y `validationAction: error`.
-- 37 indices, incluidos TTL, unicos y un indice unico parcial.
+- 38 indices secundarios: 12 unicos, 2 parciales y 4 TTL.
 - Inicializador idempotente con modos `plan`, `validate` y `apply`.
-- Verificador de deriva.
-- 16 pruebas unitarias y 20 pruebas de integracion verificadas contra MongoDB 8 local.
+- Verificador de deriva y exportador determinista de esquemas para `VirGo-API`.
+- 27 pruebas unitarias y 23 pruebas de integracion verificadas contra MongoDB 8 local.
 - Sin credenciales ni secretos en el repositorio.
 
 ## Requisitos
@@ -77,6 +77,18 @@ node src/cli/init.js --env-file .env.development --mode plan
 node src/cli/init.js --env-file .env.development --mode apply --yes
 node src/cli/verify.js --env-file .env.development
 node src/cli/inspect.js --env-file .env.development --json
+node src/cli/export.js
+node src/cli/export.js --check
+```
+
+## Exportacion del contrato para la API
+
+`VirGo-Database` es la fuente de verdad. Los esquemas consumidos por `VirGo-API` se generan, no se editan a mano:
+
+```powershell
+npm run db:export:api
+npm run db:export:api:check
+python ..\VirGo-API\db\tools\check_schema.py
 ```
 
 ## Pruebas
@@ -106,15 +118,17 @@ src/
     helpers.js         Helpers de $jsonSchema
     indexes.js         Indices declarados
     index.js           Catalogo de las 22 colecciones
-  cli/                 plan/apply/verify/inspect
+  cli/                 plan/apply/verify/inspect/export
   config/              Carga y validacion de entorno
   connection/          Cliente MongoDB
+  export/              Generacion determinista para VirGo-API
   init/                Plan, aplicacion, verificacion y formato
   util/                Parametros de CLI
 tests/
   unit/                Pruebas sin MongoDB
   integration/         Pruebas contra MongoDB local
   helpers/             Fixtures y base de prueba
+specs/                 Specs 000-base-datos y 001-contrato-con-api
 scripts/dev/           MongoDB local para pruebas
 docs/                  Arquitectura, Atlas, operaciones y decisiones
 ```
@@ -137,3 +151,6 @@ docs/                  Arquitectura, Atlas, operaciones y decisiones
 - [Operacion](docs/OPERATIONS.md)
 - [Decisiones](docs/DECISIONS.md)
 - [Pruebas](docs/TESTING.md)
+- [Handoff para la API](docs/API-HANDOFF.md)
+- [Spec 000: base de datos](specs/000-base-datos/spec.md)
+- [Spec 001: contrato con la API](specs/001-contrato-con-api/spec.md)

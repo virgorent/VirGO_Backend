@@ -17,12 +17,12 @@ export const reviewsValidator = {
       targetType: enumOf(TARGET_TYPES),
       targetId: uuid(),
       authorId: uuid(),
-      authorName: string(),
+      authorName: string(100),
       stars: int(1, 5),
-      text: string(),
+      text: string(1000),
       bookingId: uuid(),
       reply: object({
-        text: string(),
+        text: string(1000),
         at: date()
       }, ['text', 'at']),
       createdAt: date()
@@ -54,7 +54,11 @@ export const reviewsValidator = {
 };
 
 export const monthlyStatsValidator = jsonSchema('monthlyStats', {
-  _id: uuid(),
+  _id: {
+    bsonType: 'string',
+    pattern: '^(venue|provider):[0-9a-fA-F-]{36}:[0-9]{4}-[0-9]{2}$',
+    description: 'Determinista: <targetType>:<targetId>:<AAAA-MM>, para que el upsert con $inc funcione'
+  },
   targetType: enumOf(TARGET_TYPES),
   targetId: uuid(),
   month: monthString(),

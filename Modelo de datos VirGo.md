@@ -2,8 +2,8 @@
 
 Campos necesarios para crear la base de datos **no relacional** de VirGo. Se dedujeron del `Checklist VirGo.md` (73 pantallas) y de los datos que ya guarda la maqueta funcional.
 
-- **Versión:** borrador 4 · 2026-11-04 (alineado con `VirGo-API/db/schema/`)
-- **Fuente de verdad:** `VirGo-API/db/schema/*.json`. Si este documento y esos archivos difieren, mandan los archivos.
+- **Versión:** borrador 5 · 2026-11-07 (alineado con `VirGo-Database/src/catalog/`)
+- **Fuente de verdad:** `VirGo-Database/src/catalog/`. `VirGo-API/db/schema/*.json` se genera desde ese catálogo; si este documento y esos archivos difieren, manda el catálogo.
 - **Motor:** MongoDB Atlas M0, según la decisión ADR-23 del backend (`VirGo-API`)
 - **Base de datos:** `virgo` (producción) y `virgo_dev` (desarrollo)
 - **Uso:** insumo para los specs funcionales del backend (`003-auth-login` en adelante)
@@ -400,18 +400,18 @@ Se validan con `enum` en el `$jsonSchema` de cada colección y en los DTO de la 
 
 ## 7. Orden sugerido para crearla (por módulos funcionales)
 
-Las 22 colecciones ya existen en `virgo_dev`. La API las crea o actualiza al arrancar desde `db/schema/` (`MongoIndexInitializer`); no se cambian a mano.
+Las 22 colecciones se declaran en `VirGo-Database/src/catalog/`. `VirGo-API/db/schema/` se genera desde ese catálogo con `npm run db:export:api`, y la API crea o actualiza las colecciones al arrancar desde esos archivos (`MongoIndexInitializer`); no se cambian a mano.
 
 1. **Cuentas:** `users`, `sessions` (specs `003` y `004`), `passwordResets` y `paymentCards`.
 2. **Catálogo:** `venues`, `venueDates` y `providers`.
 3. **Planeación:** `events`, `eventGuests`, `eventTasks` y `favorites`.
 4. **Transacciones:** `quotes`, `bookings` y `counters`.
 5. **Interacción:** `reviews`, `conversations`, `messages` y `notices`.
-6. **Apoyo:** `gigs`, `monthlyStats`, `assistantMessages`, `contactMessages` y `config`.
+6. **Apoyo:** `gigs`, `monthlyStats`, `assistantMessages` y `contactMessages`.
 
 ## 8. Longitudes máximas
 
-Propuesta pendiente de confirmar (`007-esquema-mongodb` P-05). Los campos con formato fijo (UUID, fechas) y los enumerados ya se validan con `pattern` o `enum`.
+Confirmadas en `VirGo-Database/src/catalog/` y exportadas a `db/schema` (`007-esquema-mongodb`). Los campos con formato fijo (UUID, fechas) y los enumerados se validan con `pattern` o `enum`.
 
 | Máximo | Campos |
 |---|---|

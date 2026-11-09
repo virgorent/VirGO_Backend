@@ -7,12 +7,12 @@
 | Proyecto de datos | `VirGo-Database` |
 | Base de datos de desarrollo | `virgo_dev` |
 | Base de datos de producción prevista | `virgo` |
-| Estado de datos en desarrollo | 22 colecciones, 37 índices secundarios, 4 TTL, 0 documentos de negocio |
+| Estado de datos en desarrollo | 22 colecciones, 38 índices secundarios, 4 TTL, 0 documentos de negocio |
 | Estado de la API | No existe implementación de `VirGo-API` |
-| Fecha del documento | 2026-11-04 |
+| Fecha del documento | 2026-11-09 |
 | Audiencia | Desarrollador o equipo responsable de diseñar e implementar el backend |
 
-> **Advertencia:** este documento no declara endpoints existentes. Todos los contratos REST de la sección 9 son **propuestas de diseño**. La única fuente de verdad de campos, validadores e índices es el código de `VirGo-Database`.
+> **Advertencia:** este documento no declara endpoints existentes. Todos los contratos REST de la sección 9 son **propuestas de diseño**. La única fuente de verdad de campos, validadores e índices es `VirGo-Database/src/catalog`; `VirGo-API/db/schema` se genera desde ese catálogo.
 
 ## Cómo leer este documento
 
@@ -63,6 +63,7 @@ Mantener de forma versionada, verificable e idempotente:
 - Validadores `$jsonSchema`.
 - Índices y sus opciones.
 - Scripts de inicialización, verificación e inspección.
+- Exportación determinista de esquemas para la API.
 
 ### 1.3 Funcionalidades principales conocidas
 
@@ -91,11 +92,11 @@ Mantener de forma versionada, verificable e idempotente:
 
 - 22 colecciones.
 - Validadores estrictos con `validationLevel: strict` y `validationAction: error`.
-- 37 índices secundarios, incluidos únicos, TTL, geoespacial y único parcial.
+- 38 índices secundarios, incluidos 12 únicos, 4 TTL, 1 geoespacial y 2 parciales.
 - Inicializador idempotente con modos `plan`, `validate` y `apply`.
 - Verificador de deriva.
-- CLI de administración.
-- Pruebas unitarias y de integración.
+- CLI de administración y exportación.
+- 27 pruebas unitarias y 23 de integración.
 
 **NO IMPLEMENTADO**
 
@@ -242,7 +243,10 @@ La API debe usar su propio archivo de entorno, ignorado por Git, y un usuario ru
 | `npm run db:init:dev -- --yes` | Aplica el plan en desarrollo. |
 | `npm run db:verify:dev` | Verifica el estado de desarrollo. |
 | `npm run db:inspect:dev` | Inventario de colecciones e índices. |
-| `npm test` | 16 pruebas unitarias. |
+| `npm run db:export:api` | Genera los 22 esquemas de `VirGo-API/db/schema`. |
+| `npm run db:export:api:check` | Falla si la API difiere del catálogo; no escribe. |
+| `python ../VirGo-API/db/tools/check_schema.py` | Valida límites y paridad offline. |
+| `npm test` | 27 pruebas unitarias. |
 | `npm run test:integration` | Pruebas contra MongoDB local; se omiten si no hay servidor. |
 
 Los comandos de producción son equivalentes, pero requieren revisión, respaldo y `--confirm-production`.
@@ -257,7 +261,7 @@ Los comandos de producción son equivalentes, pero requieren revisión, respaldo
 
 | Elemento | Regla |
 | --- | --- |
-| `_id` | UUID string con patrón `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`, excepto `counters._id`. |
+| `_id` | UUID string con patrón `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`, excepto `counters._id` y `monthlyStats._id`. |
 | Fechas de calendario | String `YYYY-MM-DD`. |
 | Mes estadístico | String `YYYY-MM`. |
 | Marcas temporales | BSON `Date` en UTC. |
@@ -269,7 +273,7 @@ Los comandos de producción son equivalentes, pero requieren revisión, respaldo
 | Folios | `^VG-\d{4}-\d{4,}$`; el año corresponde a UTC al momento de generación. |
 | Contador de folios | `_id` con patrón `^folio-\d{4}$`; `next` entero mínimo 1. |
 
-La API debe generar UUIDs para todos los `_id`, excepto en `counters`. Si se deja que MongoDB genere un `ObjectId`, el validador rechazará el documento.
+La API debe generar UUIDs para todos los `_id`, excepto en `counters` y `monthlyStats`. Si se deja que MongoDB genere un `ObjectId`, el validador rechazará el documento.
 
 ### 4.2 Catálogo de colecciones
 
@@ -278,7 +282,7 @@ La API debe generar UUIDs para todos los `_id`, excepto en `counters`. Si se dej
 | Colección | Propósito | Índices secundarios | TTL |
 | --- | --- | ---: | --- |
 | `users` | Cuentas y roles. | 1 | No |
-| `passwordResets` | Tokens de recuperación. | 2 | Sí |
+| `passwordResets` | Códigos de recuperación. | 2 | Sí |
 | `sessions` | Sesiones activas. | 3 | Sí |
 | `paymentCards` | Tarjetas tokenizadas. | 2 | No |
 | `venues` | Catálogo de venues. | 3 | No |
@@ -291,7 +295,7 @@ La API debe generar UUIDs para todos los `_id`, excepto en `counters`. Si se dej
 | `eventGuests` | Invitados por evento. | 1 | No |
 | `eventTasks` | Tareas por evento. | 1 | No |
 | `quotes` | Cotizaciones. | 2 | No |
-| `bookings` | Reservaciones y pagos registrados. | 3 | No |
+| `bookings` | Reservaciones, pagos e idempotencia. | 4 | No |
 | `counters` | Secuencias de folios. | 0 | No |
 | `favorites` | Favoritos por usuario. | 1 | No |
 | `conversations` | Conversaciones cliente-destino. | 3 | No |
@@ -300,7 +304,7 @@ La API debe generar UUIDs para todos los `_id`, excepto en `counters`. Si se dej
 | `assistantMessages` | Historial del asistente. | 2 | Sí |
 | `contactMessages` | Formulario de contacto. | 1 | No |
 
-Total: **22 colecciones, 37 índices secundarios y 4 índices TTL**. Además, MongoDB crea un índice `_id_` automático por colección: 22 en total. El número total de definiciones de índice es 59.
+Total: **22 colecciones, 38 índices secundarios y 4 índices TTL**. Además, MongoDB crea un índice `_id_` automático por colección: 22 en total. El número total de definiciones de índice es 60.
 
 ### 4.3 Diagrama lógico simplificado
 
@@ -345,15 +349,20 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | Campo | Tipo | Obligatorio | Validación / referencia |
 | --- | --- | --- | --- |
 | `_id` | UUID string | Sí | Patrón UUID. |
-| `name` | string | Sí | — |
-| `email` | string | Sí | Patrón de email; índice único. API debe normalizar a minúsculas. |
+| `name` | string | Sí | `maxLength: 100`. |
+| `email` | string | Sí | Patrón de email, `maxLength: 150`; índice único. API debe normalizar a minúsculas. |
 | `passwordHash` | string | Sí | Solo hash; nunca contraseña en claro. |
 | `role` | string | Sí | Enum: `client`, `owner`, `provider`. No existe rol `admin`. |
-| `phone` | string | Sí | String libre; no hay patrón ni validación de formato. |
+| `phone` | string | Sí | String libre, `maxLength: 16`; no hay patrón de formato. |
 | `providerId` | UUID string | No | Referencia lógica a `providers._id`; derivada de `providers.userId`. |
 | `isVerified` | bool | Sí | — |
 | `createdAt` | Date | Sí | UTC. |
 | `updatedAt` | Date | Sí | UTC. |
+| `failedLoginCount` | int | Sí | Mínimo 0. |
+| `lockoutEndsAt` | Date o null | No | Fin del bloqueo temporal. |
+| `unreadNotices` | int | Sí | Mínimo 0. |
+| `city` | string | No | `maxLength: 80`. |
+| `defaultGuests` | int | No | Mínimo 0. |
 
 **Validaciones adicionales:** `additionalProperties: false`; el validador declara `_id` explícitamente.
 
@@ -365,23 +374,23 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 
 #### `passwordResets`
 
-**Propósito:** tokens temporales para recuperación de contraseña.
+**Propósito:** códigos temporales para recuperación de contraseña.
 
 | Campo | Tipo | Obligatorio | Validación / referencia |
 | --- | --- | --- | --- |
 | `_id` | UUID string | Sí | Patrón UUID. |
-| `userId` | UUID string | Sí | Referencia lógica a `users._id`. |
-| `tokenHash` | string | Sí | Hash del token; no el token en claro. |
+| `userId` | UUID string | Sí | Referencia lógica a `users._id`; índice único. |
+| `codeHash` | string | Sí | Hash del código; no el código en claro. |
 | `expiresAt` | Date | Sí | Fecha de expiración; TTL. |
-| `used` | bool | Sí | Indica si el token ya se utilizó. |
+| `attempts` | int | Sí | Entre 0 y 5. |
 
 **Validaciones adicionales:** todos los campos son obligatorios; `validationLevel: strict` y `validationAction: error`.
 
-**Índices:** `passwordResets.userId_1` (`{ userId: 1 }`, no único); `passwordResets.expiresAt_ttl` (`{ expiresAt: 1 }`, TTL con `expireAfterSeconds: 0`).
+**Índices:** `passwordResets.userId_1_unique` (`{ userId: 1 }`, único); `passwordResets.expiresAt_ttl` (`{ expiresAt: 1 }`, TTL con `expireAfterSeconds: 0`).
 
 **Referencias:** `userId` → `users._id`.
 
-**Reglas:** MongoDB elimina documentos vencidos de forma periódica, no inmediata. La API debe generar el token, guardar solo su hash, validar `used` y expiración, y decidir si revoca tokens anteriores. **`userId` no es único**, por lo que la base no impide varios tokens activos para el mismo usuario.
+**Reglas:** MongoDB elimina documentos vencidos de forma periódica, no inmediata. La API debe generar el código, guardar solo `codeHash`, incrementar `attempts` y validar expiración. **`userId` es único**, por lo que solo puede existir un código activo por usuario.
 
 #### `sessions`
 
@@ -395,14 +404,16 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `createdAt` | Date | Sí | UTC. |
 | `expiresAt` | Date | Sí | Expiración lógica de la sesión. |
 | `purgeAt` | Date | Sí | Fecha de purga; TTL. |
+| `device` | string | No | `maxLength: 100`. |
+| `revokedAt` | Date o null | No | Marca de revocación lógica. |
 
-**Validaciones adicionales:** todos los campos son obligatorios.
+**Validaciones adicionales:** los cinco campos base son obligatorios; `device` y `revokedAt` son opcionales.
 
 **Índices:** `sessions.tokenHash_1_unique` (`{ tokenHash: 1 }`, único); `sessions.userId_1` (`{ userId: 1 }`); `sessions.purgeAt_ttl` (`{ purgeAt: 1 }`, TTL con `expireAfterSeconds: 0`).
 
 **Referencias:** `userId` → `users._id`.
 
-**Reglas:** la API debe almacenar únicamente el hash del token, verificar expiración y permitir revocación. **No existe `revokedAt`** en el esquema actual; una alternativa compatible es eliminar el documento de sesión al cerrar sesión. La duración de sesión y la política de renovación no están definidas en el repositorio.
+**Reglas:** la API debe almacenar únicamente el hash del token, verificar expiración y permitir revocación. Puede usar `revokedAt` o eliminar el documento al cerrar sesión. La duración de sesión y la política de renovación no están definidas en el repositorio.
 
 #### `paymentCards`
 
@@ -439,7 +450,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `shortName` | string | Sí | — |
 | `description` | string | Sí | `minLength: 20`. |
 | `address` | string | Sí | — |
-| `zone` | string | Sí | Enum: `Norte`, `Sur`, `Centro`, `Oriente`, `Poniente`. |
+| `zone` | string | Sí | Enum `ZONES`: `Juriquilla`, `Centro`, `El Refugio`, `Santa Fe`, `Antea`, `Jurica`, `Corregidora`, `El Marqués`. |
 | `location` | object | Sí | Objeto con `type` y `coordinates`. |
 | `location.type` | string | Sí, si `location` existe | Enum: `Point`. |
 | `location.coordinates` | array | Sí, si `location` existe | Exactamente 2 números. |
@@ -451,7 +462,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `price.weekendPct` | number | No | Mínimo 0. |
 | `price.highSeasonPct` | number | No | Mínimo 0. |
 | `price.highSeasonMonths` | array de int | No | Cada entero entre 1 y 12. |
-| `amenities` | array de string | Sí | Enum de amenidades. Puede estar vacío. |
+| `amenities` | array de string | No | Enum de amenidades. Puede estar vacío. |
 | `services` | array de object | Sí | Puede estar vacío. |
 | `services[].name` | string | Sí, si el elemento existe | — |
 | `services[].included` | bool | Sí, si el elemento existe | — |
@@ -471,10 +482,10 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `rating.count` | int | Sí, si `rating` existe | Mínimo 0. |
 | `verified` | bool | Sí | Insignia de verificación. |
 | `status` | string | Sí | Enum: `draft`, `review`, `published`. |
-| `allies` | array de object | Sí | Puede estar vacío. |
+| `allies` | array de object | No | Puede estar vacío. |
 | `allies[].providerId` | UUID string | Sí, si el elemento existe | Referencia a `providers._id`. |
 | `allies[].name` | string | Sí, si el elemento existe | — |
-| `allies[].category` | string | Sí, si el elemento existe | Enum de categorías de proveedor. |
+| `allies[].category` | string | Sí, si el elemento existe | Enum `PROVIDER_CATEGORIES`: `Catering`, `Música`, `Fotografía`, `Decoración`, `Mobiliario`. |
 | `createdAt` | Date | Sí | UTC. |
 | `updatedAt` | Date | Sí | UTC. |
 
@@ -518,15 +529,16 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `userId` | UUID string | Sí | Referencia lógica a `users._id`; índice único. |
 | `businessName` | string | Sí | — |
 | `category` | string | Sí | Enum de categorías de proveedor. |
-| `description` | string | Sí | `minLength: 20`. |
-| `basePrice` | Decimal128 | Sí | Dinero. |
-| `zones` | array de string | Sí | String libre; no está limitado al enum de zonas de venues. |
+| `description` | string | Sí | `minLength: 20`, `maxLength: 2000`. |
+| `pricing` | string | Sí | Enum: `per_person`, `per_event`. |
+| `responseTime` | string | Sí | `maxLength: 50`. |
+| `zones` | array de string | Sí | String libre, `maxLength: 50`; no está limitado al enum de zonas de venues. |
 | `packages` | array de object | Sí | Puede estar vacío. |
 | `packages[].id` | string | Sí, si el elemento existe | Identificador de paquete. |
 | `packages[].name` | string | Sí, si el elemento existe | — |
 | `packages[].price` | Decimal128 | Sí, si el elemento existe | Dinero. |
 | `packages[].includes` | string o array de string | Sí, si el elemento existe | Acepta ambos formatos. |
-| `gallery` | array de object | Sí | Puede estar vacío. |
+| `gallery` | array de object | No | Puede estar vacío. |
 | `gallery[].url` | string | Sí, si el elemento existe | — |
 | `gallery[].order` | int | Sí, si el elemento existe | Mínimo 0. |
 | `coverUrl` | string | No | — |
@@ -537,7 +549,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `createdAt` | Date | Sí | UTC. |
 | `updatedAt` | Date | Sí | UTC. |
 
-**Validaciones adicionales:** `packages[].includes` puede ser un string o un arreglo de strings. `zones` no valida contra `ZONES`.
+**Validaciones adicionales:** `packages[].includes` puede ser un string o un arreglo de strings. `zones` no valida contra `ZONES`. `pricing` y `responseTime` son obligatorios; `basePrice` ya no existe.
 
 **Índices:** `providers.userId_1_unique` (`{ userId: 1 }`, único); `providers.status_1_category_1_businessName_1` (`{ status: 1, category: 1, businessName: 1 }`).
 
@@ -603,7 +615,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 
 | Campo | Tipo | Obligatorio | Validación / referencia |
 | --- | --- | --- | --- |
-| `_id` | UUID string | Sí | Patrón UUID. |
+| `_id` | string | Sí | Patrón `^(venue\|provider):[0-9a-fA-F-]{36}:[0-9]{4}-[0-9]{2}$`. |
 | `targetType` | string | Sí | Enum: `venue`, `provider`. |
 | `targetId` | UUID string | Sí | Referencia lógica al destino. |
 | `month` | string | Sí | Patrón `YYYY-MM`. |
@@ -617,7 +629,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 
 **Referencias:** `targetId` → `venues._id`/`providers._id`.
 
-**Reglas:** una fila por destino y mes. La API debe usar `$inc` atómico o una transacción para evitar pérdidas. **La fuente de `visits` no está implementada** en este repositorio. No se debe exponer escritura directa de estadísticas al cliente.
+**Reglas:** una fila por destino y mes. El `_id` determinista permite usar `$inc` con `upsert` sin generar un UUID. **La fuente de `visits` no está implementada** en este repositorio. No se debe exponer escritura directa de estadísticas al cliente.
 
 #### `events`
 
@@ -628,7 +640,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `_id` | UUID string | Sí | Patrón UUID. |
 | `ownerId` | UUID string | Sí | Referencia lógica a `users._id`. |
 | `name` | string | Sí | — |
-| `eventType` | string | Sí | Enum de tipos de evento. |
+| `eventType` | string | Sí | Enum `EVENT_TYPES`: `Boda`, `XV años`, `Cumpleaños`, `Corporativo`, `Otro`. |
 | `date` | string | Sí | Patrón `YYYY-MM-DD`. |
 | `guests` | int | Sí | Mínimo 1. |
 | `budget` | Decimal128 | Sí | Dinero. |
@@ -741,7 +753,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `target.id` | UUID string | Sí, si `target` existe | Referencia a `venues._id`/`providers._id`. |
 | `target.name` | string | Sí, si `target` existe | Snapshot. |
 | `eventId` | UUID string | No | Referencia lógica a `events._id`. |
-| `eventType` | string | Sí | Enum de tipos de evento. |
+| `eventType` | string | Sí | Enum `EVENT_TYPES`: `Boda`, `XV años`, `Cumpleaños`, `Corporativo`, `Otro`. |
 | `eventDate` | string | Sí | Patrón `YYYY-MM-DD`. |
 | `guests` | int | Sí | Mínimo 1. |
 | `requestedServices` | array de string | No | Puede estar vacío. |
@@ -779,6 +791,7 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 | `folio` | string | Sí | Patrón `^VG-\d{4}-\d{4,}$`; índice único. |
 | `clientId` | UUID string | Sí | Referencia lógica a `users._id`. |
 | `clientName` | string | Sí | Snapshot. |
+| `idempotencyKey` | string | No | Máximo 100 caracteres; único por `clientId` cuando existe. |
 | `eventId` | UUID string | No | Referencia lógica a `events._id`. |
 | `quoteId` | UUID string | No | Referencia lógica a `quotes._id`. |
 | `venue` | object | Sí | Requiere todos sus campos. |
@@ -810,11 +823,11 @@ Las relaciones del diagrama son lógicas. MongoDB no valida su existencia ni int
 
 **Validaciones adicionales:** `payments` es obligatorio aunque puede estar vacío. No se valida que `deposit <= total`, que pagos sumen el total ni que `cancellation` corresponda a una reservación cancelada.
 
-**Índices:** `bookings.folio_1_unique` (`{ folio: 1 }`, único); `bookings.clientId_1_createdAt_-1` (`{ clientId: 1, createdAt: -1 }`); `bookings.venueId_1_date_1` (`{ "venue.venueId": 1, date: 1 }`).
+**Índices:** `bookings.folio_1_unique` (`{ folio: 1 }`, único); `bookings.clientId_1_date_-1` (`{ clientId: 1, date: -1 }`); `bookings.clientId_1_idempotencyKey_1_unique` (`{ clientId: 1, idempotencyKey: 1 }`, único parcial sobre `idempotencyKey` string); `bookings.venueId_1_date_1` (`{ "venue.venueId": 1, date: 1 }`).
 
 **Referencias:** `clientId` → `users._id`; `eventId` → `events._id`; `quoteId` → `quotes._id`; `venue.venueId` → `venues._id`.
 
-**Reglas:** el índice único de `venueDates` es la garantía final contra doble reserva. La API debe generar el folio, registrar pagos, validar montos y ejecutar la reservación en una transacción. No hay relación formal con servicios de proveedor. El `_id` o `paymentId` de la pasarela no está definido.
+**Reglas:** el índice único de `venueDates` es la garantía final contra doble reserva. La API debe generar el folio, registrar pagos, validar montos y ejecutar la reservación en una transacción. Para reintentos, `clientId` + `idempotencyKey` impiden duplicados. No hay relación formal con servicios de proveedor. El `_id` o `paymentId` de la pasarela no está definido.
 
 #### `counters`
 
@@ -1375,9 +1388,9 @@ Insertar la reseña y actualizar `rating.average`/`rating.count` del destino en 
 
 - `users.passwordHash` es string.
 - `sessions.tokenHash` es único.
-- `passwordResets.tokenHash` existe.
-- `sessions` no tiene `revokedAt`; la revocación compatible es eliminar el documento.
-- `passwordResets.userId` no es único.
+- `sessions` admite `device` y `revokedAt`; también se puede eliminar el documento.
+- `passwordResets` usa `codeHash` y `attempts`.
+- `passwordResets.userId` es único: un código activo por usuario.
 
 **PENDIENTE**
 
@@ -1472,7 +1485,7 @@ La API debe verificar pertenencia con consultas a las colecciones correspondient
 | Colección | Índices | Detalle |
 | --- | ---: | --- |
 | `users` | 1 | `email_1_unique`: `{ email: 1 }`, único. |
-| `passwordResets` | 2 | `userId_1`: `{ userId: 1 }`; `expiresAt_ttl`: `{ expiresAt: 1 }`, TTL. |
+| `passwordResets` | 2 | `userId_1_unique`: `{ userId: 1 }`, único; `expiresAt_ttl`: `{ expiresAt: 1 }`, TTL. |
 | `sessions` | 3 | `tokenHash_1_unique`: `{ tokenHash: 1 }`, único; `userId_1`: `{ userId: 1 }`; `purgeAt_ttl`: `{ purgeAt: 1 }`, TTL. |
 | `paymentCards` | 2 | `userId_1`: `{ userId: 1 }`; `userId_1_default_unique`: `{ userId: 1 }`, único parcial con `isDefault: true`. |
 | `venues` | 3 | `location_2dsphere_status_1`: `{ location: "2dsphere", status: 1 }`; `ownerId_1`: `{ ownerId: 1 }`; `status_1_zone_1_categories_1`: `{ status: 1, zone: 1, categories: 1 }`. |
@@ -1485,7 +1498,7 @@ La API debe verificar pertenencia con consultas a las colecciones correspondient
 | `eventGuests` | 1 | `eventId_1_status_1`: `{ eventId: 1, status: 1 }`. |
 | `eventTasks` | 1 | `eventId_1_dueDate_1`: `{ eventId: 1, dueDate: 1 }`. |
 | `quotes` | 2 | `clientId_1_createdAt_-1`: `{ clientId: 1, createdAt: -1 }`; `targetType_1_targetId_1_status_1_createdAt_-1`: `{ "target.type": 1, "target.id": 1, status: 1, createdAt: -1 }`. |
-| `bookings` | 3 | `folio_1_unique`: `{ folio: 1 }`, único; `clientId_1_createdAt_-1`: `{ clientId: 1, createdAt: -1 }`; `venueId_1_date_1`: `{ "venue.venueId": 1, date: 1 }`. |
+| `bookings` | 4 | `folio_1_unique`: `{ folio: 1 }`, único; `clientId_1_date_-1`: `{ clientId: 1, date: -1 }`; `clientId_1_idempotencyKey_1_unique`: `{ clientId: 1, idempotencyKey: 1 }`, único parcial; `venueId_1_date_1`: `{ "venue.venueId": 1, date: 1 }`. |
 | `counters` | 0 | Solo `_id_`. |
 | `favorites` | 1 | `userId_1_targetType_1_targetId_1_unique`: `{ userId: 1, targetType: 1, targetId: 1 }`, único. |
 | `conversations` | 3 | `clientId_1_lastAt_-1`: `{ clientId: 1, lastAt: -1 }`; `targetUserId_1_lastAt_-1`: `{ targetUserId: 1, lastAt: -1 }`; `clientId_1_targetType_1_targetId_1_unique`: `{ clientId: 1, "target.type": 1, "target.id": 1 }`, único. |
@@ -1502,29 +1515,31 @@ La API debe verificar pertenencia con consultas a las colecciones correspondient
 | --- | ---: | --- |
 | Colecciones | 22 | — |
 | Índices `_id_` automáticos | 22 | Uno por colección. |
-| Índices secundarios | 37 | Definidos en `src/catalog/indexes.js`. |
-| Índices únicos | 10 | Incluye el parcial de tarjeta predeterminada. |
+| Índices secundarios | 38 | Definidos en `src/catalog/indexes.js`. |
+| Índices únicos | 12 | Incluye los parciales de tarjeta predeterminada e idempotencia. |
 | Índices TTL | 4 | `passwordResets`, `sessions`, `notices`, `assistantMessages`. |
 | Índices geoespaciales | 1 | `venues.location_2dsphere_status_1`. |
-| Índices parciales | 1 | `paymentCards.userId_1_default_unique`. |
-| Total de definiciones | 59 | 22 `_id_` + 37 secundarios. |
+| Índices parciales | 2 | `paymentCards.userId_1_default_unique` y `bookings.clientId_1_idempotencyKey_1_unique`. |
+| Total de definiciones | 60 | 22 `_id_` + 38 secundarios. |
 
 ### 8.3 Índices únicos
 
 **IMPLEMENTADO**
 
 1. `users.email_1_unique`.
-2. `sessions.tokenHash_1_unique`.
-3. `paymentCards.userId_1_default_unique` (parcial, `isDefault: true`).
-4. `venueDates.venueId_1_date_1_unique`.
-5. `providers.userId_1_unique`.
-6. `reviews.targetType_1_targetId_1_authorId_1_unique`.
-7. `monthlyStats.targetType_1_targetId_1_month_1_unique`.
-8. `bookings.folio_1_unique`.
-9. `favorites.userId_1_targetType_1_targetId_1_unique`.
-10. `conversations.clientId_1_targetType_1_targetId_1_unique`.
+2. `passwordResets.userId_1_unique`.
+3. `sessions.tokenHash_1_unique`.
+4. `paymentCards.userId_1_default_unique` (parcial, `isDefault: true`).
+5. `venueDates.venueId_1_date_1_unique`.
+6. `providers.userId_1_unique`.
+7. `reviews.targetType_1_targetId_1_authorId_1_unique`.
+8. `monthlyStats.targetType_1_targetId_1_month_1_unique`.
+9. `bookings.folio_1_unique`.
+10. `bookings.clientId_1_idempotencyKey_1_unique` (parcial, `idempotencyKey` string).
+11. `favorites.userId_1_targetType_1_targetId_1_unique`.
+12. `conversations.clientId_1_targetType_1_targetId_1_unique`.
 
-No hay índice único sobre `reviews.bookingId`, `passwordResets.userId`, `gigs`, `messages` ni `contactMessages`.
+No hay índice único sobre `reviews.bookingId`, `gigs`, `messages` ni `contactMessages`.
 
 ### 8.4 Índices TTL
 
@@ -1532,7 +1547,7 @@ No hay índice único sobre `reviews.bookingId`, `passwordResets.userId`, `gigs`
 
 | Índice | Campo | `expireAfterSeconds` | Regla de fecha |
 | --- | --- | ---: | --- |
-| `passwordResets.expiresAt_ttl` | `expiresAt` | 0 | Fecha de expiración del token. |
+| `passwordResets.expiresAt_ttl` | `expiresAt` | 0 | Fecha de expiración del código. |
 | `sessions.purgeAt_ttl` | `purgeAt` | 0 | Fecha de purga de la sesión. |
 | `notices.purgeAt_ttl` | `purgeAt` | 0 | `createdAt + 90 días`, según decisión aprobada. |
 | `assistantMessages.purgeAt_ttl` | `purgeAt` | 0 | `createdAt + 30 días`, según decisión aprobada. |
@@ -1564,7 +1579,7 @@ MongoDB no elimina documentos en el instante exacto de expiración. La API debe 
 | Tareas por evento/fecha | `eventTasks.eventId_1_dueDate_1`. |
 | Cotizaciones de un cliente | `quotes.clientId_1_createdAt_-1`. |
 | Bandeja de un destino | `quotes.targetType_1_targetId_1_status_1_createdAt_-1`. |
-| Reservas de un cliente | `bookings.clientId_1_createdAt_-1`. |
+| Reservas de un cliente | `bookings.clientId_1_date_-1`. |
 | Reservas de un venue/fecha | `bookings.venueId_1_date_1`. |
 | Folio | `bookings.folio_1_unique`. |
 | Favoritos de un usuario | `favorites.userId_1_targetType_1_targetId_1_unique`. |
@@ -1675,9 +1690,9 @@ Códigos sugeridos:
 
 La respuesta no debe revelar si el correo existe en recuperación de contraseña.
 
-**Logout:** eliminar la sesión actual de `sessions` o marcarla inválida según el mecanismo elegido. El esquema no tiene `revokedAt`; eliminar el documento es compatible.
+**Logout:** marcar `sessions.revokedAt` o eliminar la sesión actual.
 
-**Recuperación:** crear `passwordResets` con `tokenHash`, `expiresAt` y `used: false`; invalidar tokens anteriores de forma explícita si se decide. Al usar el token, marcarlo `used: true`, actualizar `passwordHash` y revocar sesiones.
+**Recuperación:** crear o reemplazar `passwordResets` con `codeHash`, `expiresAt` y `attempts: 0`. Al validar, incrementar `attempts`; al usarlo, actualizar `passwordHash`, eliminar el código y revocar sesiones.
 
 ### 9.3 Usuarios y perfil
 
@@ -2175,15 +2190,16 @@ No devolver mensajes internos de MongoDB al cliente.
 
 El archivo `C:\Users\Lobo\Modelo de datos VirGo.md` es un modelo histórico. No debe usarse como fuente de campos. Divergencias detectadas:
 
-| Tema | Modelo externo | Esquema implementado |
-| --- | --- | --- |
-| Recuperación | `passwordResets.codeHash` | `passwordResets.tokenHash`. |
-| Sesiones | `device`, `revokedAt` | Solo `tokenHash`, `createdAt`, `expiresAt`, `purgeAt`. |
-| Usuarios | Campos adicionales como `city`, `defaultGuests`, `unreadNotices`, `failedLoginCount`, `lockoutEndsAt` | `users` no los contiene. |
-| Proveedores | `pricing`, `responseTime` | `basePrice`; no hay `responseTime`. |
-| Zonas | Distintas listas | Usar `ZONES` de `src/catalog/enums.js`. |
-| Reseñas | Posible unicidad por reservación | Solo es único por destino y autor; `bookingId` no tiene índice único. |
-| Disponibilidad | Posible TTL | `venueDates` no tiene TTL. |
+| Tema | Estado en el esquema implementado |
+| --- | --- |
+| Recuperación | Coincide: `passwordResets.codeHash` y `attempts`; `userId` único. |
+| Sesiones | Coincide: `sessions.device` y `sessions.revokedAt`. |
+| Usuarios | Coincide: `city`, `defaultGuests`, `unreadNotices`, `failedLoginCount` y `lockoutEndsAt`. |
+| Proveedores | Coincide: `pricing` y `responseTime`; no existe `basePrice`. |
+| Zonas | Usar `ZONES` y `PROVIDER_CATEGORIES` de `src/catalog/enums.js`. |
+| Reseñas | Solo es único por destino y autor; `bookingId` no tiene índice único. |
+| Disponibilidad | `venueDates` no tiene TTL. |
+| Idempotencia | `bookings` agrega `idempotencyKey` único por cliente. |
 | Roles | Posible admin | Solo `client`, `owner`, `provider`. |
 
 ---
@@ -2249,7 +2265,7 @@ Separar dominio, acceso a datos y transporte. No acoplar controladores directame
 - Usar transacciones con `withTransaction` o equivalente.
 - Reintentar transacciones ante errores transitorios.
 - No reintentar errores de validación ni claves duplicadas no recuperables.
-- Usar `Idempotency-Key` persistida o una colección de idempotencia; **no existe en el esquema actual**, por lo que requiere decisión.
+- Persistir `Idempotency-Key` en `bookings.idempotencyKey`. Para webhooks de pago todavía se requiere una decisión de esquema.
 - Registrar `requestId` y contexto sin datos sensibles.
 - No hacer `find()` sin límite en endpoints públicos.
 - Paginar por cursor en listas grandes.
@@ -2305,7 +2321,7 @@ Separar dominio, acceso a datos y transporte. No acoplar controladores directame
 | Fuente | Uso |
 | --- | --- |
 | `src/catalog/validators/*.js` | Campos, tipos, obligatoriedad y reglas `$jsonSchema`. |
-| `src/catalog/indexes.js` | Nombres, claves y opciones de los 37 índices. |
+| `src/catalog/indexes.js` | Nombres, claves y opciones de los 38 índices. |
 | `src/catalog/enums.js` | Valores permitidos. |
 | `src/catalog/helpers.js` | Patrones UUID, email, fecha, folio y dinero. |
 | `src/config/env.js` | Variables y guardas de entorno/base. |
@@ -2314,7 +2330,9 @@ Separar dominio, acceso a datos y transporte. No acoplar controladores directame
 | `src/init/apply.js` | Aplicación idempotente. |
 | `src/init/verify.js` | Verificación posterior. |
 | `src/init/inspect.js` | Inventario real. |
+| `src/export/schema.js` | Exportación determinista a `VirGo-API/db/schema`. |
 | `src/cli/*` | Comandos y guardas. |
+| `specs/000-base-datos` y `specs/001-contrato-con-api` | Decisiones y verificación del contrato. |
 | `docs/DECISIONS.md` | Decisiones aprobadas y pendientes. |
 | `docs/OPERATIONS.md` | Folios, cancelación, TTL y operación. |
 | `docs/ARCHITECTURE.md` | Capas y separación de responsabilidades. |
@@ -2328,17 +2346,17 @@ Separar dominio, acceso a datos y transporte. No acoplar controladores directame
 **IMPLEMENTADO**
 
 - `virgo_dev` contiene 22 colecciones.
-- 37 índices secundarios.
+- 38 índices secundarios.
 - 22 índices `_id_`.
-- 10 índices únicos.
+- 12 índices únicos.
 - 4 índices TTL.
 - 1 índice `2dsphere`.
-- 1 índice parcial.
+- 2 índices parciales.
 - 0 documentos de negocio.
 - `db:verify:dev` e `inspect` reportan el estado esperado.
 - `.env.development` existe y está ignorado por Git.
 - Producción `virgo` no fue modificada ni verificada en esta entrega.
-- No se crearon endpoints ni se modificó el esquema durante la elaboración de este documento.
+- No se crearon endpoints. El contrato se actualizó, exportó y verificó contra `VirGo-API/db/schema`.
 
 ### 12.3 Cobertura del documento
 
@@ -2347,7 +2365,7 @@ Separar dominio, acceso a datos y transporte. No acoplar controladores directame
 | Área | Cobertura |
 | --- | --- |
 | Modelo de datos | 22 colecciones con campos, tipos y reglas. |
-| Índices | 37 secundarios, 4 TTL, 10 únicos, 1 geoespacial, 1 parcial. |
+| Índices | 38 secundarios, 4 TTL, 12 únicos, 1 geoespacial, 2 parciales. |
 | Reglas de negocio | Implementadas, aprobadas, propuestas y pendientes separadas. |
 | Transacciones | Confirmación, cancelación, folios y ratings. |
 | Seguridad | Autenticación, autorización, validación y datos sensibles. |

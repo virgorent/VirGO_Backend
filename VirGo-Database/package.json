@@ -18,6 +18,8 @@
     "db:verify:prod": "node src/cli/verify.js --env-file .env.production",
     "db:inspect:dev": "node src/cli/inspect.js --env-file .env.development",
     "db:inspect:prod": "node src/cli/inspect.js --env-file .env.production",
+    "db:export:api": "node src/cli/export.js",
+    "db:export:api:check": "node src/cli/export.js --check",
     "test": "node --test \"tests/unit/*.test.js\"",
     "test:integration": "node --test \"tests/integration/*.test.js\"",
     "test:all": "node --test \"tests/**/*.test.js\""

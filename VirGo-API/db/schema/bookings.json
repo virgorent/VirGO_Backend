@@ -46,6 +46,10 @@
           "bsonType": "string",
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
         },
+        "idempotencyKey": {
+          "bsonType": "string",
+          "maxLength": 100
+        },
         "venue": {
           "bsonType": "object",
           "properties": {
@@ -204,6 +208,21 @@
         "date": -1
       },
       "options": {}
+    },
+    {
+      "name": "clientId_1_idempotencyKey_1_unique",
+      "key": {
+        "clientId": 1,
+        "idempotencyKey": 1
+      },
+      "options": {
+        "unique": true,
+        "partialFilterExpression": {
+          "idempotencyKey": {
+            "$type": "string"
+          }
+        }
+      }
     },
     {
       "name": "venueId_1_date_1",

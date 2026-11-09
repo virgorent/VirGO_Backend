@@ -11,13 +11,13 @@
 
 ## 1. Resumen técnico
 
-`VirGo-API/db/schema/<coleccion>.json` guarda el validador y los índices de cada colección. Se exportó de `virgo_dev` y se corrigió contra el modelo. `db/tools/check_schema.py` comprueba los límites sin credenciales y, con `--live`, compara contra la base. `MongoIndexInitializer` (`000`: T019) aplica esos mismos archivos al arrancar la API.
+`VirGo-API/db/schema/<coleccion>.json` guarda el validador y los índices de cada colección. Se genera desde `VirGo-Database/src/catalog/` con `npm run db:export:api` y no se edita a mano. `db/tools/check_schema.py` comprueba los límites sin credenciales y, con `--live`, compara contra la base. `MongoIndexInitializer` (`000`: T019) aplica esos mismos archivos al arrancar la API.
 
 ## 2. Contexto técnico
 
 | Aspecto | Decisión |
 |---|---|
-| Fuente de verdad | `VirGo-API/db/schema/*.json` |
+| Fuente de verdad | `VirGo-Database/src/catalog/`; `VirGo-API/db/schema/*.json` es generado |
 | Formato | `collection`, `validationLevel`, `validationAction`, `validator`, `indexes` |
 | Herramienta | Python 3 con `pymongo` solo para `--live` |
 | Credencial | Variable `VIRGO_MONGO_URI`; nunca en archivos |
@@ -53,7 +53,7 @@ VirGo-API/db/
 
 | ADR | Decisión | Alternativas descartadas | Motivo |
 |---|---|---|---|
-| ADR-27 | **`db/schema/` como fuente de verdad** | El modelo en Markdown; la base en vivo | Es lo único que una máquina puede comparar y aplicar |
+| ADR-27 | **`db/schema/` como contrato generado para la API** (superseded por ADR-32) | El modelo en Markdown; la base en vivo | Es lo único que una máquina puede comparar y aplicar |
 | ADR-28 | **`_id` y referencias como texto UUID** | UUID binario | Ya estaba así; se lee directo en herramientas y JSON. En .NET se mapea con `BsonRepresentation(BsonType.String)` |
 | ADR-29 | `monthlyStats._id` determinista: `<targetType>:<targetId>:<AAAA-MM>` | `_id` generado | El `upsert` con `$inc` no puede generar un UUID válido por sí solo |
 

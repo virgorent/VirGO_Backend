@@ -4,12 +4,14 @@
 
 Mantener el contrato de datos de VirGo en MongoDB de forma versionada, verificable e idempotente, sin acoplarse a la API.
 
-El repositorio es la fuente de verdad de:
+`src/catalog` es la fuente de verdad de:
 
 - Nombres de colecciones.
 - Validadores `$jsonSchema`.
 - Indices y sus opciones.
 - Reglas de despliegue y verificacion.
+
+`VirGo-API/db/schema` es una salida generada desde el catalogo; no se edita a mano.
 
 ## Capas
 
@@ -59,6 +61,16 @@ Si hay un conflicto de indices, no se aplica ningun cambio. Los indices adiciona
 
 `apply` imprime el plan antes de escribir. Sin `--yes` no escribe. En produccion requiere `--confirm-production`.
 
+### Exportacion
+
+`src/export/schema.js` transforma cada coleccion del catalogo al contrato de `VirGo-API`:
+
+- `buildApiSchemas` produce los 22 documentos.
+- `writeApiSchemas` escribe JSON determinista con LF y salto final.
+- `checkApiSchemas` detecta archivos faltantes, distintos o extra sin escribir.
+
+`src/cli/export.js` expone `db:export:api` y `db:export:api:check`.
+
 ### Configuracion
 
 `src/config/env.js` carga el archivo indicado con `dotenv`, valida las variables y aplica guardas de entorno:
@@ -76,6 +88,7 @@ El inicializador no usa locks, colecciones de configuracion ni migraciones.
 - Si una coleccion no existe, se crea.
 - Si existe, se actualiza el validador con `collMod`.
 - Un indice se considera satisfecho si existe uno equivalente por clave y opciones, aunque su nombre sea distinto.
+- El indice parcial de idempotencia solo aplica a documentos con `bookings.idempotencyKey` string.
 - Si el mismo nombre existe con otra definicion, se reporta conflicto y no se escribe.
 - Los indices adicionales se reportan como advertencia.
 
@@ -87,7 +100,7 @@ Esto permite ejecutar el proceso en cada despliegue y tambien convivir con indic
 - Marcas temporales: BSON `Date` UTC.
 - Dinero: `Decimal128`.
 - Contadores enteros: `int`.
-- `_id`: UUID string, excepto `counters._id` con formato `folio-AAAA`.
+- `_id`: UUID string, excepto `counters._id` con formato `folio-AAAA` y `monthlyStats._id` con formato `<targetType>:<targetId>:<AAAA-MM>`.
 - Meses estadisticos: string `YYYY-MM`.
 - Folios: string `VG-AAAA-NNNN` con al menos cuatro digitos.
 

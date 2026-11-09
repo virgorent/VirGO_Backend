@@ -56,11 +56,12 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-24 | 2026-11-03 | Atlas con lista de acceso `0.0.0.0/0` y controles compensatorios | Lambda no tiene IP fija sin NAT (prohibido); M0 no admite *private endpoint* |
 | ADR-25 | 2026-11-03 | **Testcontainers** para probar los repositorios de MongoDB en el CI | Gratis en GitHub Actions; local sigue sin Docker (en memoria) |
 | ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/virGO_App` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
-| ADR-27 | 2026-11-04 | **`db/schema/`** como fuente de verdad del esquema | Es lo único que una máquina puede comparar y aplicar |
+| ADR-27 | 2026-11-04 | **`db/schema/`** como contrato generado para la API (superseded por ADR-32) | Es lo único que una máquina puede comparar y aplicar |
 | ADR-28 | 2026-11-04 | `_id` y referencias como **texto UUID** (provisional) | Ya estaba así en `virgo_dev` |
 | ADR-29 | 2026-11-04 | `monthlyStats._id` determinista | Permite el `upsert` con `$inc` |
 | ADR-30 | 2026-11-04 | **Semgrep, SonarCloud y OWASP ZAP** en cada PR | Clase del 2026-11-04 y proyecto de referencia |
 | ADR-31 | 2026-11-04 | **Mutación nocturna**, fuera de los checks requeridos | Mantiene el CI corto, como la referencia |
+| ADR-32 | 2026-11-07 | **`VirGo-Database/src/catalog/`** es la fuente de verdad; `db/schema/` se genera desde el catálogo | Evita divergencia y ediciones manuales entre ambos proyectos |
 
 ## Cambios de contrato (compartidos con Móvil)
 
