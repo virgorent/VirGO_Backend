@@ -8,6 +8,7 @@ using VirGo.Infrastructure.Persistence.MongoDb;
 using VirGo.Infrastructure.Auth;
 using VirGo.Application.Auth;
 using VirGo.Application.Marketplace;
+using VirGo.Infrastructure.Caching;
 
 namespace VirGo.Infrastructure;
 
@@ -74,7 +75,36 @@ public static class DependencyInjection
             services.AddSingleton<IMongoRepositoryFactory, MongoRepositoryFactory>();
         }
 
+        AddCaching(services, configuration);
+
         return services;
+    }
+
+    private static void AddCaching(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration["Redis:ConnectionString"];
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            services.AddDistributedMemoryCache();
+        }
+        else
+        {
+            var redis = StackExchange.Redis.ConfigurationOptions.Parse(connectionString);
+            redis.AbortOnConnectFail = false;
+            redis.ConnectTimeout = 2000;
+            redis.SyncTimeout = 1000;
+            redis.AsyncTimeout = 500;
+            redis.ConnectRetry = 1;
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.ConfigurationOptions = redis;
+                options.InstanceName = "virgo:";
+            });
+        }
+
+        services.AddSingleton<ICacheService, DistributedCacheService>();
+        services.Decorate<IVenueRepository>((inner, serviceProvider) =>
+            new CachedVenueRepository(inner, serviceProvider.GetRequiredService<ICacheService>()));
     }
 
     private sealed class SystemClock : IClock

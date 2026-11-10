@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirGo.Application.Auth;
 using VirGo.Application.Marketplace;
+using VirGo.Api.Dto;
 
 namespace VirGo.Api.Controllers;
 
@@ -58,11 +59,3 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
             : Created($"/api/v1/bookings/{result.Booking.Id}", result.Booking);
     }
 }
-
-public sealed record CreateBookingRequest(
-    string? QuoteId,
-    string? EventId,
-    string? VenueId,
-    string? Date,
-    int Hours,
-    decimal? Deposit);

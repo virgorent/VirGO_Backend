@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirGo.Application.Auth;
 using VirGo.Application.Marketplace;
+using VirGo.Api.Dto;
 
 namespace VirGo.Api.Controllers;
 
@@ -60,14 +61,3 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
 
     private static readonly string[] AllowedEventTypes = ["Boda", "XV años", "Cumpleaños", "Corporativo", "Otro"];
 }
-
-public sealed record CreateQuoteRequest(
-    QuoteTargetRequest? Target,
-    string? EventId,
-    string? EventType,
-    string? EventDate,
-    int Guests,
-    string[]? RequestedServices,
-    string? Message);
-
-public sealed record QuoteTargetRequest(string? Type, string? Id);

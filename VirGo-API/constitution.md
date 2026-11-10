@@ -96,6 +96,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | API Gateway (HTTP API) | Entrada HTTPS pública |
    | AWS Lambda | Ejecución de la API |
    | MongoDB Atlas **M0** (externo a la cuenta de AWS; 512 MB) | Base de datos |
+   | Redis externo, plan gratuito (**propuesto**, `098-cache-redis`) | Caché distribuida del catálogo |
    | SSM Parameter Store (estándar) | Secretos y configuración |
    | CloudWatch Logs (retención de 7 días) | Registros |
    | AWS Budgets | Alerta de gasto |

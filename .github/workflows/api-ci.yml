@@ -57,39 +57,24 @@ jobs:
         run: dotnet restore VirGo.slnx
       - name: Build
         run: dotnet build VirGo.slnx -c Release --no-restore -warnaserror
-      - name: Test
-        run: dotnet test VirGo.slnx -c Release --no-build --logger trx
+      - name: Unit tests
+        run: dotnet test tests/VirGo.UnitTests -c Release --no-build --logger trx --settings coverage.runsettings --collect "XPlat Code Coverage"
+      - name: Integration tests
+        run: dotnet test tests/VirGo.IntegrationTests -c Release --no-build --logger trx --settings coverage.runsettings --collect "XPlat Code Coverage"
+      - name: Security tests
+        run: dotnet test tests/VirGo.SecurityTests -c Release --no-build --logger trx --settings coverage.runsettings --collect "XPlat Code Coverage"
+      - name: Contract tests
+        run: dotnet test tests/VirGo.ContractTests -c Release --no-build --logger trx --settings coverage.runsettings --collect "XPlat Code Coverage"
+      - name: Database tests
+        run: dotnet test tests/VirGo.DatabaseTests -c Release --no-build --logger trx --settings coverage.runsettings --collect "XPlat Code Coverage"
+      - name: Performance baseline
+        run: dotnet test tests/VirGo.PerformanceTests -c Release --no-build --logger trx --settings coverage.runsettings --collect "XPlat Code Coverage"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: api-test-results
           path: VirGo-API/**/TestResults/**/*.trx
-
-  api-mutation:
-    needs: changes
-    if: needs.changes.outputs.api == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: VirGo-API
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - name: Setup .NET
-        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
-        with:
-          dotnet-version: 10.0.x
-      - name: Restore tools
-        run: dotnet tool restore
-      - name: Run mutation tests
-        run: dotnet stryker --config-file stryker-config.json
-      - name: Upload mutation report
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: api-mutation-report
-          path: VirGo-API/StrykerOutput/
 
   api-iac:
     needs: changes
@@ -126,3 +111,127 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Validate schema files
         run: python db/tools/check_schema.py
+
+  api-semgrep:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install Semgrep
+        run: python -m pip install semgrep
+      - name: Scan
+        run: semgrep scan --config .semgrep/semgrep.yaml --config p/csharp --error VirGo-API/src
+
+  api-sonarcloud:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: VirGo-API
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: 10.0.x
+      - name: Analyze
+        run: |
+          if [[ -z "$SONAR_TOKEN" ]]; then
+            echo '::notice::SonarCloud sin configurar: falta el secreto SONAR_TOKEN.'
+            exit 0
+          fi
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet sonarscanner begin /k:"${{ vars.SONAR_PROJECT_KEY }}" /o:"${{ vars.SONAR_ORGANIZATION }}" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url=https://sonarcloud.io /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          dotnet build VirGo.slnx -c Release
+          dotnet test VirGo.slnx -c Release --no-build --settings coverage.runsettings --collect "XPlat Code Coverage"
+          dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+
+  api-zap:
+    needs: api-build-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: VirGo-API
+    env:
+      ASPNETCORE_ENVIRONMENT: Testing
+      ASPNETCORE_URLS: http://127.0.0.1:5080
+      Jwt__SigningKey: ci-only-signing-key-for-zap-baseline-scan
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: 10.0.x
+      - name: Start API
+        run: |
+          dotnet run --project src/VirGo.Api -c Release > api.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:5080/health && exit 0
+            sleep 2
+          done
+          cat api.log
+          exit 1
+      - name: Baseline scan
+        run: |
+          mkdir -p zap && chmod 777 zap
+          docker run --rm --network host -v "$PWD/zap:/zap/wrk" ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://127.0.0.1:5080/api/v1/venues -r report.html -I
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: api-zap-report
+          path: VirGo-API/zap/
+
+  hardening-report:
+    needs: [changes, api-build-test, api-iac, api-schema, api-semgrep, api-sonarcloud, api-zap]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          {
+            echo '## Hardening report'
+            echo
+            echo '| Check | Resultado |'
+            echo '|---|---|'
+            echo '| Pruebas | ${{ needs.api-build-test.result }} |'
+            echo '| IaC | ${{ needs.api-iac.result }} |'
+            echo '| Esquema | ${{ needs.api-schema.result }} |'
+            echo '| Semgrep | ${{ needs.api-semgrep.result }} |'
+            echo '| SonarCloud | ${{ needs.api-sonarcloud.result }} |'
+            echo '| OWASP ZAP | ${{ needs.api-zap.result }} |'
+          } | tee hardening-report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload report
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: hardening-report
+          path: hardening-report.md
+
+  pr-quality-gate:
+    needs: [api-build-test, api-iac, api-schema, api-semgrep, api-sonarcloud, api-zap]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RESULTS: ${{ join(needs.*.result, ' ') }}
+    steps:
+      - name: Comment and decide
+        run: |
+          if echo "$RESULTS" | grep -qE 'failure|cancelled'; then
+            body="El PR tiene checks en rojo: revisa los jobs fallidos, corrige sobre el mismo spec y en la misma rama. Resultados: $RESULTS"
+            gh pr comment "${{ github.event.pull_request.number }}" --repo "$GITHUB_REPOSITORY" --body "$body"
+            exit 1
+          fi
+          echo 'Todos los checks pasaron.'

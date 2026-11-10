@@ -234,3 +234,29 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Evidencia:** `dotnet test VirGo.slnx -c Release`: 35 pruebas aprobadas (30 integracion, 2 unitarias, 3 seguridad); CI remoto previo verde para build, esquema, IaC, mutacion, CodeQL, Gitleaks y dependency review.
 - **Costo:** $0; no se crearon recursos AWS ni Atlas.
 - **Pendiente:** persistencia live contra Atlas, prueba de humo HTTPS, OIDC y aprobacion humana del PR; no hacer merge automaticamente.
+
+### 2026-11-06 · Caché distribuida con Redis
+
+- **Autor:** equipo + Claude Code (`dev-dotnet`)
+- **Módulo / tareas:** `098-cache-redis` · T9801 y T9802
+- **Qué se hizo:** caché *cache-aside* del catálogo de salones sobre `IDistributedCache`, con fallo abierto y caché en memoria si no hay Redis configurado.
+- **Evidencia:** `dotnet test`: 43 de 43 (10 unitarias, 30 de integración y 3 de seguridad).
+- **Decisiones:** ADR-34 a ADR-36.
+- **Costo:** $0; no se creó ningún recurso.
+- **Aprendizaje:** ElastiCache no encaja con costo cero ni con Lambda fuera de una VPC.
+- **Pendiente:** aprobar el proveedor (Art. VII), crear Redis, conectarlo y probar con Redis real.
+
+### 2026-11-06 · Estructura alineada con el proyecto de referencia
+
+- **Autor:** equipo + Claude Code (`dev-dotnet`, `qa`, `devops-aws`)
+- **Módulo / tareas:** `000`, `002` y `098`
+- **Qué se hizo:**
+  - Capas: DTOs en `VirGo.Api/Dto` y pruebas de arquitectura de todas las capas.
+  - Pruebas: `VirGo.ContractTests`, `VirGo.DatabaseTests` y `VirGo.PerformanceTests`, y más pruebas de seguridad.
+  - Pipeline: pruebas por tipo, Semgrep, SonarCloud, OWASP ZAP, *hardening report*, *quality gate* y mutación nocturna.
+  - Se corrigió la inestabilidad de las pruebas por el límite de solicitudes.
+  - Se agregaron `docs/RAMAS.md`, `memorias/` y una memoria por proyecto de pruebas.
+- **Evidencia:** `dotnet test`: 174 de 174. Los workflows no se han ejecutado en GitHub.
+- **Costo:** $0.
+- **Aprendizaje:** el 35 de 35 anterior salió de una corrida en frío; en corridas rápidas fallaban 11 pruebas. Hay que repetir las suites.
+- **Pendiente:** ejecutar el CI en GitHub, configurar SonarCloud y aprobar la estrategia de ramas.

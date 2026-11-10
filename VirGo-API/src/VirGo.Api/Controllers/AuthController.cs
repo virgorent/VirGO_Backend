@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirGo.Application.Auth;
+using VirGo.Api.Dto;
 
 namespace VirGo.Api.Controllers;
 
@@ -173,7 +174,3 @@ public sealed class AuthController(
         };
     }
 }
-
-public sealed record LoginRequest(string? Email, string? Password);
-
-public sealed record RegisterRequest(string? Name, string? Email, string? Password, string? Phone);
