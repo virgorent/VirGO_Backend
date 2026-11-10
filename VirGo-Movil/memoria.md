@@ -201,4 +201,13 @@ Versiones fijadas en T005 y verificadas con `./gradlew help`.
 - **Aprendizaje:** ktlint requiere `ktlint_function_naming_ignore_when_annotated_with = Composable` en `.editorconfig` para no reportar nombres de funciones composables como violaciones de estilo.
 - **Pendiente:** Fase 3 (Arranque y navegación: T015-T017) e integración de la pantalla de Login basada en el diseño recibido.
 
+### 2026-11-05 · Specs de pantallas
 
+- **Autor:** equipo + Claude Code (`arquitecto-movil`)
+- **Módulo / tareas:** `001`–`029` · ninguna tarea ejecutada
+- **Qué se hizo:** se redactaron 29 specs por flujo que cubren las 73 pantallas de `Checklist VirGo.md`, con los endpoints que consume cada uno. `LoginScreen.kt` queda cubierta por `003-iniciar-sesion`.
+- **Evidencia:** `docs/frontend/MAPA-SPECS.md`.
+- **Decisiones:** un spec por flujo corto (Art. I.5).
+- **Costo:** $0.
+- **Aprendizaje:** los specs se generaron desde el checklist; requieren revisión humana.
+- **Pendiente:** revisar los specs contra la maqueta de Figma.

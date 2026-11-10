@@ -5,7 +5,7 @@
 | Módulo | `003-auth-login` |
 | Endpoint | `POST /api/v1/auth/login` |
 | Versión | 1.0.0 |
-| Estado | Borrador. **Se redacta para dar contexto; no se ejecuta hasta cerrar `000`, `001` y `002` (Art. II.2).** |
+| Estado | Borrador. **Se redacta para dar contexto; no se ejecuta hasta cerrar `000`, `900` y `901` (Art. II.2).** |
 | Fecha | 2026-11-03 |
 | Constitución | v1.1.0. Aplica sobre todo IV, V y VI |
 | Plan | [plan.md](plan.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
@@ -73,7 +73,7 @@ El objetivo es que una persona registrada pueda iniciar sesión de forma segura,
 
 ## 7. Supuestos, dependencias y preguntas abiertas
 
-**Dependencias:** `000` (JWT, Problem Details, límites), `001` (tabla con TTL), `002` (CI, humo).
+**Dependencias:** `000` (JWT, Problem Details, límites), `900` (tabla con TTL), `901` (CI, humo).
 
 **Preguntas abiertas**
 

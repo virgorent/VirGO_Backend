@@ -22,7 +22,7 @@
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
 | T001 | Confirmar que `VirGo-API/` entró a `main` del repositorio `virgorent/virGO_App` con su `.gitignore` DevSecOps (Art. V.10) y su `README.md` en inglés | — | `devops-aws` | `git remote -v` muestra el repositorio; `git status` limpio tras el primer commit | ⏳ |
-| T002 | ➡️ Movida a `002-pipeline-cicd` como **T207** (ruleset `main-protection`) | — | — | — | ➡️ |
+| T002 | ➡️ Movida a `901-pipeline-cicd` como **T207** (ruleset `main-protection`) | — | — | — | ➡️ |
 | T003 | [P] Crear `.editorconfig` y `Directory.Build.props` (net10.0, `Nullable`, `AnalysisLevel=latest-recommended`, advertencias de seguridad como error) | T001 | `dev-dotnet` | Los archivos existen y la compilación los aplica (T006) | ⏳ |
 | T004 | [P] Revisar la alineación de `constitution.md`, `AGENTS.md`, subagentes, skills y specs con la skill `verificar-constitucion` | — | `arquitecto` | Tabla de resultados «Alineado» registrada en `memoria.md` | ⏳ |
 | T005 | [P] Agregar en la raíz del repositorio `.github/pull_request_template.md` (lista con el ID de tarea y los artículos revisados) y `.github/dependabot.yml` (NuGet semanal, Actions mensual) | T001 | `devops-aws` | Archivos en el repositorio; Dependabot aparece activo en GitHub | ⏳ |
@@ -56,15 +56,15 @@
 | T018 | [P] Implementación en memoria (`Persistence/InMemory`), segura para concurrencia | T017 | `dev-dotnet` | Pruebas unitarias del repositorio en memoria en verde (T025) | ⏳ |
 | T019 | [P] Implementación base de MongoDB (`Persistence/MongoDb`): `MongoClient` singleton, opciones (`DatabaseName`, `ConnectionString`), `MongoIndexInitializer` y selector `Persistence:Provider` en `AddInfrastructure()` | T017 | `dev-dotnet` | Con `Provider=InMemory` la app arranca sin Atlas; con `MongoDb` contra Testcontainers se conecta y crea los índices | ⏳ |
 
-## F4 · Alojamiento en Lambda e infraestructura ➡️ `001-infraestructura-iac`
+## F4 · Alojamiento en Lambda e infraestructura ➡️ `900-infraestructura-iac`
 
 | Antes | Ahora | Tarea |
 |---|---|---|
-| T020 | `001`: T110 | Runtime de Lambda y `AddAWSLambdaHosting` |
-| T021 | `001`: T102 | `infra/bootstrap.yaml` |
-| T022 | `001`: T103 | `infra/template.yaml` |
-| T023 | `001`: T104 | Costo estimado en `memoria.md` |
-| T024 | `001`: T105 | Revisión de seguridad de la infraestructura |
+| T020 | `900`: T110 | Runtime de Lambda y `AddAWSLambdaHosting` |
+| T021 | `900`: T102 | `infra/bootstrap.yaml` |
+| T022 | `900`: T103 | `infra/template.yaml` |
+| T023 | `900`: T104 | Costo estimado en `memoria.md` |
+| T024 | `900`: T105 | Revisión de seguridad de la infraestructura |
 
 ## F5 · Pruebas
 
@@ -74,24 +74,24 @@
 | T026 | [P] Pruebas de integración: `/health` 200; 404, 401 y 500 en Problem Details sin trazas; encabezados de seguridad; `X-Correlation-Id`; 429; `/openapi/v1.json` 200 | T012–T016 | `qa` | `dotnet test tests/VirGo.IntegrationTests` en verde (CA-02, CA-03, CA-04, CA-09) | ⏳ |
 | T027 | Prueba de arranque local con un solo comando y sin AWS (CA-01, RNF-07) | T019, T026 | `qa` | `dotnet run --project src/VirGo.Api` → `/health` 200 con `Provider=InMemory` | ⏳ |
 
-## F6 · CI/CD y entrega de la URL HTTPS ➡️ `002-pipeline-cicd`
+## F6 · CI/CD y entrega de la URL HTTPS ➡️ `901-pipeline-cicd`
 
 | Antes | Ahora | Tarea |
 |---|---|---|
-| T028 | `002`: T204 | `api-ci.yml` (ahora con pruebas de seguridad, mutación, Gitleaks, *dependency review* y Checkov) |
-| T029 | `002`: T205 | CodeQL |
-| T030 | `001`: T107 | 🧑 Stack `bootstrap`, variables de GitHub y llave JWT en SSM |
-| T031 | `002`: T208 | `api-deploy.yml` **manual** (`workflow_dispatch`) y `smoke.sh` |
-| T032 | `002`: T209 | 🧑 Primer despliegue y verificación |
-| T033 | `002`: T210 | Entrega de la URL HTTPS a Móvil |
+| T028 | `901`: T204 | `api-ci.yml` (ahora con pruebas de seguridad, mutación, Gitleaks, *dependency review* y Checkov) |
+| T029 | `901`: T205 | CodeQL |
+| T030 | `900`: T107 | 🧑 Stack `bootstrap`, variables de GitHub y llave JWT en SSM |
+| T031 | `901`: T208 | `api-deploy.yml` **manual** (`workflow_dispatch`) y `smoke.sh` |
+| T032 | `901`: T209 | 🧑 Primer despliegue y verificación |
+| T033 | `901`: T210 | Entrega de la URL HTTPS a Móvil |
 
 ## F7 · Cierre del módulo
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T034 | ➡️ Movida a `001-infraestructura-iac` como **T108** (prueba de borrado) | — | — | — | ➡️ |
+| T034 | ➡️ Movida a `900-infraestructura-iac` como **T108** (prueba de borrado) | — | — | — | ➡️ |
 | T036 | Regla global de longitudes: atributos de longitud en todos los DTO con los límites de `db/schema/`, y 400 en Problem Details al superarlos | T012 | `dev-dotnet` | Prueba de seguridad: un campo de 1500 caracteres recibe 400 | ⏳ |
-| T035 | Completar `check.md`; verificación final con `verificar-constitucion`; marcar el spec, el plan y las tareas como *Cerrado*; entrada de cierre en `memoria.md` | T001–T027, T036, `001`: T109, `002`: T211, `010`: T1007 | `qa` + `arquitecto` | Resultado «Alineado» y todos los criterios de aceptación con evidencia | ⏳ |
+| T035 | Completar `check.md`; verificación final con `verificar-constitucion`; marcar el spec, el plan y las tareas como *Cerrado*; entrada de cierre en `memoria.md` | T001–T027, T036, `900`: T109, `901`: T211, `010`: T1007 | `qa` + `arquitecto` | Resultado «Alineado» y todos los criterios de aceptación con evidencia | ⏳ |
 
 ---
 
@@ -102,26 +102,26 @@ Los IDs con prefijo `001:` o `002:` están en esos módulos.
 | Requerimiento / Criterio | Tareas |
 |---|---|
 | RF-01 Capas | T006, T007, T010 |
-| RF-02 Ejecución dual local/nube | T009, `001`:T110, T027, `002`:T209 |
-| RF-03 Chequeo de salud | T009, T026, `002`:T209 |
+| RF-02 Ejecución dual local/nube | T009, `900`:T110, T027, `901`:T209 |
+| RF-03 Chequeo de salud | T009, T026, `901`:T209 |
 | RF-04 Prefijo `/api/v1` | T016, T026 |
 | RF-05 Problem Details | T012, T015, T026 |
-| RF-06 OpenAPI | T009, T026, `002`:T210 |
+| RF-06 OpenAPI | T009, T026, `901`:T210 |
 | RF-07 Persistencia intercambiable | T017, T018, T019 |
 | RF-08 Validación de tokens | T016, T026 |
 | RF-09 Configuración validada | T011, T025 |
 | RF-10 Correlación | T013, T026 |
-| RF-11 Proyectos de pruebas | T008, T025, T026, `002`:T202 |
-| RF-12 CI en PR ➡️ | `002`:T204, `002`:T205 |
-| RF-13 CD y URL HTTPS ➡️ | `002`:T208, `002`:T209 |
-| RF-14 Infraestructura como código ➡️ | `001`:T102, `001`:T103, `001`:T108 |
-| RF-15 Alerta de presupuesto ➡️ | `001`:T102, `001`:T107 |
+| RF-11 Proyectos de pruebas | T008, T025, T026, `901`:T202 |
+| RF-12 CI en PR ➡️ | `901`:T204, `901`:T205 |
+| RF-13 CD y URL HTTPS ➡️ | `901`:T208, `901`:T209 |
+| RF-14 Infraestructura como código ➡️ | `900`:T102, `900`:T103, `900`:T108 |
+| RF-15 Alerta de presupuesto ➡️ | `900`:T102, `900`:T107 |
 | RF-16 Longitudes | T036, `010`:T1002 |
-| RNF-01 Costo $0 | `001`:T103, `001`:T104, `002`:T209 |
-| RNF-02 Seguridad | `002`:T207, T014, T016, `001`:T105, `002`:T205, `001`:T107 |
-| RNF-03 Arranque < 3 s | `002`:T209 |
-| RNF-04 Límite de solicitudes | T015, `001`:T103 |
-| RNF-05 Sin advertencias de seguridad | T003, `002`:T204 |
-| RNF-06 Trazabilidad | `001`:T104, `002`:T209, T035 |
+| RNF-01 Costo $0 | `900`:T103, `900`:T104, `901`:T209 |
+| RNF-02 Seguridad | `901`:T207, T014, T016, `900`:T105, `901`:T205, `900`:T107 |
+| RNF-03 Arranque < 3 s | `901`:T209 |
+| RNF-04 Límite de solicitudes | T015, `900`:T103 |
+| RNF-05 Sin advertencias de seguridad | T003, `901`:T204 |
+| RNF-06 Trazabilidad | `900`:T104, `901`:T209, T035 |
 | RNF-07 Arranque local simple | T027 |
-| CA-01 … CA-10 | T027 · T026 · T026 · T016/T026 · T011/T025 · `002`:T204 · `002`:T209 · `002`:T209 · T026/`002`:T210 · `001`:T108 |
+| CA-01 … CA-10 | T027 · T026 · T026 · T016/T026 · T011/T025 · `901`:T204 · `901`:T209 · `901`:T209 · T026/`901`:T210 · `900`:T108 |
