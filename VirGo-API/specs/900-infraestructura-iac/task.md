@@ -4,10 +4,10 @@
 |---|---|
 | Módulo | `900-infraestructura-iac` |
 | Versión | 1.0.0 |
-| Estado | Borrador. **Las tareas aún no se ejecutan.** |
+| Estado | Implementación local parcial; tareas externas pendientes |
 | Fecha | 2026-11-03 |
 | Spec / Plan / Check | [spec.md](spec.md) · [plan.md](plan.md) · [check.md](check.md) |
-| Constitución | v1.1.0 |
+| Constitución | v1.2.0 |
 
 **IDs de tarea:** se conservan los anteriores (`T1NN`) para no romper las referencias; este módulo se llamaba `001`.
 
@@ -31,9 +31,9 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T102 | [P] `infra/bootstrap.yaml`: proveedor OIDC, rol `virgo-github-deploy` (condiciones de la sección 6.2 del plan) y presupuesto de $1 USD con correo | — | `devops-aws` | `cfn-lint infra/bootstrap.yaml` sin errores | ⏳ |
-| T103 | [P] `infra/template.yaml`: HTTP API (throttling 20/40, CORS), Lambda 512 MB, LogGroup de 7 días, tema SNS, alarmas `Api5xxAlarm` y `LambdaErrorsAlarm`, parámetros de la llave JWT y de la cadena de Mongo, y salida `ApiUrl` | T110 | `devops-aws` | `sam validate --lint` sin errores | ⏳ |
-| T104 | Registrar en `memoria.md` la tabla de costo estimado de los 12 servicios, incluido Atlas M0 (Art. VII.5) | T101, T102, T103 | `devops-aws` | Entrada con total $0 | ⏳ |
+| T102 | [P] `infra/bootstrap.yaml`: proveedor OIDC, rol `virgo-github-deploy` (condiciones de la sección 6.2 del plan) y presupuesto de $1 USD con correo | — | `devops-aws` | `cfn-lint infra/bootstrap.yaml` sin errores | 🔄 En curso |
+| T103 | [P] `infra/template.yaml`: HTTP API (throttling 20/40, CORS), Lambda 512 MB, LogGroup de 7 días, tema SNS, alarmas `Api5xxAlarm` y `LambdaErrorsAlarm`, parámetros de la llave JWT y de la cadena de Mongo, y salida `ApiUrl` | T110 | `devops-aws` | `sam validate --lint` sin errores | 🔄 En curso |
+| T104 | Registrar en `memoria.md` la tabla de costo estimado de los 12 servicios, incluido Atlas M0 (Art. VII.5) | T101, T102, T103 | `devops-aws` | Entrada con total $0 | ✅ Hecha |
 
 ## F2 · Seguridad y validación
 
@@ -46,7 +46,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T107 | 🧑 Crear el stack `virgo-bootstrap`; registrar `AWS_ROLE_ARN` y `AWS_REGION` en el *environment* `production` de GitHub; crear `/virgo/prod/jwt-signing-key` (SecureString, 32 bytes aleatorios o más) y `/virgo/prod/mongo-uri` (SecureString, usuario `virgo-api-prod`) | T105, T106 | `devops-aws` | Stack `CREATE_COMPLETE`; correo del presupuesto confirmado (CA-04); variables visibles en GitHub | ⏳ |
+| T107 | 🧑 Crear el stack `virgo-bootstrap`; registrar `AWS_ROLE_ARN` y `AWS_REGION` en el *environment* `production` de GitHub; crear `/virgo/prod/Jwt/SigningKey` (SecureString, 32 bytes aleatorios o más) y `/virgo/prod/Persistence/ConnectionString` (SecureString, usuario `virgo-api-prod`) | T105, T106 | `devops-aws` | Stack `CREATE_COMPLETE`; correo del presupuesto confirmado (CA-04); variables visibles en GitHub | ⏳ |
 
 > El primer despliegue del stack `virgo-api-prod` y la verificación de CA-02, CA-03 y CA-08 se hacen en `901-pipeline-cicd` (T209), porque usan el workflow manual.
 

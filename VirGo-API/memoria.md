@@ -6,12 +6,12 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 | Campo | Valor |
 |---|---|
-| Constitución | v1.1.0 **propuesta** (pendiente de aprobación del equipo) |
-| Módulo en curso | `000-arquitectura-base` en revisión; `001`–`004` en borrador. Ninguna tarea ejecutada |
-| Tareas | 0 hechas (`000`: 23 vigentes · `001`: 11 · `002`: 17 · `003`: 13 · `004`: 9 · `010`: 2 de 6) |
+| Constitución | v1.2.0 ratificada el 2026-11-04 |
+| Módulo en curso | Vertical slice local de `003`–`009`; validación cloud y despliegue pendientes |
+| Tareas | Implementación local: 7 endpoints, 23 pruebas automatizadas aprobadas |
 | URL de producción | Pendiente (se obtiene en `002`: T209) |
 | Costo acumulado en AWS | $0 USD (todavía no se crea ningún recurso) |
-| Siguiente paso | Evaluación del 2026-11-04: aprobar la enmienda v1.1.0 y los specs `000`–`004` |
+| Siguiente paso | Cerrar el merge, actualizar el PR #5 y preparar validación IaC/cloud sin crear recursos aún |
 
 ## Módulos
 
@@ -228,3 +228,76 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje:** los specs se generaron desde datos estructurados; requieren revisión humana antes de aprobarse.
 - **Pendiente:** resolver las preguntas abiertas de cada spec y los 10 endpoints que requieren decisión; conseguir la URL.
+### 2026-11-05 · Vertical slice y alineación con el esquema versionado
+
+- **Autor:** equipo + OpenCode (`dev-dotnet`)
+- **Módulo / tareas:** `003`–`009` · PR #5
+- **Qué se hizo:**
+  - Se implementaron siete endpoints de autenticación, perfil, catálogo, cotizaciones y reservaciones con persistencia en memoria y MongoDB.
+  - Se incorporó `db/schema/` desde `main` como contrato versionado y se ajustaron `users`, `quotes` y `bookings` para respetar campos requeridos y propiedades opcionales.
+  - Se resolvió el merge de `origin/main` en la rama `feat/vertical-slice-7-apis` y se publicó el resultado en el PR #5.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore -warnaserror` sin advertencias; `dotnet test VirGo.slnx -c Release`: 28 pruebas aprobadas (2 unitarias, 23 integración, 3 seguridad).
+- **Costo:** $0; no se crearon recursos AWS ni Atlas.
+- **Pendiente:** ejecutar `db/tools/check_schema.py` cuando Python esté disponible; completar la validacion live contra Atlas y el despliegue autorizado.
+
+### 2026-11-05 · Revisión del PR y corrección de bloqueos
+
+- **Autor:** equipo + OpenCode (`qa`, `seguridad`)
+- **Módulo / tareas:** `003`, `009`, `002` · PR #5
+- **Qué se corrigió:**
+  - Se implementó idempotencia persistida para reservaciones mediante `idempotencyKey` y un índice único por cliente.
+  - Se agregó bloqueo de cuenta tras cinco fallos consecutivos, con respuesta 429 y `Retry-After` en el siguiente intento.
+  - Se alinearon validaciones de entrada con los límites de `db/schema/`, se eliminó la clave JWT de `appsettings.json` y se corrigió la validación de sesión/correlación señalada por CodeQL.
+  - Se corrigieron CloudFormation, CORS, la ruta del template generado en el despliegue y los gates de esquema/dependencias del CI.
+- **Evidencia local:** build estricto sin advertencias; 19 pruebas de integración, 2 unitarias y 3 de seguridad aprobadas.
+- **Pendiente:** confirmar los nuevos checks remotos de CodeQL, IaC, esquema y seguridad; no hacer merge sin aprobación humana.
+
+### 2026-11-05 · Correcciones de contrato y pruebas del vertical slice
+
+- **Autor:** equipo + OpenCode (`dev-dotnet`, `qa`)
+- **Módulo / tareas:** `005`–`009` · PR #5
+- **Qué se corrigió:**
+  - Se rechazaron elementos nulos en servicios de cotizacion y se diferenciaron errores `400` de venues inexistentes `404`.
+  - El catalogo local usa categorias y amenities permitidos por `db/schema/venues.json`.
+  - Las reservaciones respetan `price.unit` y `minHours`, calculan el anticipo por defecto al 30% y rechazan importes fuera de rango.
+  - Se agregaron pruebas de validacion, autenticacion, filtros, fecha, venue inexistente, payload nulo, importe invalido y concurrencia de idempotencia.
+  - Se versiono `API-HANDOFF.md` como snapshot auditable del contrato citado por los specs.
+- **Evidencia:** `dotnet test VirGo.slnx -c Release`: 35 pruebas aprobadas (30 integracion, 2 unitarias, 3 seguridad); CI remoto previo verde para build, esquema, IaC, mutacion, CodeQL, Gitleaks y dependency review.
+- **Costo:** $0; no se crearon recursos AWS ni Atlas.
+- **Pendiente:** persistencia live contra Atlas, prueba de humo HTTPS, OIDC y aprobacion humana del PR; no hacer merge automaticamente.
+
+### 2026-11-06 · Caché distribuida con Redis
+
+- **Autor:** equipo + Claude Code (`dev-dotnet`)
+- **Módulo / tareas:** `098-cache-redis` · T9801 y T9802
+- **Qué se hizo:** caché *cache-aside* del catálogo de salones sobre `IDistributedCache`, con fallo abierto y caché en memoria si no hay Redis configurado.
+- **Evidencia:** `dotnet test`: 43 de 43 (10 unitarias, 30 de integración y 3 de seguridad).
+- **Decisiones:** ADR-34 a ADR-36.
+- **Costo:** $0; no se creó ningún recurso.
+- **Aprendizaje:** ElastiCache no encaja con costo cero ni con Lambda fuera de una VPC.
+- **Pendiente:** aprobar el proveedor (Art. VII), crear Redis, conectarlo y probar con Redis real.
+
+### 2026-11-06 · Estructura alineada con el proyecto de referencia
+
+- **Autor:** equipo + Claude Code (`dev-dotnet`, `qa`, `devops-aws`)
+- **Módulo / tareas:** `000`, `002` y `098`
+- **Qué se hizo:**
+  - Capas: DTOs en `VirGo.Api/Dto` y pruebas de arquitectura de todas las capas.
+  - Pruebas: `VirGo.ContractTests`, `VirGo.DatabaseTests` y `VirGo.PerformanceTests`, y más pruebas de seguridad.
+  - Pipeline: pruebas por tipo, Semgrep, SonarCloud, OWASP ZAP, *hardening report*, *quality gate* y mutación nocturna.
+  - Se corrigió la inestabilidad de las pruebas por el límite de solicitudes.
+  - Se agregaron `docs/RAMAS.md`, `memorias/` y una memoria por proyecto de pruebas.
+- **Evidencia:** `dotnet test`: 174 de 174. Los workflows no se han ejecutado en GitHub.
+- **Costo:** $0.
+- **Aprendizaje:** el 35 de 35 anterior salió de una corrida en frío; en corridas rápidas fallaban 11 pruebas. Hay que repetir las suites.
+- **Pendiente:** ejecutar el CI en GitHub, configurar SonarCloud y aprobar la estrategia de ramas.
+
+### 2026-11-11 · Primer despliegue en AWS
+
+- **Autor:** Angelica + Claude Code (`devops-aws`)
+- **Módulo / tareas:** `900` (T107, T108), `901` (T209)
+- **Qué se hizo:** cuenta AWS propia en plan Free, presupuesto de $1, secretos en SSM y `sam deploy` del stack `virgo-api-prod`.
+- **Correcciones:** secretos leídos de SSM al arrancar, sin concurrencia reservada, sin KMS propio, alarma con la métrica `5xx` y `NextFolioAsync` sin `SetOnInsert`.
+- **Evidencia:** <https://rcof55a3c9.execute-api.us-east-1.amazonaws.com/health> responde 200; `/api/v1/venues` responde 200 conectado a Atlas.
+- **Costo:** $0.
+- **Pendiente:** usuario `virgo-api-prod` en Atlas, catálogo y datos en la base `virgo`, y despliegue por OIDC.

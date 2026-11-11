@@ -10,7 +10,7 @@ description: Valida y despliega la infraestructura serverless del backend de Vir
 ## 1. Revisión previa (sin costo)
 
 - [ ] `infra/template.yaml` solo usa los servicios permitidos del Art. VII.
-- [ ] El clúster de Atlas es **M0**, su organización no tiene método de pago y la cadena de conexión está en SSM (`/virgo/prod/mongo-uri`), no en el template.
+- [ ] El clúster de Atlas es **M0**, su organización no tiene método de pago y la cadena de conexión está en SSM (`/virgo/prod/Persistence/ConnectionString`), no en el template.
 - [ ] API Gateway tiene throttling (`ThrottlingRateLimit` y `ThrottlingBurstLimit`).
 - [ ] Los logs tienen una retención de 7 días.
 - [ ] No hay secretos en el template; se reciben como parámetros `NoEcho` o desde SSM.

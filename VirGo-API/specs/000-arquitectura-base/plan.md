@@ -132,7 +132,7 @@ VirGo-API/
 
 | Sección | Claves | Origen |
 |---|---|---|
-| `Persistence` | `Provider` (`InMemory` o `MongoDb`), `DatabaseName`, `ConnectionString` | `ConnectionString` desde SSM (`/virgo/prod/mongo-uri`) o variable de entorno local; el resto desde `appsettings` |
+| `Persistence` | `Provider` (`InMemory` o `MongoDb`), `DatabaseName`, `ConnectionString` | `ConnectionString` desde SSM (`/virgo/prod/Persistence/ConnectionString`) o variable de entorno local; el resto desde `appsettings` |
 | `Jwt` | `Issuer`, `Audience`, `SigningKey` (≥ 32 bytes) | `SigningKey` desde SSM; el resto desde `appsettings` |
 | `Cors` | `AllowedOrigins[]` | `appsettings.Production.json` y variables de entorno |
 | `RateLimiting` | `PermitLimit`, `WindowSeconds` | `appsettings` |

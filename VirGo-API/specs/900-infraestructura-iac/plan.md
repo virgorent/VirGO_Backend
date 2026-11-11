@@ -4,10 +4,10 @@
 |---|---|
 | Módulo | `900-infraestructura-iac` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; validación y despliegue pendientes |
 | Fecha | 2026-11-03 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
-| Constitución | v1.1.0 |
+| Constitución | v1.2.0 |
 
 ## 1. Resumen técnico
 
@@ -101,7 +101,7 @@ Identificamos lo que el proyecto necesitaría en AWS y lo adaptamos a la capa gr
 | 1 | API Gateway HTTP API | `VirGoHttpApi` | Entrada HTTPS, *throttling* 20 rps / ráfaga 40, CORS |
 | 2 | Lambda | `VirGoApiFunction` (512 MB, 15 s, arm64) | Ejecuta `VirGo.Api` |
 | 3 | MongoDB Atlas M0 (externo) | `virgo-dev`, bases `virgo` y `virgo_dev` | 512 MB; TLS obligatorio; cifrado en reposo por defecto; usuarios `virgo-api-prod` (`readWrite@virgo`), `virgo-api-dev` (`readWrite@virgo_dev`) y `virgo-mcp` (`read` en ambas) |
-| 4 | SSM Parameter Store | `/virgo/prod/jwt-signing-key`, `/virgo/prod/mongo-uri` | Llave JWT (≥ 32 bytes) y cadena de conexión de Atlas, ambas SecureString |
+| 4 | SSM Parameter Store | `/virgo/prod/Jwt/SigningKey`, `/virgo/prod/Persistence/ConnectionString` | Llave JWT (≥ 32 bytes) y cadena de conexión de Atlas, ambas SecureString |
 | 5 | KMS | Llave administrada `aws/ssm` | Cifra el SecureString, sin costo |
 | 6 | IAM | `virgo-github-deploy`, rol de ejecución de la Lambda | Mínimo privilegio |
 | 7 | STS | `AssumeRoleWithWebIdentity` | Credenciales temporales para GitHub Actions |
@@ -118,7 +118,7 @@ Identificamos lo que el proyecto necesitaría en AWS y lo adaptamos a la capa gr
 
 ### 6.3 Llave JWT y cadena de conexión
 
-Ambas se crean una vez con `aws ssm put-parameter --type SecureString` (T107). La cadena de conexión usa `mongodb+srv://`, el usuario `virgo-api-prod` y `tls=true`. La plantilla las recibe como referencia dinámica `{{resolve:ssm-secure:/virgo/prod/jwt-signing-key}}` cuando el tipo de recurso lo permite; si no, la Lambda las lee al arrancar con permiso `ssm:GetParameter` sobre esos dos parámetros.
+Ambas se crean una vez con `aws ssm put-parameter --type SecureString` (T107). La cadena de conexión usa `mongodb+srv://`, el usuario `virgo-api-prod` y `tls=true`. Lambda no admite `{{resolve:ssm-secure}}` en variables de entorno, así que la plantilla solo pasa `Aws__ParameterPrefix=/virgo/prod/`. Al arrancar, `Program.cs` carga todo ese prefijo con `AddSystemsManager`: `/virgo/prod/Jwt/SigningKey` se vuelve `Jwt:SigningKey`. La Lambda tiene `SSMParameterReadPolicy` sobre `virgo/prod/*`.
 
 ## 7. Costo estimado
 

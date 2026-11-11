@@ -1,0 +1,25 @@
+rules:
+  - id: virgo-mongo-filter-from-text
+    message: No armes filtros de MongoDB con texto; usa Builders<T>.Filter para evitar inyección de operadores.
+    severity: ERROR
+    languages: [csharp]
+    pattern-either:
+      - pattern: BsonDocument.Parse(...)
+      - pattern: new JsonFilterDefinition<$T>(...)
+  - id: virgo-sensitive-data-in-logs
+    message: No escribas contraseñas, tokens ni secretos en los logs (Art. V.8).
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "*.cs"
+    pattern-regex: 'Log(Trace|Debug|Information|Warning|Error|Critical)\(.*(?i)(password|contrase|secret|signingkey|refreshtoken|accesstoken)'
+  - id: virgo-connection-string-with-credentials
+    message: No guardes cadenas de conexión con credenciales en el código (Art. V.1).
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include:
+        - "*.cs"
+        - "*.json"
+    pattern-regex: 'mongodb(\+srv)?://[^"<$\s:]+:[^"<$\s@]+@'
