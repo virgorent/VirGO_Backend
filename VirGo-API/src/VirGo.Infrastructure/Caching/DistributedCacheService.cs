@@ -5,7 +5,7 @@ using VirGo.Application.Abstractions;
 
 namespace VirGo.Infrastructure.Caching;
 
-public sealed class DistributedCacheService(
+public sealed partial class DistributedCacheService(
     IDistributedCache cache,
     ILogger<DistributedCacheService> logger) : ICacheService
 {
@@ -34,7 +34,7 @@ public sealed class DistributedCacheService(
         }
         catch (Exception exception) when (IsCacheFailure(exception, cancellationToken))
         {
-            logger.LogWarning(exception, "Cache remove failed.");
+            LogRemoveFailed(logger, exception);
         }
     }
 
@@ -47,7 +47,7 @@ public sealed class DistributedCacheService(
         }
         catch (Exception exception) when (IsCacheFailure(exception, cancellationToken))
         {
-            logger.LogWarning(exception, "Cache read failed; using the data source.");
+            LogReadFailed(logger, exception);
             return (false, default);
         }
     }
@@ -61,9 +61,18 @@ public sealed class DistributedCacheService(
         }
         catch (Exception exception) when (IsCacheFailure(exception, cancellationToken))
         {
-            logger.LogWarning(exception, "Cache write failed.");
+            LogWriteFailed(logger, exception);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Cache read failed; using the data source.")]
+    private static partial void LogReadFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Cache write failed.")]
+    private static partial void LogWriteFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Cache remove failed.")]
+    private static partial void LogRemoveFailed(ILogger logger, Exception exception);
 
     private static bool IsCacheFailure(Exception exception, CancellationToken cancellationToken) =>
         exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested;
