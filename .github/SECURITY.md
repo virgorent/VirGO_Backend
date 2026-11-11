@@ -20,4 +20,4 @@ Incluye:
 
 ## Alcance
 
-Aplica a todo el monorepo `virgorent/virGO_App` (`VirGo-API`, `VirGo-Movil` y gobernanza global).
+Aplica a `virgorent/virGO_App` (`VirGo-API`, `VirGo-Database` y gobernanza global). La app móvil tiene su propia política en `virgorent/VirGO_Movil`.

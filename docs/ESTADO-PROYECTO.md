@@ -5,7 +5,7 @@
 
 ## Specs
 
-142 specs en borrador: 98 de API (94 de endpoints), 11 de base de datos, 30 de Móvil y 3 globales. El orden sigue lo que pidió el profesor: gobernanza, arquitectura base, endpoints, infraestructura y pipeline. Ver [`backend/MAPA-SPECS.md`](backend/MAPA-SPECS.md) y [`frontend/MAPA-SPECS.md`](frontend/MAPA-SPECS.md).
+142 specs en borrador: 98 de API (94 de endpoints), 11 de base de datos, 30 de Móvil y 3 globales. El orden sigue lo que pidió el profesor: gobernanza, arquitectura base, endpoints, infraestructura y pipeline. Ver [`backend/MAPA-SPECS.md`](backend/MAPA-SPECS.md) y [`frontend/MAPA-SPECS.md`](https://github.com/virgorent/VirGO_Movil/blob/main/docs/frontend/MAPA-SPECS.md).
 
 ## API (.NET 10)
 
