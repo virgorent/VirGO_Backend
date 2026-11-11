@@ -217,9 +217,7 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
     {
         var counterId = $"folio-{year:D4}";
         var filter = Builders<BsonDocument>.Filter.Eq("_id", counterId);
-        var update = Builders<BsonDocument>.Update
-            .SetOnInsert("next", 0)
-            .Inc("next", 1);
+        var update = Builders<BsonDocument>.Update.Inc("next", 1);
         var options = new FindOneAndUpdateOptions<BsonDocument>
         {
             IsUpsert = true,

@@ -3,3 +3,6 @@ skip-check:
   - CKV_AWS_116 # Lambda reserved concurrency is intentionally left to the free-tier deployment plan.
   - CKV_AWS_117 # MongoDB Atlas is public by design; a VPC would require a prohibited NAT Gateway.
   - CKV_AWS_158 # CloudWatch Logs uses the AWS-managed service encryption path; a customer CMK is not cost-free.
+  - CKV_AWS_115 # New accounts have a concurrency quota of 10; reserving it would block the deployment.
+  - CKV_AWS_173 # Environment variables hold no secrets; secrets are read from SSM at startup.
+  - CKV_AWS_26 # The SNS topic only carries alarm notifications; the AWS-managed SNS key blocks CloudWatch from publishing.

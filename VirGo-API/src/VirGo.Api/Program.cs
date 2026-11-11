@@ -16,6 +16,20 @@ using VirGo.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// En AWS los secretos viven en SSM Parameter Store (SecureString) y se leen al arrancar.
+// /virgo/prod/Jwt/SigningKey se convierte en la clave de configuración Jwt:SigningKey.
+var parameterPrefix = builder.Configuration["Aws:ParameterPrefix"];
+if (!string.IsNullOrWhiteSpace(parameterPrefix))
+{
+    builder.Configuration.AddSystemsManager(parameterPrefix);
+}
+
+if (builder.Environment.IsProduction()
+    && !string.Equals(builder.Configuration["Persistence:Provider"], "MongoDb", StringComparison.OrdinalIgnoreCase))
+{
+    throw new InvalidOperationException("Production requires Persistence:Provider = MongoDb.");
+}
+
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 builder.Services.AddProblemDetails();

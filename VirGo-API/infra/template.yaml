@@ -3,12 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: VirGo API serverless application.
 
 Parameters:
-  JwtSigningKeyParameter:
-    Type: String
-    Default: /virgo/prod/jwt-signing-key
-  MongoUriParameter:
-    Type: String
-    Default: /virgo/prod/mongo-uri
   AlertEmail:
     Type: String
 
@@ -24,8 +18,7 @@ Globals:
         ASPNETCORE_ENVIRONMENT: Production
         Persistence__Provider: MongoDb
         Persistence__DatabaseName: virgo
-        Jwt__SigningKey: !Sub '{{resolve:ssm-secure:${JwtSigningKeyParameter}}}'
-        Persistence__ConnectionString: !Sub '{{resolve:ssm-secure:${MongoUriParameter}}}'
+        Aws__ParameterPrefix: /virgo/prod/
 
 Resources:
   VirGoHttpApi:
@@ -67,8 +60,9 @@ Resources:
       FunctionName: virgo-api-prod
       CodeUri: ../src/VirGo.Api/
       Handler: VirGo.Api
-      ReservedConcurrentExecutions: 10
-      KmsKeyArn: !Sub arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/lambda
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: virgo/prod/*
       Events:
         Api:
           Type: HttpApi
@@ -85,7 +79,6 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: virgo-alerts
-      KmsMasterKeyId: alias/aws/sns
 
   VirGoAlertSubscription:
     Type: AWS::SNS::Subscription
@@ -99,7 +92,7 @@ Resources:
     Properties:
       AlarmDescription: VirGo API Gateway returned a 5xx response.
       Namespace: AWS/ApiGateway
-      MetricName: 5XXError
+      MetricName: 5xx
       Dimensions:
         - Name: ApiId
           Value: !Ref VirGoHttpApi
