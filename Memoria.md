@@ -53,6 +53,6 @@ Por indicación del curso, el backend y el frontend viven en repositorios distin
 | Repositorio | Contenido |
 |---|---|
 | [`virgorent/virGO_App`](https://github.com/virgorent/virGO_App) | Backend: `VirGo-API` y `VirGo-Database` |
-| [`virgorent/virGO_Movil`](https://github.com/virgorent/virGO_Movil) | Frontend: `VirGo-Movil` |
+| [`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil) | Frontend: `VirGo-Movil` |
 
 La gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`, `.specify/`, `.opencode/`) está copiada en ambos y debe mantenerse alineada. Las entradas anteriores de esta bitácora describen el monorepo de entonces.

@@ -11,4 +11,4 @@ Documentación transversal del monorepo que no pertenece a un proyecto concreto.
 - [`backend/MAPA-SPECS.md`](backend/MAPA-SPECS.md) y [`backend/ENDPOINTS.md`](backend/ENDPOINTS.md): specs y endpoints de API y base de datos.
 - [`ANALISIS-PROYECTO.md`](ANALISIS-PROYECTO.md): análisis spec por spec, endpoint por endpoint y archivo por archivo.
 
-- Los specs de Móvil están en [`virgorent/virGO_Movil`](https://github.com/virgorent/virGO_Movil/tree/main/VirGo-Movil/specs).
+- Los specs de Móvil están en [`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil/tree/main/VirGo-Movil/specs).

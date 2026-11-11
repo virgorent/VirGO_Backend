@@ -32,7 +32,7 @@
 
 ## 3. Fases
 
-Este repositorio es el **backend**. La app móvil vive en [`virgorent/virGO_Movil`](https://github.com/virgorent/virGO_Movil).
+Este repositorio es el **backend**. La app móvil vive en [`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil).
 
 
 | Fase | Objetivo | Estado |

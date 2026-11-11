@@ -5,7 +5,7 @@
 | Versión | 1.0.0 |
 | Ratificada | 2026-11-04 |
 | Estado | Vigente |
-| Ámbito | Gobernanza global de VirGo, copiada en `virgorent/virGO_App` (backend) y `virgorent/virGO_Movil` (frontend) |
+| Ámbito | Gobernanza global de VirGo, copiada en `virgorent/virGO_App` (backend) y `virgorent/VirGO_Movil` (frontend) |
 
 > Rector SDD. Ante conflicto con otro artefacto, **manda esta constitución**.
 > Filosofía madre: base SDD para proyecto Backend y Móvil, arquitectura ejecutable sin funcionalidad específica.
@@ -94,5 +94,5 @@
 
 - Esta constitución manda en los **principios generales**. La de cada proyecto los desarrolla y manda en lo **técnico** de ese proyecto.
 - `.github/` vive en la raíz y se comparte: GitHub no lee esa carpeta dentro de subcarpetas.
-- `Modelo de datos VirGo.md` vive en la raíz. La app móvil vive en [`virgorent/virGO_Movil`](https://github.com/virgorent/virGO_Movil) y consume el OpenAPI que publica la API.
+- `Modelo de datos VirGo.md` vive en la raíz. La app móvil vive en [`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil) y consume el OpenAPI que publica la API.
 - `VirGo-Database` es el único proyecto que cambia la estructura de MongoDB; `VirGo-API` solo lee y escribe documentos.
