@@ -57,7 +57,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-23 | 2026-11-03 | **MongoDB Atlas M0** en AWS `us-east-1` como base de datos | Decisión del equipo: la base se hace en MongoDB; M0 es gratis permanente |
 | ADR-24 | 2026-11-03 | Atlas con lista de acceso `0.0.0.0/0` y controles compensatorios | Lambda no tiene IP fija sin NAT (prohibido); M0 no admite *private endpoint* |
 | ADR-25 | 2026-11-03 | **Testcontainers** para probar los repositorios de MongoDB en el CI | Gratis en GitHub Actions; local sigue sin Docker (en memoria) |
-| ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/virGO_App` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
+| ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/VirGO_Backend` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
 | ADR-27 | 2026-11-04 | ~~`db/schema/` como fuente de verdad~~ **Modificada por ADR-32:** es copia generada | `VirGo-Database` ya coincide con la base |
 | ADR-28 | 2026-11-04 | `_id` y referencias como **texto UUID** | Lo confirma `VirGo-Database` |
 | ADR-29 | 2026-11-04 | `monthlyStats._id` determinista | Permite el `upsert` con `$inc` |
@@ -166,9 +166,9 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Autor:** equipo + Claude Code (`arquitecto`)
 - **Módulo / tareas:** gobernanza · `specs/000`, `001`, `002` · ninguna tarea ejecutada
-- **Qué se hizo:** no se pudo transferir `Karasu0001/virGO_App`, así que se creó `virgorent/virGO_App` vacío y se subieron `main`, `rama-apis`, `rama-backend`, `rama-movil` y `docs/sdd-virgo` con su historial. Las referencias vigentes, incluido el `sub` de OIDC, apuntan al repositorio nuevo; las entradas anteriores de esta bitácora conservan el nombre de entonces.
+- **Qué se hizo:** no se pudo transferir `Karasu0001/virGO_App`, así que se creó `virgorent/VirGO_Backend` vacío y se subieron `main`, `rama-apis`, `rama-backend`, `rama-movil` y `docs/sdd-virgo` con su historial. Las referencias vigentes, incluido el `sub` de OIDC, apuntan al repositorio nuevo; las entradas anteriores de esta bitácora conservan el nombre de entonces.
 - **Evidencia:** `git ls-remote` muestra los mismos commits en ambos repositorios.
-- **Decisiones:** `virgorent/virGO_App` es el repositorio oficial.
+- **Decisiones:** `virgorent/VirGO_Backend` es el repositorio oficial.
 - **Costo:** $0.
 - **Aprendizaje:** ninguno.
 - **Pendiente:** archivar `Karasu0001/virGO_App` cuando el equipo confirme; `002` P-02 (el repositorio es privado y el ruleset no aplicaría).
@@ -177,7 +177,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Autor:** equipo + Claude Code (`arquitecto`)
 - **Módulo / tareas:** gobernanza · ninguna tarea ejecutada
-- **Qué se hizo:** se comprobó que `virgorent/virGO_App` es público, con lo que el ruleset y los revisores de los *environments* ya están disponibles en el plan Free. Se corrigió el conteo de tareas de `001` (11, por la T101 de Atlas).
+- **Qué se hizo:** se comprobó que `virgorent/VirGO_Backend` es público, con lo que el ruleset y los revisores de los *environments* ya están disponibles en el plan Free. Se corrigió el conteo de tareas de `001` (11, por la T101 de Atlas).
 - **Evidencia:** la API pública de GitHub responde `visibility: public`. `Karasu0001/virGO_App` responde «not found».
 - **Decisiones:** se resuelve `VirGo-API` `002` P-02.
 - **Costo:** $0.

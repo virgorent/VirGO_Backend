@@ -88,7 +88,7 @@ VirGo-API/
 │   └── template.yaml               # SAM: HTTP API, Lambda, parámetros SSM y LogGroup
 ```
 
-`.github/` no va aquí: vive en la raíz del repositorio `virgorent/virGO_App` y se detalla en `901-pipeline-cicd`.
+`.github/` no va aquí: vive en la raíz del repositorio `virgorent/VirGO_Backend` y se detalla en `901-pipeline-cicd`.
 
 **Dependencias entre proyectos:** `Api → Application, Infrastructure` · `Infrastructure → Application` · `Application → Domain` · `Domain → (ninguno)`.
 

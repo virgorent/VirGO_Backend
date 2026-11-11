@@ -46,7 +46,7 @@
 
 ## 4. Pendiente operativo
 
-- Aplicar `.github/rulesets/main-protection.json` con permisos de administración y verificar con `gh api repos/virgorent/virGO_App/rulesets`.
+- Aplicar `.github/rulesets/main-protection.json` con permisos de administración y verificar con `gh api repos/virgorent/VirGO_Backend/rulesets`.
 - Habilitar **Dependency graph** en `Settings → Code security and analysis`.
 - Antes del primer PR de código, añadir los checks SAST/pruebas de cada proyecto al ruleset.
 

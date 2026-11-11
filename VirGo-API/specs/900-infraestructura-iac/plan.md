@@ -113,7 +113,7 @@ Identificamos lo que el proyecto necesitaría en AWS y lo adaptamos a la capa gr
 
 ### 6.2 Rol de despliegue (`virgo-github-deploy`)
 
-- Confianza: `token.actions.githubusercontent.com`, condición `sub = repo:virgorent/virGO_App:ref:refs/heads/main` y `aud = sts.amazonaws.com`. El *environment* `production` de `901` usa `sub = repo:virgorent/virGO_App:environment:production`; se permite solo ese valor.
+- Confianza: `token.actions.githubusercontent.com`, condición `sub = repo:virgorent/VirGO_Backend:ref:refs/heads/main` y `aud = sts.amazonaws.com`. El *environment* `production` de `901` usa `sub = repo:virgorent/VirGO_Backend:environment:production`; se permite solo ese valor.
 - Permisos: CloudFormation sobre `virgo-api-*`, `iam:PassRole` solo del rol de la Lambda, S3 del bucket de SAM y `ssm:GetParameter` de `/virgo/prod/*`. Nada de `*:*`.
 
 ### 6.3 Llave JWT y cadena de conexión
