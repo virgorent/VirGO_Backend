@@ -44,7 +44,7 @@ Secciones obligatorias:
 
 ## 4. `task.md`: pasos ejecutables
 
-- Cada tarea lleva un ID con el número del módulo (`000` → `T001…`, `001` → `T101…`, `003` → `T301…`) y una sola acción verificable de 30 minutos a 2 horas.
+- Cada tarea lleva un ID con el número del módulo (`000` → `T001…`, `900` → `T101…`, `003` → `T301…`) y una sola acción verificable de 30 minutos a 2 horas.
 - Incluye tareas para los cinco tipos de prueba (unitarias, integración, seguridad, mutación y humo), el PR, el despliegue o release manual y la entrega del contrato.
 - Columnas: `ID | Fase | Tarea | Depende de | Responsable (subagente) | Verificación | Estado`.
 - Marca con `[P]` las tareas que pueden ir en paralelo.

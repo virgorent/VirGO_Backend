@@ -1,6 +1,6 @@
 # Check — 000 Arquitectura base del Backend
 
-Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. El módulo se marca *Cerrado* solo con todas las casillas en ✅ o ➖ justificado. Los criterios marcados con ➡️ se verifican en `001` o `002`; aquí solo se enlaza su evidencia.
+Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. El módulo se marca *Cerrado* solo con todas las casillas en ✅ o ➖ justificado. Los criterios marcados con ➡️ se verifican en `900` o `901`; aquí solo se enlaza su evidencia.
 
 | Campo | Valor |
 |---|---|
@@ -15,7 +15,7 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 - [ ] El Constitution Check del plan no tiene ❌ (constitución v1.2.0 aprobada).
 - [ ] `README.md` en inglés y `.gitignore` DevSecOps en el primer commit (T001).
 - [ ] `verificar-constitucion` sobre la gobernanza: «Alineado» (T004).
-- [ ] Los MCP de `opencode.json` están instalados antes de codificar (`001`: T100, `002`: T200).
+- [ ] Los MCP de `opencode.json` están instalados antes de codificar (`900`: T100, `901`: T200).
 
 ## 2. Criterios de aceptación
 
@@ -26,11 +26,11 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 | CA-03 500 sin trazas y con correlación | `VirGo.IntegrationTests.BaseApiTests.UnexpectedFailureReturnsSafeProblemDetails` | ✅ |
 | CA-04 401 sin token | `VirGo.IntegrationTests.BaseApiTests.ProtectedRouteWithoutTokenReturnsUnauthorizedProblemDetails` | ✅ |
 | CA-05 Llave corta detiene el arranque | `dotnet run` con `Jwt__SigningKey=short` termina con `OptionsValidationException` | ✅ |
-| CA-06 ➡️ CI bloquea la fusión | `002`: check CA-02 | ⏳ |
-| CA-07 ➡️ Despliegue con URL HTTPS | `002`: check CA-05 | ⏳ |
-| CA-08 ➡️ Solo servicios permitidos y presupuesto | `001`: check CA-03 y CA-04 | ⏳ |
+| CA-06 ➡️ CI bloquea la fusión | `901`: check CA-02 | ⏳ |
+| CA-07 ➡️ Despliegue con URL HTTPS | `901`: check CA-05 | ⏳ |
+| CA-08 ➡️ Solo servicios permitidos y presupuesto | `900`: check CA-03 y CA-04 | ⏳ |
 | CA-09 OpenAPI publicado | `VirGo.IntegrationTests.BaseApiTests.OpenApiIsPublished`; entrega a Móvil pendiente | 🔄 |
-| CA-10 ➡️ Borrado de la infraestructura | `001`: check CA-07 | ⏳ |
+| CA-10 ➡️ Borrado de la infraestructura | `900`: check CA-07 | ⏳ |
 
 ## 3. Pruebas
 
@@ -38,9 +38,9 @@ Lista de verificación del módulo (Art. I.4). Cada casilla lleva su evidencia. 
 |---|---|---|
 | Unitarias | `dotnet test tests/VirGo.UnitTests` · total: 2 | ✅ |
 | Integración | `dotnet test tests/VirGo.IntegrationTests` · total: 18 | ✅ |
-| Seguridad | `dotnet test tests/VirGo.SecurityTests` · total: 3; ampliación y CI en `002`: T202 | 🔄 |
-| Mutación | Stryker sobre `Domain` y `Application` (`002`: T203) · puntaje: — % | ⏳ |
-| Humo | `smoke.sh` tras el primer despliegue (`002`: T209) | ⏳ |
+| Seguridad | `dotnet test tests/VirGo.SecurityTests` · total: 3; ampliación y CI en `901`: T202 | 🔄 |
+| Mutación | Stryker sobre `Domain` y `Application` (`901`: T203) · puntaje: — % | ⏳ |
+| Humo | `smoke.sh` tras el primer despliegue (`901`: T209) | ⏳ |
 | Arquitectura | Prueba de dependencias de `VirGo.Domain` (T010) | ⏳ |
 | Validación de longitudes | Regla global en DTO y `db/schema/` (T036) | ⏳ |
 

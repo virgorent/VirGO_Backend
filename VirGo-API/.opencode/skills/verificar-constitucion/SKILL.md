@@ -12,7 +12,7 @@ description: Revisa que un spec, plan, task.md, PR o archivo del backend de VirG
 | Art. | Tema | Resultado | Evidencia o brecha |
 |---|---|---|---|
 | I | SDD: spec → plan → task → check; specs atómicos; IDs `TNNN` por módulo | ✅ / ⚠️ / ❌ / ➖ | |
-| II | Base primero; los specs funcionales solo se redactan hasta cerrar `000`–`002` | | |
+| II | Base primero; los specs funcionales solo se redactan hasta cerrar `000`–`901` | | |
 | III | Capas, inyección de dependencias, persistencia por interfaces, ejecución dual | | |
 | IV | Contrato: `/api/v1`, Problem Details, `camelCase`, UTC, OpenAPI | | |
 | V | Seguridad: secretos, `.gitignore`, HTTPS, JWT, IAM, OIDC, CORS, logs, Gitleaks, Checkov | | |

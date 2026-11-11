@@ -18,7 +18,7 @@ Se crea una solución .NET 10 con cuatro capas: Api, Application, Domain e Infra
 - **Infraestructura:** se define con **AWS SAM**.
 - **CI/CD:** **GitHub Actions** con conexión a AWS por **OIDC**. El despliegue es manual (*Run workflow*) y publica la URL HTTPS.
 
-> **Cambio v1.1.0:** el detalle y las tareas de la infraestructura (secciones 7 y F4) viven ahora en [`001-infraestructura-iac`](../001-infraestructura-iac/plan.md), y los del CI/CD (F6) en [`002-pipeline-cicd`](../002-pipeline-cicd/plan.md). Aquí se conservan como contexto de la arquitectura global.
+> **Cambio v1.1.0:** el detalle y las tareas de la infraestructura (secciones 7 y F4) viven ahora en [`900-infraestructura-iac`](../900-infraestructura-iac/plan.md), y los del CI/CD (F6) en [`901-pipeline-cicd`](../901-pipeline-cicd/plan.md). Aquí se conservan como contexto de la arquitectura global.
 
 No se implementa ninguna funcionalidad del negocio.
 
@@ -51,7 +51,7 @@ No se implementa ninguna funcionalidad del negocio.
 | V | Seguridad | ✅ Cumple | HTTPS por API Gateway, JWT con llave ≥ 256 bits validada al arrancar, CORS explícito, límites de solicitudes, encabezados de seguridad, OIDC, SSM, CodeQL y Dependabot. |
 | VI | Pruebas | ✅ Cumple | Proyectos de pruebas unitarias y de integración desde el inicio; el CI bloquea la fusión si fallan. |
 | VII | Costo cero | ✅ Cumple | Lambda, HTTP API, SSM estándar, CloudWatch Logs (7 días) y Budgets en AWS; MongoDB Atlas M0 sin método de pago. Ver la sección 7. |
-| VIII | CI/CD | ✅ Cumple | Se delega a `002-pipeline-cicd`: ruleset, CI en cada PR y CD manual con humo y URL HTTPS. |
+| VIII | CI/CD | ✅ Cumple | Se delega a `901-pipeline-cicd`: ruleset, CI en cada PR y CD manual con humo y URL HTTPS. |
 | IX | Observabilidad | ✅ Cumple | Logs JSON, `X-Correlation-Id` y `/health`. |
 | X | Memoria | ✅ Cumple | Cada tarea cierra con una entrada en `memoria.md`; commits con el ID de la tarea. |
 | XI | Agentes | ✅ Cumple | Cada tarea tiene un subagente responsable definido en `AGENTS.md`. |
@@ -88,7 +88,7 @@ VirGo-API/
 │   └── template.yaml               # SAM: HTTP API, Lambda, parámetros SSM y LogGroup
 ```
 
-`.github/` no va aquí: vive en la raíz del repositorio `virgorent/virGO_App` y se detalla en `002-pipeline-cicd`.
+`.github/` no va aquí: vive en la raíz del repositorio `virgorent/VirGO_Backend` y se detalla en `901-pipeline-cicd`.
 
 **Dependencias entre proyectos:** `Api → Application, Infrastructure` · `Infrastructure → Application` · `Application → Domain` · `Domain → (ninguno)`.
 
@@ -132,7 +132,7 @@ VirGo-API/
 
 | Sección | Claves | Origen |
 |---|---|---|
-| `Persistence` | `Provider` (`InMemory` o `MongoDb`), `DatabaseName`, `ConnectionString` | `ConnectionString` desde SSM (`/virgo/prod/mongo-uri`) o variable de entorno local; el resto desde `appsettings` |
+| `Persistence` | `Provider` (`InMemory` o `MongoDb`), `DatabaseName`, `ConnectionString` | `ConnectionString` desde SSM (`/virgo/prod/Persistence/ConnectionString`) o variable de entorno local; el resto desde `appsettings` |
 | `Jwt` | `Issuer`, `Audience`, `SigningKey` (≥ 32 bytes) | `SigningKey` desde SSM; el resto desde `appsettings` |
 | `Cors` | `AllowedOrigins[]` | `appsettings.Production.json` y variables de entorno |
 | `RateLimiting` | `PermitLimit`, `WindowSeconds` | `appsettings` |
@@ -143,7 +143,7 @@ VirGo-API/
 - Un `MongoClient` único por proceso (singleton), creado fuera del manejador para reutilizar conexiones entre invocaciones de Lambda, con `maxPoolSize` de 10 (M0 admite 500 conexiones).
 - `MongoIndexInitializer` crea de forma idempotente validadores e índices desde `db/schema/` al arrancar. Así, al ejecutar el primer *task* de usuarios, la base y sus colecciones se crean solas.
 - Documentos con `_id` y referencias como texto UUID (`BsonRepresentation(BsonType.String)`, ADR-28), nombres de campo en `camelCase` inglés y fechas en UTC.
-- La fuente de verdad son los archivos de `db/schema/` (`007-esquema-mongodb`): el inicializador los aplica tal cual.
+- La fuente de verdad es `VirGo-Database/src/catalog`; `db/schema/` es una copia generada (`010-contrato-datos`).
 
 La base no define entidades: los módulos funcionales documentan sus patrones de llave en su propio plan.
 
@@ -179,7 +179,7 @@ AWS Budgets ($1 USD) ──▶ correo del equipo
 | Integración | `VirGo.IntegrationTests` | `/health` = 200; ruta inexistente = 404 Problem Details; excepción = 500 Problem Details sin trazas; ruta segura sin token = 401; encabezados de seguridad y `X-Correlation-Id`; `/openapi/v1.json` = 200 |
 | Humo (CD) | `api-deploy.yml` | `curl -fsS https://…/health` después de desplegar |
 | Infraestructura | `api-ci.yml` | `sam validate --lint` y `cfn-lint` |
-| Seguridad y mutación | `VirGo.SecurityTests`, Stryker.NET | Se agregan en `002-pipeline-cicd` (T202, T203) y cubren también el código de este módulo |
+| Seguridad y mutación | `VirGo.SecurityTests`, Stryker.NET | Se agregan en `901-pipeline-cicd` (T202, T203) y cubren también el código de este módulo |
 
 ## 9. Riesgos y mitigaciones
 
@@ -200,7 +200,7 @@ AWS Budgets ($1 USD) ──▶ correo del equipo
 | F1 | Solución y capas | T006–T010 |
 | F2 | Núcleo transversal: errores, configuración, logs y seguridad | T011–T016 |
 | F3 | Persistencia base | T017–T019 |
-| F4 | ➡️ Movida a `001-infraestructura-iac` | T102–T105, T110 |
+| F4 | ➡️ Movida a `900-infraestructura-iac` | T102–T105, T110 |
 | F5 | Pruebas | T025–T027 |
-| F6 | ➡️ Movida a `002-pipeline-cicd` | T204–T210 |
-| F7 | Cierre del módulo (el borrado pasó a `001`: T108) | T035 |
+| F6 | ➡️ Movida a `901-pipeline-cicd` | T204–T210 |
+| F7 | Cierre del módulo (el borrado pasó a `900`: T108) | T035 |

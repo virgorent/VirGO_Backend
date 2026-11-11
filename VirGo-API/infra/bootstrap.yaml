@@ -7,7 +7,7 @@ Parameters:
     Description: Email address that receives the one-dollar budget alert.
   GitHubRepository:
     Type: String
-    Default: virgorent/virGO_App
+    Default: virgorent/VirGO_Backend
     Description: GitHub repository allowed to deploy the API.
 
 Resources:

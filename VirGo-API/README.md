@@ -1,6 +1,6 @@
 # VirGo API
 
-REST API for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`virGO_App`](https://github.com/virgorent/virGO_App) repository contains only the backend; the Android app lives in `../VirGo-Movil`.
+REST API for **VirGo**, a platform that connects people organizing an event with venues and service providers. This folder of the [`VirGO_Backend`](https://github.com/virgorent/VirGO_Backend) repository contains only the backend; the Android app lives in `../VirGo-Movil`.
 
 > **Status:** local implementation of the architecture, infrastructure, pipeline and seven-endpoint vertical slice. Cloud validation and deployment remain pending.
 
@@ -43,7 +43,7 @@ VirGo-API/
 ├── specs/            # One folder per module: spec.md, plan.md, task.md, check.md
 ├── src/              # VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
 ├── tests/            # Unit, Integration, Security, smoke
-├── db/               # MongoDB schema (source of truth) and check tool
+├── db/               # Generated copy of the MongoDB schema and check tool
 ├── infra/            # SAM template and bootstrap stack
 ```
 
@@ -56,8 +56,8 @@ The project follows **Spec-Driven Development**: no code without an approved spe
 | Module | Scope | Status |
 |---|---|---|
 | [`000-arquitectura-base`](specs/000-arquitectura-base/spec.md) | Solution layers, errors, configuration, base security, persistence | In review |
-| [`001-infraestructura-iac`](specs/001-infraestructura-iac/spec.md) | AWS infrastructure as code, HTTPS URL, $0 cost | Draft |
-| [`002-pipeline-cicd`](specs/002-pipeline-cicd/spec.md) | CI with DevSecOps checks, rulesets, manual CD, smoke tests | Draft |
+| [`900-infraestructura-iac`](specs/900-infraestructura-iac/spec.md) | AWS infrastructure as code, HTTPS URL, $0 cost | Draft |
+| [`901-pipeline-cicd`](specs/901-pipeline-cicd/spec.md) | CI with DevSecOps checks, rulesets, manual CD, smoke tests | Draft |
 | [`003-auth-login`](specs/003-auth-login/spec.md) | `POST /api/v1/auth/login` | Local |
 | [`004-auth-logout`](specs/004-auth-logout/spec.md) | `POST /api/v1/auth/logout` | Local |
 | [`005-auth-register`](specs/005-auth-register/spec.md) | `POST /api/v1/auth/register` | Local |
@@ -65,7 +65,7 @@ The project follows **Spec-Driven Development**: no code without an approved spe
 | [`007-venues-catalog`](specs/007-venues-catalog/spec.md) | `GET /api/v1/venues` | Local |
 | [`008-quotes-create`](specs/008-quotes-create/spec.md) | `POST /api/v1/quotes` | Local |
 | [`009-bookings-create`](specs/009-bookings-create/spec.md) | `POST /api/v1/bookings` | Local |
-| [`007-esquema-mongodb`](specs/007-esquema-mongodb/spec.md) | MongoDB schema as the single source of truth | Draft |
+| [`010-contrato-datos`](specs/010-contrato-datos/spec.md) | Data contract with `VirGo-Database` | Draft |
 
 ## Getting started
 

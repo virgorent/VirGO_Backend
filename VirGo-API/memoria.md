@@ -22,7 +22,9 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | `002-pipeline-cicd` | ✏️ Borrador | Ruleset, CI con 5 tipos de prueba y DevSecOps, CD manual, humo |
 | `003-auth-login` | ✏️ Borrador | `POST /api/v1/auth/login`; espera a `000`–`002` |
 | `004-auth-logout` | ✏️ Borrador | `POST /api/v1/auth/logout`; espera a `003` |
-| `007-esquema-mongodb` | ✏️ Borrador | Fuente de verdad del esquema; debe cerrarse antes de `003` |
+| `011`–`097` | ✏️ Borrador | 87 specs, uno por endpoint; ver `docs/backend/ENDPOINTS.md` |
+| `900-infraestructura-iac`, `901-pipeline-cicd` | ✏️ Borrador | Antes `001` y `002`; van al final, como pidió el profesor |
+| `010-contrato-datos` | ✏️ Borrador | Antes `007-esquema-mongodb`; alinea la API con `VirGo-Database` |
 | `005-auth-registro`, `006-auth-renovar-sesion` | 💡 Propuestos | Salieron del alcance de `003` y `004` |
 
 ## Decisiones (ADR)
@@ -55,12 +57,14 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-23 | 2026-11-03 | **MongoDB Atlas M0** en AWS `us-east-1` como base de datos | Decisión del equipo: la base se hace en MongoDB; M0 es gratis permanente |
 | ADR-24 | 2026-11-03 | Atlas con lista de acceso `0.0.0.0/0` y controles compensatorios | Lambda no tiene IP fija sin NAT (prohibido); M0 no admite *private endpoint* |
 | ADR-25 | 2026-11-03 | **Testcontainers** para probar los repositorios de MongoDB en el CI | Gratis en GitHub Actions; local sigue sin Docker (en memoria) |
-| ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/virGO_App` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
-| ADR-27 | 2026-11-04 | **`db/schema/`** como fuente de verdad del esquema | Es lo único que una máquina puede comparar y aplicar |
-| ADR-28 | 2026-11-04 | `_id` y referencias como **texto UUID** (provisional) | Ya estaba así en `virgo_dev` |
+| ADR-26 | 2026-11-03 | **Repositorio único** `virgorent/VirGO_Backend` con carpetas por proyecto; `.github/` en la raíz | Decisión del equipo |
+| ADR-27 | 2026-11-04 | ~~`db/schema/` como fuente de verdad~~ **Modificada por ADR-32:** es copia generada | `VirGo-Database` ya coincide con la base |
+| ADR-28 | 2026-11-04 | `_id` y referencias como **texto UUID** | Lo confirma `VirGo-Database` |
 | ADR-29 | 2026-11-04 | `monthlyStats._id` determinista | Permite el `upsert` con `$inc` |
 | ADR-30 | 2026-11-04 | **Semgrep, SonarCloud y OWASP ZAP** en cada PR | Clase del 2026-11-04 y proyecto de referencia |
 | ADR-31 | 2026-11-04 | **Mutación nocturna**, fuera de los checks requeridos | Mantiene el CI corto, como la referencia |
+| ADR-32 | 2026-11-05 | **`VirGo-Database` define la estructura**; la API no ejecuta DDL | Constitución v1.2.0 del PR #5 |
+| ADR-33 | 2026-11-05 | Testcontainers con los validadores reales | La persistencia en memoria no detecta rechazos |
 
 ## Cambios de contrato (compartidos con Móvil)
 
@@ -162,9 +166,9 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Autor:** equipo + Claude Code (`arquitecto`)
 - **Módulo / tareas:** gobernanza · `specs/000`, `001`, `002` · ninguna tarea ejecutada
-- **Qué se hizo:** no se pudo transferir `Karasu0001/virGO_App`, así que se creó `virgorent/virGO_App` vacío y se subieron `main`, `rama-apis`, `rama-backend`, `rama-movil` y `docs/sdd-virgo` con su historial. Las referencias vigentes, incluido el `sub` de OIDC, apuntan al repositorio nuevo; las entradas anteriores de esta bitácora conservan el nombre de entonces.
+- **Qué se hizo:** no se pudo transferir `Karasu0001/virGO_App`, así que se creó `virgorent/VirGO_Backend` vacío y se subieron `main`, `rama-apis`, `rama-backend`, `rama-movil` y `docs/sdd-virgo` con su historial. Las referencias vigentes, incluido el `sub` de OIDC, apuntan al repositorio nuevo; las entradas anteriores de esta bitácora conservan el nombre de entonces.
 - **Evidencia:** `git ls-remote` muestra los mismos commits en ambos repositorios.
-- **Decisiones:** `virgorent/virGO_App` es el repositorio oficial.
+- **Decisiones:** `virgorent/VirGO_Backend` es el repositorio oficial.
 - **Costo:** $0.
 - **Aprendizaje:** ninguno.
 - **Pendiente:** archivar `Karasu0001/virGO_App` cuando el equipo confirme; `002` P-02 (el repositorio es privado y el ruleset no aplicaría).
@@ -173,7 +177,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Autor:** equipo + Claude Code (`arquitecto`)
 - **Módulo / tareas:** gobernanza · ninguna tarea ejecutada
-- **Qué se hizo:** se comprobó que `virgorent/virGO_App` es público, con lo que el ruleset y los revisores de los *environments* ya están disponibles en el plan Free. Se corrigió el conteo de tareas de `001` (11, por la T101 de Atlas).
+- **Qué se hizo:** se comprobó que `virgorent/VirGO_Backend` es público, con lo que el ruleset y los revisores de los *environments* ya están disponibles en el plan Free. Se corrigió el conteo de tareas de `001` (11, por la T101 de Atlas).
 - **Evidencia:** la API pública de GitHub responde `visibility: public`. `Karasu0001/virGO_App` responde «not found».
 - **Decisiones:** se resuelve `VirGo-API` `002` P-02.
 - **Costo:** $0.
@@ -197,6 +201,33 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Aprendizaje (5 porqués):** la causa raíz fue que nada comparaba los documentos con la realidad; `verificar-constitucion` ahora lo exige.
 - **Pendiente:** `007` P-01 a P-05 (T701), T700 y T704; D5 (Redis y colas) y D6 (Pact y pruebas de base de datos) con el profesor; revisión de otra persona antes de aprobar v1.1.0.
 
+### 2026-11-05 · Contrato de datos con VirGo-Database
+
+- **Autor:** equipo + Claude Code (`arquitecto`)
+- **Módulo / tareas:** `010-contrato-datos` · `VirGo-Database` `000` y `001` · ninguna tarea de código
+- **Qué se hizo:**
+  - Se compararon en modo lectura la base, el catálogo de `VirGo-Database` y `db/schema/`: el catálogo coincide 22 de 22 con `virgo_dev`, y `db/schema/` difiere en 8 colecciones.
+  - `007-esquema-mongodb` pasó a `010-contrato-datos`, porque el PR #5 usa `007-venues-catalog`.
+  - Se redactaron los specs `000-base-datos` y `001-contrato-con-api` de `VirGo-Database`.
+- **Evidencia:** `check_schema.py --live`: 25 diferencias; comparación del catálogo: 22 de 22.
+- **Decisiones:** ADR-32 y ADR-33; ADR-27 modificada.
+- **Costo:** $0.
+- **Aprendizaje:** dos personas definieron el esquema por separado; la comparación contra la base lo reveló.
+- **Pendiente:** decidir `VirGo-Database` `001` P-01, P-02 y P-05, y aplicarlo antes de desplegar el PR #5.
+
+### 2026-11-05 · Correcciones de la evaluación: bloques de specs
+
+- **Autor:** equipo + Claude Code (`arquitecto`)
+- **Módulo / tareas:** `011`–`097`, `900`, `901` · ninguna tarea de código
+- **Qué se hizo:**
+  - El profesor pidió el orden: gobernanza, arquitectura base, todos los endpoints, infraestructura y pipeline.
+  - Se inventariaron 94 endpoints, sin duplicados, y se redactó un spec por endpoint a partir de `API-HANDOFF.md` §9, el catálogo y el checklist.
+  - `001` y `002` pasaron a `900` y `901`, y se agregó el listado de servicios adaptado a costo cero.
+- **Evidencia:** `docs/backend/` y `docs/frontend/`.
+- **Decisiones:** un spec por endpoint (Art. I.5); backend y frontend se documentan por separado. Las tareas de `900` y `901` conservan sus IDs.
+- **Costo:** $0.
+- **Aprendizaje:** los specs se generaron desde datos estructurados; requieren revisión humana antes de aprobarse.
+- **Pendiente:** resolver las preguntas abiertas de cada spec y los 10 endpoints que requieren decisión; conseguir la URL.
 ### 2026-11-05 · Vertical slice y alineación con el esquema versionado
 
 - **Autor:** equipo + OpenCode (`dev-dotnet`)
@@ -260,3 +291,13 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Aprendizaje:** el 35 de 35 anterior salió de una corrida en frío; en corridas rápidas fallaban 11 pruebas. Hay que repetir las suites.
 - **Pendiente:** ejecutar el CI en GitHub, configurar SonarCloud y aprobar la estrategia de ramas.
+
+### 2026-11-11 · Primer despliegue en AWS
+
+- **Autor:** Angelica + Claude Code (`devops-aws`)
+- **Módulo / tareas:** `900` (T107, T108), `901` (T209)
+- **Qué se hizo:** cuenta AWS propia en plan Free, presupuesto de $1, secretos en SSM y `sam deploy` del stack `virgo-api-prod`.
+- **Correcciones:** secretos leídos de SSM al arrancar, sin concurrencia reservada, sin KMS propio, alarma con la métrica `5xx` y `NextFolioAsync` sin `SetOnInsert`.
+- **Evidencia:** <https://rcof55a3c9.execute-api.us-east-1.amazonaws.com/health> responde 200; `/api/v1/venues` responde 200 conectado a Atlas.
+- **Costo:** $0.
+- **Pendiente:** usuario `virgo-api-prod` en Atlas, catálogo y datos en la base `virgo`, y despliegue por OIDC.

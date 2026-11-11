@@ -73,7 +73,7 @@ El objetivo es que una persona registrada pueda iniciar sesión de forma segura,
 
 ## 7. Supuestos, dependencias y preguntas abiertas
 
-**Dependencias:** `000` (JWT, Problem Details, límites), `001` (tabla con TTL), `002` (CI, humo).
+**Dependencias:** `000` (JWT, Problem Details, límites), `900` (tabla con TTL), `901` (CI, humo).
 
 **Preguntas abiertas**
 

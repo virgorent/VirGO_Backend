@@ -30,7 +30,7 @@ Un controlador `AuthController` con la acción `Login` llama al caso de uso `Log
 | Art. | Tema | Resultado | Cómo se cumple |
 |---|---|---|---|
 | I | SDD | ✅ Cumple | Spec atómico de un endpoint; cuatro archivos; tareas `T3NN`. |
-| II | Modularidad | ⚠️ Justificado | Se redacta antes de cerrar la base (Art. II.2); sus tareas esperan a `000`–`002`. |
+| II | Modularidad | ⚠️ Justificado | Se redacta antes de cerrar la base (Art. II.2); sus tareas esperan a `000`–`901`. |
 | III | Arquitectura | ✅ Cumple | Controlador delgado, caso de uso en Application, entidades en Domain, repositorios por interfaz. |
 | IV | Contrato | ✅ Cumple | `/api/v1/auth/login`, `camelCase`, UTC, Problem Details, OpenAPI con ejemplos. |
 | V | Seguridad | ✅ Cumple | PBKDF2, respuesta genérica, bloqueo, límite por IP, huella del token, sin datos sensibles en logs. |

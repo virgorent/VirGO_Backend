@@ -27,10 +27,13 @@
 | Documentación de apoyo | `docs/` | Notas y diagramas (README) |
 | Scripts de apoyo | `scripts/` | Automatizaciones locales (README) |
 | Backend | `VirGo-API/` | Gobernanza y specs `NNN-…` propios |
-| Móvil | `VirGo-Movil/` | Gobernanza y specs `NNN-…` propios |
+| Base de datos | `VirGo-Database/` | Catálogo de MongoDB; specs `NNN-…` propios |
 | Datos | `Modelo de datos VirGo.md` | Modelo de MongoDB compartido |
 
 ## 3. Fases
+
+Este repositorio es el **backend**. La app móvil vive en [`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil).
+
 
 | Fase | Objetivo | Estado |
 |---|---|---|
@@ -38,7 +41,6 @@
 | **nv-01** | Arquitectura base SDD | Cumplido (2026-11-04) |
 | **nv-02** | Gobernanza global de proyectos | Cumplido con pendiente operativo (aplicar ruleset) |
 | **VirGo-API** | Backend .NET 10 (specs `000`–`004`) | Especificación |
-| **VirGo-Movil** | App Android (spec `000`) | Especificación |
 
 ## 4. Convenciones
 

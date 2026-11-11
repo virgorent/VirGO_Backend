@@ -3,7 +3,8 @@
 Campos necesarios para crear la base de datos **no relacional** de VirGo. Se dedujeron del `Checklist VirGo.md` (73 pantallas) y de los datos que ya guarda la maqueta funcional.
 
 - **Versión:** borrador 4 · 2026-11-04 (alineado con `VirGo-API/db/schema/`)
-- **Fuente de verdad:** `VirGo-API/db/schema/*.json`. Si este documento y esos archivos difieren, mandan los archivos.
+- **Fuente de verdad:** `VirGo-Database/src/catalog`. Si este documento difiere del catálogo, manda el catálogo.
+- **Diferencias abiertas:** están en `VirGo-Database/specs/001-contrato-con-api/plan.md`, sección 2. Las zonas, categorías y campos de este documento pueden no ser los vigentes hasta resolverlas.
 - **Motor:** MongoDB Atlas M0, según la decisión ADR-23 del backend (`VirGo-API`)
 - **Base de datos:** `virgo` (producción) y `virgo_dev` (desarrollo)
 - **Uso:** insumo para los specs funcionales del backend (`003-auth-login` en adelante)
@@ -400,7 +401,7 @@ Se validan con `enum` en el `$jsonSchema` de cada colección y en los DTO de la 
 
 ## 7. Orden sugerido para crearla (por módulos funcionales)
 
-Las 22 colecciones ya existen en `virgo_dev`. La API las crea o actualiza al arrancar desde `db/schema/` (`MongoIndexInitializer`); no se cambian a mano.
+Las 22 colecciones ya existen en `virgo_dev`. Las administra `VirGo-Database` (`npm run db:plan:dev` y `db:init:dev`); la API no cambia la estructura ni se edita a mano en Atlas.
 
 1. **Cuentas:** `users`, `sessions` (specs `003` y `004`), `passwordResets` y `paymentCards`.
 2. **Catálogo:** `venues`, `venueDates` y `providers`.
@@ -411,7 +412,7 @@ Las 22 colecciones ya existen en `virgo_dev`. La API las crea o actualiza al arr
 
 ## 8. Longitudes máximas
 
-Propuesta pendiente de confirmar (`007-esquema-mongodb` P-05). Los campos con formato fijo (UUID, fechas) y los enumerados ya se validan con `pattern` o `enum`.
+Propuesta pendiente de confirmar (`VirGo-Database` `001` P-05). Los campos con formato fijo (UUID, fechas) y los enumerados ya se validan con `pattern` o `enum`.
 
 | Máximo | Campos |
 |---|---|
