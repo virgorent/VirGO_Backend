@@ -11,7 +11,7 @@
 
 ## 1. Resumen técnico
 
-Cinco workflows de GitHub Actions y un ruleset, todos en `.github/` de la **raíz** de `virgorent/virGO_App` (GitHub ignora `.github/` en subcarpetas) y compartidos con Móvil:
+Cinco workflows de GitHub Actions y un ruleset, todos en `.github/` de la **raíz** de `virgorent/VirGO_Backend` (GitHub ignora `.github/` en subcarpetas) y compartidos con Móvil:
 
 - `api-ci.yml` (PR y *push* a `main`): compilación, pruebas, Semgrep, SonarCloud, OWASP ZAP, IaC, esquema y comentario de calidad.
 - `api-mutation-nightly.yml` (cada noche y `workflow_dispatch`): Stryker.
@@ -57,7 +57,7 @@ Cinco workflows de GitHub Actions y un ruleset, todos en `.github/` de la **raí
 ## 4. Estructura
 
 ```text
-virGO_App/                           # Raíz del repositorio
+VirGO_Backend/                           # Raíz del repositorio
 ├── .github/
 │   ├── workflows/
 │   │   ├── api-ci.yml

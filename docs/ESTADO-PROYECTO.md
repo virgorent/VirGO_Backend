@@ -1,7 +1,7 @@
 # VirGo: estado del proyecto
 
 **Fecha:** 6 de noviembre de 2026
-**Repositorio:** `virgorent/virGO_App`, con API, base de datos y app móvil.
+**Repositorio:** `virgorent/VirGO_Backend`, con API, base de datos y app móvil.
 
 ## Specs
 

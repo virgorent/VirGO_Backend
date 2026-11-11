@@ -5,7 +5,7 @@
 | Versión | 1.0.0 |
 | Ratificada | 2026-11-04 |
 | Estado | Vigente |
-| Ámbito | Gobernanza global de VirGo, copiada en `virgorent/virGO_App` (backend) y `virgorent/VirGO_Movil` (frontend) |
+| Ámbito | Gobernanza global de VirGo, copiada en `virgorent/VirGO_Backend` (backend) y `virgorent/VirGO_Movil` (frontend) |
 
 > Rector SDD. Ante conflicto con otro artefacto, **manda esta constitución**.
 > Filosofía madre: base SDD para proyecto Backend y Móvil, arquitectura ejecutable sin funcionalidad específica.

@@ -86,5 +86,5 @@ El objetivo es que el flujo **spec → rama → PR → CI → merge → deploy m
 | # | Pregunta | Responsable |
 |---|---|---|
 | P-01 | ¿Quién aprueba los PR a `main`? (antes P-02 de `000`) | Equipo |
-| P-02 | ✅ Resuelta (2026-11-04): `virgorent/virGO_App` es público, así que el ruleset y los revisores de los *environments* funcionan en el plan Free. | — |
+| P-02 | ✅ Resuelta (2026-11-04): `virgorent/VirGO_Backend` es público, así que el ruleset y los revisores de los *environments* funcionan en el plan Free. | — |
 | P-03 | ¿Para qué se usa `rama-apis`, si ya existe `rama-backend`? | Equipo |

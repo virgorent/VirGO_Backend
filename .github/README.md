@@ -44,7 +44,7 @@ Hasta que existan esos workflows, el ruleset solo exige `gitleaks` y `dependency
 El archivo por sí solo **no protege** `main`: hay que aplicarlo una vez con permisos de administración.
 
 ```bash
-gh api repos/virgorent/virGO_App/rulesets \
+gh api repos/virgorent/VirGO_Backend/rulesets \
   --method POST \
   --input .github/rulesets/main-protection.json
 ```
@@ -52,5 +52,5 @@ gh api repos/virgorent/virGO_App/rulesets \
 Verificar:
 
 ```bash
-gh api repos/virgorent/virGO_App/rulesets
+gh api repos/virgorent/VirGO_Backend/rulesets
 ```

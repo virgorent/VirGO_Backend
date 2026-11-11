@@ -1,6 +1,6 @@
 # AGENTS.md — VirGo API (Backend)
 
-Guía base para los agentes de IA y las personas que trabajan en este proyecto (carpeta `VirGo-API/` del repositorio `virgorent/virGO_App`). Sigue lo que dice [`constitution.md`](constitution.md); si algo aquí lo contradice, gana la constitución.
+Guía base para los agentes de IA y las personas que trabajan en este proyecto (carpeta `VirGo-API/` del repositorio `virgorent/VirGO_Backend`). Sigue lo que dice [`constitution.md`](constitution.md); si algo aquí lo contradice, gana la constitución.
 
 ## Contexto del proyecto
 
