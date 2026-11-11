@@ -1,6 +1,6 @@
 # .github — DevSecOps compartido
 
-GitHub solo lee esta carpeta desde la raíz del repositorio. Contiene los controles compartidos por `VirGo-API` y `VirGo-Movil`.
+GitHub solo lee esta carpeta desde la raíz del repositorio. Contiene los controles de `VirGo-API` y `VirGo-Database`.
 
 | Archivo | Propósito |
 |---|---|
@@ -23,7 +23,6 @@ GitHub solo lee esta carpeta desde la raíz del repositorio. Contiene los contro
 Este baseline cubre **secretos** y **dependencias**. El análisis estático (SAST/CodeQL/linters) y las pruebas automatizadas los aportan los workflows de cada proyecto:
 
 - `VirGo-API`: `api-*.yml` (spec `002-pipeline-cicd`).
-- `VirGo-Movil`: `movil-*.yml` (spec `000-arquitectura-base`, tareas T031–T032 y T038–T039).
 
 Hasta que existan esos workflows, el ruleset solo exige `gitleaks` y `dependency review`. Antes del primer PR de código hay que añadir los checks de cada proyecto al ruleset.
 

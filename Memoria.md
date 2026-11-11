@@ -25,6 +25,7 @@
 | 2026-11-04 | Cerrar `nv-02` como Cumplido con pendientes operativos | La gobernanza, plantillas y baseline están verificados; faltan aplicar el ruleset de `main` y habilitar Dependency graph |
 | 2026-11-04 | `VirGo-API/db/schema/` es la fuente de verdad del esquema de MongoDB | La base y el modelo se contradecían; ver `VirGo-API/memoria.md` |
 | 2026-11-05 | `VirGo-Database` es la fuente de verdad del esquema; `db/schema/` será una copia generada | Su catálogo coincide 22 de 22 con `virgo_dev`; ver `VirGo-API/specs/010-contrato-datos` |
+| 2026-11-11 | `VirGo-Movil` sale de este repositorio | Indicación del curso: backend y frontend separados |
 
 ## Errores a evitar
 
@@ -44,3 +45,14 @@
 ## Notas
 
 Este archivo se irá actualizando conforme avance el proyecto.
+
+## Separación de repositorios (2026-11-11)
+
+Por indicación del curso, el backend y el frontend viven en repositorios distintos:
+
+| Repositorio | Contenido |
+|---|---|
+| [`virgorent/virGO_App`](https://github.com/virgorent/virGO_App) | Backend: `VirGo-API` y `VirGo-Database` |
+| [`virgorent/virGO_Movil`](https://github.com/virgorent/virGO_Movil) | Frontend: `VirGo-Movil` |
+
+La gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`, `.specify/`, `.opencode/`) está copiada en ambos y debe mantenerse alineada. Las entradas anteriores de esta bitácora describen el monorepo de entonces.
