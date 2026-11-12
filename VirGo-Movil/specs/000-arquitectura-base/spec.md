@@ -4,7 +4,7 @@
 |---|---|
 | Módulo | `000-arquitectura-base` |
 | Versión | 1.1.0 |
-| Estado | En revisión |
+| Estado | Aprobado |
 | Fecha | 2026-10-29 |
 | Constitución | v1.1.0. Aplica todos los artículos; sobre todo II, III, IV, V, VII y VIII |
 | Plan | [plan.md](plan.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
@@ -95,7 +95,7 @@ El objetivo es que, al terminar este módulo, exista una app **sin funcionalidad
 
 **Dependencias**
 
-- La URL HTTPS de producción de la API la entrega la tarea T210 de `VirGo-API` (antes T033). Mientras no exista, la versión de desarrollo apunta a la API local (`http://10.0.2.2:5080`, solo en *debug*).
+- La URL HTTPS de producción de la API la entrega la tarea T210 de `VirGo-API` (antes T033). Mientras no exista, la versión de desarrollo apunta a la API local (`http://10.0.2.2:5122`, solo en *debug*).
 
 **Preguntas abiertas**
 

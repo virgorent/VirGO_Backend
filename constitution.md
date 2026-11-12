@@ -91,7 +91,9 @@
 |---|---|---|
 | Backend | `VirGo-API/` | `constitution.md`, `AGENTS.md`, `memoria.md`, `specs/NNN-…` |
 | Móvil | `VirGo-Movil/` | `constitution.md`, `AGENTS.md`, `memoria.md`, `specs/NNN-…` |
+| Base de datos | `VirGo-Database/` | `README.md`, `docs/DECISIONS.md`, `specs/NNN-…`; se rige por esta constitución |
 
 - Esta constitución manda en los **principios generales**. La de cada proyecto los desarrolla y manda en lo **técnico** de ese proyecto.
 - `.github/` vive en la raíz y se comparte: GitHub no lee esa carpeta dentro de subcarpetas.
 - `Modelo de datos VirGo.md` vive en la raíz porque lo usan ambos proyectos.
+- `VirGo-Database` es el único proyecto que cambia la estructura de MongoDB; `VirGo-API` solo lee y escribe documentos.

@@ -400,7 +400,7 @@ Se validan con `enum` en el `$jsonSchema` de cada colección y en los DTO de la 
 
 ## 7. Orden sugerido para crearla (por módulos funcionales)
 
-Las 22 colecciones se declaran en `VirGo-Database/src/catalog/`. `VirGo-API/db/schema/` se genera desde ese catálogo con `npm run db:export:api`, y la API crea o actualiza las colecciones al arrancar desde esos archivos (`MongoIndexInitializer`); no se cambian a mano.
+Las 22 colecciones se declaran en `VirGo-Database/src/catalog/`. `VirGo-API/db/schema/` se genera desde ese catálogo con `npm run db:export:api`, y la API crea o actualiza las colecciones al arrancar desde esos archivos (`MongoIndexInitializer`); la estructura la administra `VirGo-Database` (`npm run db:plan:dev` y `db:init:dev`) y no se edita a mano en Atlas.
 
 1. **Cuentas:** `users`, `sessions` (specs `003` y `004`), `passwordResets` y `paymentCards`.
 2. **Catálogo:** `venues`, `venueDates` y `providers`.
@@ -411,7 +411,7 @@ Las 22 colecciones se declaran en `VirGo-Database/src/catalog/`. `VirGo-API/db/s
 
 ## 8. Longitudes máximas
 
-Confirmadas en `VirGo-Database/src/catalog/` y exportadas a `db/schema` (`007-esquema-mongodb`). Los campos con formato fijo (UUID, fechas) y los enumerados se validan con `pattern` o `enum`.
+Confirmadas en `VirGo-Database/src/catalog/` y exportadas a `db/schema` (`010-contrato-datos`). Los campos con formato fijo (UUID, fechas) y los enumerados se validan con `pattern` o `enum`.
 
 | Máximo | Campos |
 |---|---|
