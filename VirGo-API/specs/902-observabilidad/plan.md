@@ -12,7 +12,7 @@
 ## 1. Resumen técnico
 
 - `Tracing: Active` en las dos funciones desde `Globals` de `template.yaml`; SAM agrega el permiso de escritura de X-Ray.
-- Paquete `AWSXRayRecorder.Handlers.AwsSdk`: registra el SDK de AWS solo cuando la variable `AWS_LAMBDA_FUNCTION_NAME` existe, con la estrategia `LOG_ERROR` si no hay contexto.
+- Sin SDK de X-Ray en el código: `Tracing: Active` crea la traza de cada invocación sin dependencias nuevas (ADR-40).
 - El *middleware* de correlación agrega el `traceId` de `_X_AMZN_TRACE_ID` al alcance del log.
 - `AWS::CloudWatch::Dashboard` `virgo-api` con el cuerpo en JSON dentro de la plantilla.
 
@@ -20,7 +20,7 @@
 
 | Aspecto | Decisión |
 |---|---|
-| Lenguaje / framework | .NET 10 con `AWSXRayRecorder.Handlers.AwsSdk` |
+| Lenguaje / framework | .NET 10; el rastreo lo hace el servicio de Lambda |
 | Infraestructura | SAM: `Globals.Function.Tracing`, `AWS::CloudWatch::Dashboard` |
 | Seguridad | Sin metadatos sensibles en las trazas |
 
@@ -35,16 +35,15 @@
 ## 4. Estructura
 
 ```text
-src/VirGo.Api/Observability/Tracing.cs   # registro condicional del SDK
-src/VirGo.Worker/Function.cs             # mismo registro en el worker
-infra/template.yaml                      # Tracing y VirGoDashboard
+src/VirGo.Api/Middleware/CorrelationIdMiddleware.cs   # traceId en el alcance del log
+infra/template.yaml                                   # Tracing y VirGoDashboard
 ```
 
 ## 5. Decisiones técnicas (ADR)
 
 | ADR | Decisión | Alternativas descartadas | Motivo |
 |---|---|---|---|
-| ADR-40 | X-Ray con muestreo por defecto | OpenTelemetry con ADOT | ADOT agrega una capa y memoria; X-Ray es nativo y gratis en este volumen |
+| ADR-40 | X-Ray activo en Lambda (`Tracing: Active`) sin SDK en el código | SDK de X-Ray para .NET; OpenTelemetry con ADOT | El SDK de X-Ray está en mantenimiento y no está validado con AWSSDK v4; ADOT agrega una capa y memoria. Lo nativo es gratis en este volumen |
 | ADR-41 | Tablero definido como código | Tablero hecho a mano en la consola | Art. VII.4: nada se crea a mano |
 
 ## 6. Diseño
@@ -60,7 +59,7 @@ infra/template.yaml                      # Tracing y VirGoDashboard
 
 ### 6.2 Seguridad
 
-El SDK de X-Ray solo registra el nombre de la operación, el servicio y el código de respuesta.
+La traza de Lambda solo contiene tiempos, el resultado de la invocación y el identificador de la solicitud.
 
 ## 7. DevSecOps y CI/CD
 
@@ -73,15 +72,14 @@ El SDK de X-Ray solo registra el nombre de la operación, el servicio y el códi
 
 | Nivel | Dónde | Qué cubre |
 |---|---|---|
-| Unitarias | `VirGo.UnitTests` | El rastreo no se registra fuera de Lambda |
-| Integración | `VirGo.IntegrationTests` | Las pruebas existentes pasan sin daemon de X-Ray |
+| Unitarias | `VirGo.UnitTests` | El `traceId` entra al alcance del log solo cuando existe |
+| Integración | `VirGo.IntegrationTests` | Las pruebas existentes pasan sin AWS |
 | Humo | Consola de X-Ray y CloudWatch | CA-01 a CA-03 |
 
 ## 9. Riesgos y mitigaciones
 
 | Riesgo | Mitigación |
 |---|---|
-| Excepciones por falta de segmento en local | Registro condicional y `LOG_ERROR` |
 | Superar 100 000 trazas | Muestreo por defecto; el presupuesto de $1 avisa |
 
 ## 10. Fases

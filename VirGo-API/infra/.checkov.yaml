@@ -6,3 +6,12 @@ skip-check:
   - CKV_AWS_115 # New accounts have a concurrency quota of 10; reserving it would block the deployment.
   - CKV_AWS_173 # Environment variables hold no secrets; secrets are read from SSM at startup.
   - CKV_AWS_26 # The SNS topic only carries alarm notifications; the AWS-managed SNS key blocks CloudWatch from publishing.
+  - CKV_AWS_18 # Media bucket access logging needs a second bucket with storage cost; CloudFront metrics cover usage (904).
+  - CKV_AWS_21 # Media versioning doubles storage; photos can be uploaded again (904).
+  - CKV_AWS_144 # Cross-region replication has a cost and media is not critical data (904).
+  - CKV_AWS_145 # Media uses SSE-S3; a customer KMS key is not cost-free (904).
+  - CKV_AWS_68 # AWS WAF has a monthly cost (Art. VII.2); CloudFront only serves public photos (904).
+  - CKV_AWS_86 # CloudFront access logs need a log bucket with storage cost (904).
+  - CKV_AWS_174 # The default *.cloudfront.net certificate does not allow setting the minimum TLS version; a custom domain is not cost-free (904).
+  - CKV_AWS_310 # Origin failover needs a second bucket; media is not critical data (904).
+  - CKV_AWS_305 # The distribution serves objects by path only; there is no root page (904).

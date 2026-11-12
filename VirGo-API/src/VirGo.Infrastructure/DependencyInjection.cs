@@ -9,6 +9,13 @@ using VirGo.Infrastructure.Auth;
 using VirGo.Application.Auth;
 using VirGo.Application.Marketplace;
 using VirGo.Infrastructure.Caching;
+using Amazon.SimpleEmailV2;
+using Amazon.SQS;
+using Microsoft.Extensions.Logging;
+using VirGo.Application.Email;
+using VirGo.Application.Jobs;
+using VirGo.Infrastructure.Email;
+using VirGo.Infrastructure.Jobs;
 
 namespace VirGo.Infrastructure;
 
@@ -43,7 +50,10 @@ public static class DependencyInjection
             services.AddSingleton<IUserRepository, InMemoryUserRepository>();
             services.AddSingleton<ISessionRepository, InMemorySessionRepository>();
             services.AddSingleton<IVenueRepository, InMemoryVenueRepository>();
-            services.AddSingleton<IQuoteRepository, InMemoryQuoteRepository>();
+            services.AddSingleton<InMemoryQuoteRepository>();
+            services.AddSingleton<IQuoteRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryQuoteRepository>());
+            services.AddSingleton<IQuoteExpiry>(serviceProvider => serviceProvider.GetRequiredService<InMemoryQuoteRepository>());
+            services.AddSingleton<INoticeRepository, InMemoryNoticeRepository>();
             services.AddSingleton<IBookingRepository, InMemoryBookingRepository>();
         }
         else
@@ -52,6 +62,8 @@ public static class DependencyInjection
             services.AddSingleton<ISessionRepository, MongoSessionRepository>();
             services.AddSingleton<IVenueRepository, MongoVenueRepository>();
             services.AddSingleton<IQuoteRepository, MongoQuoteRepository>();
+            services.AddSingleton<IQuoteExpiry, MongoQuoteExpiry>();
+            services.AddSingleton<INoticeRepository, MongoNoticeRepository>();
             services.AddSingleton<IBookingRepository, MongoBookingRepository>();
         }
 
@@ -76,8 +88,46 @@ public static class DependencyInjection
         }
 
         AddCaching(services, configuration);
+        AddJobs(services, configuration);
 
         return services;
+    }
+
+    /// <summary>Job queue, email sender and job handlers. Empty settings fall back to in-memory and logging implementations.</summary>
+    private static void AddJobs(IServiceCollection services, IConfiguration configuration)
+    {
+        var queueUrl = configuration["Jobs:QueueUrl"];
+        if (string.IsNullOrWhiteSpace(queueUrl))
+        {
+            services.AddSingleton<InMemoryJobPublisher>();
+            services.AddSingleton<IJobPublisher>(serviceProvider => serviceProvider.GetRequiredService<InMemoryJobPublisher>());
+        }
+        else
+        {
+            services.AddSingleton<IAmazonSQS, AmazonSQSClient>();
+            services.AddSingleton<IJobPublisher>(serviceProvider => new SqsJobPublisher(
+                serviceProvider.GetRequiredService<IAmazonSQS>(),
+                queueUrl,
+                serviceProvider.GetRequiredService<ILogger<SqsJobPublisher>>()));
+        }
+
+        var senderAddress = configuration["Email:SenderAddress"];
+        if (string.IsNullOrWhiteSpace(senderAddress))
+        {
+            services.AddSingleton<IEmailSender, LoggingEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<IAmazonSimpleEmailServiceV2, AmazonSimpleEmailServiceV2Client>();
+            services.AddSingleton<IEmailSender>(serviceProvider => new SesEmailSender(
+                serviceProvider.GetRequiredService<IAmazonSimpleEmailServiceV2>(),
+                senderAddress));
+        }
+
+        services.AddScoped<IJobHandler, BookingCreatedHandler>();
+        services.AddScoped<IJobHandler, EmailSendHandler>();
+        services.AddScoped<IJobHandler, QuotesExpireHandler>();
+        services.AddScoped<JobDispatcher>();
     }
 
     private static void AddCaching(IServiceCollection services, IConfiguration configuration)

@@ -17,7 +17,7 @@ Hoy solo hay logs y dos alarmas. Para saber **dónde** se tarda o falla una peti
 
 | ID | Historia |
 |---|---|
-| HT-01 | Como **desarrollador**, quiero ver el recorrido de una petición (Lambda → MongoDB, SQS, SSM) con el tiempo de cada parte, para encontrar la causa de una falla o una demora. |
+| HT-01 | Como **desarrollador**, quiero ver cada invocación de la API y del worker con su tiempo y su resultado, para encontrar la causa de una falla o una demora. |
 | HT-02 | Como **operador**, quiero un tablero con peticiones, errores, latencia, cola y worker en una sola pantalla. |
 
 ## 3. Requerimientos funcionales
@@ -25,8 +25,7 @@ Hoy solo hay logs y dos alarmas. Para saber **dónde** se tarda o falla una peti
 | ID | Requerimiento |
 |---|---|
 | RF-01 | Las funciones de la API y del worker tienen el rastreo de X-Ray activo. |
-| RF-02 | Las llamadas al SDK de AWS (SQS, SES, SSM) aparecen como subsegmentos de la traza. |
-| RF-03 | El mapa de servicios de X-Ray muestra la API, el worker y los servicios de AWS que usan. |
+| RF-03 | El mapa de servicios de X-Ray muestra la API y el worker. |
 | RF-04 | Existe el tablero `virgo-api` con: peticiones, 4xx y 5xx, latencia p50/p95/p99 de API Gateway; invocaciones, errores, duración y *throttles* de las dos Lambdas; mensajes visibles en `virgo-jobs` y en su cola de errores. |
 | RF-05 | Cada log de la API incluye el identificador de traza de X-Ray junto al `correlationId`. |
 | RF-06 | Fuera de AWS (local y pruebas), el rastreo está apagado y no produce errores. |
@@ -45,7 +44,7 @@ Hoy solo hay logs y dos alarmas. Para saber **dónde** se tarda o falla una peti
 | ID | Criterio |
 |---|---|
 | CA-01 | **Dado** el stack desplegado, **cuando** llamo a `/api/v1/venues`, **entonces** en X-Ray aparece una traza con el segmento de la Lambda. |
-| CA-02 | **Dado** una reservación creada, **cuando** abro su traza, **entonces** aparece el subsegmento de SQS. |
+| CA-02 | **Dado** una reservación creada, **cuando** el worker procesa el aviso, **entonces** en X-Ray aparece también la traza del worker. |
 | CA-03 | **Dado** el stack desplegado, **cuando** abro CloudWatch → Paneles, **entonces** existe `virgo-api` con todos los widgets de RF-04 con datos. |
 | CA-04 | **Dado** las pruebas locales, **cuando** corren sin AWS, **entonces** pasan sin errores de X-Ray. |
 
@@ -60,6 +59,7 @@ Hoy solo hay logs y dos alarmas. Para saber **dónde** se tarda o falla una peti
 
 - Rastreo de API Gateway: el HTTP API no admite X-Ray; la traza empieza en la Lambda.
 - Rastreo de las consultas a MongoDB como subsegmentos propios.
+- Subsegmentos de las llamadas al SDK de AWS: el SDK de X-Ray para .NET está en mantenimiento y se compiló para la versión 3 del SDK de AWS, mientras el proyecto usa la 4. Se evaluará OpenTelemetry (ADOT) en otro spec.
 - CloudTrail (descartado por el equipo); la actividad de la cuenta se consulta en el historial de eventos gratuito de 90 días.
 
 ## 8. Supuestos, dependencias y preguntas abiertas

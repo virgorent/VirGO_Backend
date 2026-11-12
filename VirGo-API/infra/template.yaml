@@ -5,6 +5,13 @@ Description: VirGo API serverless application.
 Parameters:
   AlertEmail:
     Type: String
+  SenderEmail:
+    Type: String
+    Default: ''
+    Description: Verified Amazon SES sender address (903). Empty disables SES; the worker only logs emails.
+
+Conditions:
+  HasSender: !Not [!Equals [!Ref SenderEmail, '']]
 
 Globals:
   Function:
@@ -13,6 +20,7 @@ Globals:
       - arm64
     MemorySize: 512
     Timeout: 15
+    Tracing: Active
     Environment:
       Variables:
         ASPNETCORE_ENVIRONMENT: Production
@@ -60,9 +68,20 @@ Resources:
       FunctionName: virgo-api-prod
       CodeUri: ../src/VirGo.Api/
       Handler: VirGo.Api
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Canary10Percent5Minutes
+        Alarms:
+          - !Ref CanaryErrorsAlarm
+      Environment:
+        Variables:
+          Jobs__QueueUrl: !Ref JobsQueue
+          Media__BaseUrl: !Sub https://${MediaDistribution.DomainName}
       Policies:
         - SSMParameterReadPolicy:
             ParameterName: virgo/prod/*
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt JobsQueue.QueueName
       Events:
         Api:
           Type: HttpApi
@@ -74,6 +93,220 @@ Resources:
     Properties:
       LogGroupName: /aws/lambda/virgo-api-prod
       RetentionInDays: 7
+
+  # 099 · Cola de trabajos y worker
+  JobsDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: virgo-jobs-dlq
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: true
+
+  JobsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: virgo-jobs
+      VisibilityTimeout: 60
+      MessageRetentionPeriod: 345600
+      SqsManagedSseEnabled: true
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt JobsDeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  JobsQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref JobsQueue
+        - !Ref JobsDeadLetterQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: sqs:*
+            Resource:
+              - !GetAtt JobsQueue.Arn
+              - !GetAtt JobsDeadLetterQueue.Arn
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  VirGoWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: virgo-worker-prod
+      CodeUri: ../src/VirGo.Worker/
+      Handler: VirGo.Worker::VirGo.Worker.JobsFunction::FunctionHandler
+      MemorySize: 256
+      Timeout: 10
+      Environment:
+        Variables:
+          Email__SenderAddress: !Ref SenderEmail
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: virgo/prod/*
+        - Statement:
+            - Sid: SendFromVerifiedSender
+              Effect: Allow
+              Action: ses:SendEmail
+              Resource: !Sub arn:${AWS::Partition}:ses:${AWS::Region}:${AWS::AccountId}:identity/*
+              Condition:
+                StringEquals:
+                  ses:FromAddress: !Ref SenderEmail
+      Events:
+        Jobs:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt JobsQueue.Arn
+            BatchSize: 10
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+  VirGoWorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/virgo-worker-prod
+      RetentionInDays: 7
+
+  # 903 · Remitente de SES (solo si se indica SenderEmail)
+  SenderIdentity:
+    Type: AWS::SES::EmailIdentity
+    Condition: HasSender
+    Properties:
+      EmailIdentity: !Ref SenderEmail
+
+  # 905 · Tareas programadas
+  SchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: scheduler.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+      Policies:
+        - PolicyName: send-to-jobs-queue
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: sqs:SendMessage
+                Resource: !GetAtt JobsQueue.Arn
+
+  QuotesExpireSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: virgo-quotes-expire
+      Description: Expires quotes whose event date already passed (905).
+      ScheduleExpression: cron(0 0 * * ? *)
+      ScheduleExpressionTimezone: America/Mexico_City
+      FlexibleTimeWindow:
+        Mode: 'OFF'
+      State: ENABLED
+      Target:
+        Arn: !GetAtt JobsQueue.Arn
+        RoleArn: !GetAtt SchedulerRole.Arn
+        Input: '{"type":"quotes.expire"}'
+        RetryPolicy:
+          MaximumRetryAttempts: 3
+          MaximumEventAgeInSeconds: 3600
+
+  # 904 · Medios en S3 servidos por CloudFront
+  MediaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub virgo-media-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      LifecycleConfiguration:
+        Rules:
+          - Id: abort-incomplete-uploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  MediaOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub virgo-media-${AWS::AccountId}
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  MediaDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: VirGo media (904)
+        PriceClass: PriceClass_100
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        Origins:
+          - Id: media-bucket
+            DomainName: !GetAtt MediaBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt MediaOriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId: media-bucket
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+          CachedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03 # Managed-SecurityHeadersPolicy
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+
+  MediaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref MediaBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${MediaBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${MediaDistribution}
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !GetAtt MediaBucket.Arn
+              - !Sub ${MediaBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
 
   VirGoAlerts:
     Type: AWS::SNS::Topic
@@ -123,7 +356,71 @@ Resources:
       AlarmActions:
         - !Ref VirGoAlerts
 
+  # 900 · Alarma del canary: errores de la versión nueva (alias live)
+  CanaryErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: The new VirGo API version returned Lambda errors during the canary; CodeDeploy rolls back.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: virgo-api-prod
+        - Name: Resource
+          Value: virgo-api-prod:live
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref VirGoAlerts
+
+  # 099 · Mensajes en la cola de errores
+  JobsDeadLetterAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: A VirGo job failed 3 times and is in virgo-jobs-dlq.
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt JobsDeadLetterQueue.QueueName
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref VirGoAlerts
+
+  # 902 · Tablero
+  VirGoDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: virgo-api
+      DashboardBody: !Sub |
+        {"widgets":[
+          {"type":"metric","x":0,"y":0,"width":12,"height":6,"properties":{"title":"API Gateway: peticiones y errores","region":"${AWS::Region}","stat":"Sum","period":300,"view":"timeSeries","metrics":[["AWS/ApiGateway","Count","ApiId","${VirGoHttpApi}"],[".","4xx",".","."],[".","5xx",".","."]]}},
+          {"type":"metric","x":12,"y":0,"width":12,"height":6,"properties":{"title":"API Gateway: latencia (ms)","region":"${AWS::Region}","period":300,"view":"timeSeries","metrics":[["AWS/ApiGateway","Latency","ApiId","${VirGoHttpApi}",{"stat":"p50"}],["...",{"stat":"p95"}],["...",{"stat":"p99"}]]}},
+          {"type":"metric","x":0,"y":6,"width":12,"height":6,"properties":{"title":"Lambda de la API","region":"${AWS::Region}","stat":"Sum","period":300,"view":"timeSeries","metrics":[["AWS/Lambda","Invocations","FunctionName","virgo-api-prod"],[".","Errors",".","."],[".","Throttles",".","."],[".","ConcurrentExecutions",".",".",{"stat":"Maximum"}]]}},
+          {"type":"metric","x":12,"y":6,"width":12,"height":6,"properties":{"title":"Duración p95 (ms)","region":"${AWS::Region}","stat":"p95","period":300,"view":"timeSeries","metrics":[["AWS/Lambda","Duration","FunctionName","virgo-api-prod"],["...","virgo-worker-prod"]]}},
+          {"type":"metric","x":0,"y":12,"width":12,"height":6,"properties":{"title":"Worker","region":"${AWS::Region}","stat":"Sum","period":300,"view":"timeSeries","metrics":[["AWS/Lambda","Invocations","FunctionName","virgo-worker-prod"],[".","Errors",".","."]]}},
+          {"type":"metric","x":12,"y":12,"width":12,"height":6,"properties":{"title":"Colas: mensajes visibles","region":"${AWS::Region}","stat":"Maximum","period":300,"view":"timeSeries","metrics":[["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","virgo-jobs"],["...","virgo-jobs-dlq"]]}}
+        ]}
+
 Outputs:
   ApiUrl:
     Description: HTTPS URL of the API Gateway HTTP API.
     Value: !Sub https://${VirGoHttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
+  MediaBaseUrl:
+    Description: HTTPS base URL of the media CDN (904).
+    Value: !Sub https://${MediaDistribution.DomainName}
+  JobsQueueUrl:
+    Description: URL of the virgo-jobs queue (099).
+    Value: !Ref JobsQueue
+  DashboardUrl:
+    Description: CloudWatch dashboard (902).
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards/dashboard/virgo-api

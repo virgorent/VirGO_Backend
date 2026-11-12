@@ -61,7 +61,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T111 | `template.yaml`: `AutoPublishAlias: live`, `DeploymentPreference` `Canary10Percent5Minutes` y alarma `CanaryErrorsAlarm` sobre el alias | — | `devops-aws` | `sam validate --lint`, cfn-lint | ⏳ |
+| T111 | `template.yaml`: `AutoPublishAlias: live`, `DeploymentPreference` `Canary10Percent5Minutes` y alarma `CanaryErrorsAlarm` sobre el alias | — | `devops-aws` | `sam validate --lint`, cfn-lint | ✅ local |
 | T112 | 🧑 Desplegar y verificar el despliegue *canary* en CodeDeploy | T111 | `devops-aws` | CA-10 | ⏳ |
 | T113 | 🧑 Crear la organización de AWS Organizations y activar IAM Identity Center en `us-east-1` desde la consola | — | Angelica | Consola de IAM Identity Center | ⏳ |
 | T114 | Crear el usuario `angelica-admin`, el conjunto de permisos `AdministratorAccess` (sesión de 8 h) y asignarlo a la cuenta | T113 | `devops-aws` | `aws sso-admin list-account-assignments` | ⏳ |

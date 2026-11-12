@@ -15,12 +15,12 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T9901 | `IJobQueue`, `JobMessage`, `JobTypes` en `Application` e `InMemoryJobQueue` en `Infrastructure` | — | `dev-dotnet` | Compila; pruebas unitarias | ⏳ |
-| T9902 | `SqsJobQueue` y publicación de `booking.created` en `BookingService` con fallo abierto | T9901 | `dev-dotnet` | CA-01, CA-04 | ⏳ |
-| T9903 | Proyecto `VirGo.Worker` con `JobDispatcher` y `BookingCreatedHandler` idempotente | T9901 | `dev-dotnet` | CA-02, CA-03 | ⏳ |
-| T9904 | `template.yaml`: `virgo-jobs`, `virgo-jobs-dlq`, `VirGoWorkerFunction`, permisos y alarma de la DLQ | T9903 | `devops-aws` | `sam validate --lint`, cfn-lint, Checkov | ⏳ |
-| T9905 | Pruebas unitarias e integración de la cola y del worker | T9902, T9903 | `qa` | `dotnet test` en verde | ⏳ |
-| T9906 | Registrar el costo estimado en `memoria.md` (Art. VII.5) | T9904 | `devops-aws` | Entrada en `memoria.md` | ⏳ |
+| T9901 | `IJobPublisher`, `JobMessage`, `JobTypes` en `Application` e `InMemoryJobPublisher` en `Infrastructure` | — | `dev-dotnet` | Compila; pruebas unitarias | ✅ local |
+| T9902 | `SqsJobPublisher` y publicación de `booking.created` en `BookingService` con fallo abierto | T9901 | `dev-dotnet` | CA-01, CA-04 | ✅ local |
+| T9903 | Proyecto `VirGo.Worker` con `JobDispatcher` y `BookingCreatedHandler` idempotente | T9901 | `dev-dotnet` | CA-02, CA-03 | ✅ local |
+| T9904 | `template.yaml`: `virgo-jobs`, `virgo-jobs-dlq`, `VirGoWorkerFunction`, permisos y alarma de la DLQ | T9903 | `devops-aws` | `sam validate --lint`, cfn-lint, Checkov | ✅ local |
+| T9905 | Pruebas unitarias e integración de la cola y del worker | T9902, T9903 | `qa` | `dotnet test` en verde | ✅ local |
+| T9906 | Registrar el costo estimado en `memoria.md` (Art. VII.5) | T9904 | `devops-aws` | Entrada en `memoria.md` | ✅ local |
 | T9907 | 🧑 Desplegar y probar: reservación → aviso en `notices`; mensaje inválido → DLQ y alarma | T9904, T9905 | `devops-aws` | CA-01 a CA-05 en la nube | ⏳ |
 | T9908 | Completar `check.md` y registrar el cierre en `memoria.md` | T9907 | `qa` | `check.md` sin ⏳ | ⏳ |
 

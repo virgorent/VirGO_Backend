@@ -15,9 +15,9 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T90301 | `IEmailSender`, `EmailTemplates`, `SesEmailSender` y `LoggingEmailSender` | — | `dev-dotnet` | Pruebas unitarias | ⏳ |
-| T90302 | `EmailSendHandler` en el worker | T90301, `099`: T9903 | `dev-dotnet` | CA-03, CA-04 | ⏳ |
-| T90303 | `template.yaml`: `SenderIdentity` (`SenderEmail`) y permiso del worker | `099`: T9904 | `devops-aws` | cfn-lint, Checkov | ⏳ |
+| T90301 | `IEmailSender`, `EmailTemplates`, `SesEmailSender` y `LoggingEmailSender` | — | `dev-dotnet` | Pruebas unitarias | ✅ local |
+| T90302 | `EmailSendHandler` en el worker | T90301, `099`: T9903 | `dev-dotnet` | CA-03, CA-04 | ✅ local |
+| T90303 | `template.yaml`: `SenderIdentity` (`SenderEmail`) y permiso del worker | `099`: T9904 | `devops-aws` | cfn-lint, Checkov | ✅ local |
 | T90304 | 🧑 Desplegar, confirmar el correo de verificación de SES y enviar un correo de prueba | T90302, T90303 | `devops-aws` | CA-01, CA-02 | ⏳ |
 | T90305 | Completar `check.md` y registrar en `memoria.md` | T90304 | `qa` | `check.md` sin ⏳ | ⏳ |
 

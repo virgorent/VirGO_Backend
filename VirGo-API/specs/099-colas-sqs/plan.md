@@ -11,8 +11,8 @@
 
 ## 1. Resumen técnico
 
-- `Application` define `IJobQueue` y el contrato `JobMessage` (tipo, carga útil y `correlationId`).
-- `Infrastructure` implementa `SqsJobQueue` (AWSSDK.SQS) y `InMemoryJobQueue` para local y pruebas.
+- `Application` define `IJobPublisher` y el contrato `JobMessage` (tipo, carga útil y `correlationId`).
+- `Infrastructure` implementa `SqsJobPublisher` (AWSSDK.SQS) y `InMemoryJobPublisher` para local y pruebas.
 - `BookingService` publica `booking.created` después de guardar, con fallo abierto.
 - Nuevo proyecto `src/VirGo.Worker`: una Lambda que recibe eventos de SQS y despacha por tipo a un `IJobHandler`.
 - `infra/template.yaml` agrega la cola, la cola de errores, la función del worker, sus permisos y la alarma.
@@ -40,8 +40,8 @@
 
 ```text
 src/
-├── VirGo.Application/Jobs/        # IJobQueue, JobMessage, JobTypes
-├── VirGo.Infrastructure/Jobs/     # SqsJobQueue, InMemoryJobQueue
+├── VirGo.Application/Jobs/        # IJobPublisher, JobMessage, JobTypes
+├── VirGo.Infrastructure/Jobs/     # SqsJobPublisher, InMemoryJobPublisher
 └── VirGo.Worker/                  # Function (SQS), JobDispatcher, BookingCreatedHandler
 tests/VirGo.UnitTests/Jobs/        # dispatcher, idempotencia, fallo abierto
 ```

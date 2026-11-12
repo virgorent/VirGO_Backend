@@ -1,5 +1,7 @@
+using System.Globalization;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using VirGo.Application.Jobs;
 using VirGo.Application.Marketplace;
 using VirGo.Domain.Marketplace;
 
@@ -43,7 +45,7 @@ public sealed class InMemoryVenueRepository : IVenueRepository
     }
 }
 
-public sealed class InMemoryQuoteRepository : IQuoteRepository
+public sealed class InMemoryQuoteRepository : IQuoteRepository, IQuoteExpiry
 {
     private readonly List<Quote> quotes = [];
     private readonly Lock gate = new();
@@ -57,6 +59,52 @@ public sealed class InMemoryQuoteRepository : IQuoteRepository
         }
 
         return Task.CompletedTask;
+    }
+
+    public IReadOnlyList<Quote> Snapshot()
+    {
+        lock (gate)
+        {
+            return quotes.ToArray();
+        }
+    }
+
+    public Task<long> ExpireBeforeAsync(DateOnly today, DateTime now, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var cutoff = today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        long expired = 0;
+        lock (gate)
+        {
+            for (var index = 0; index < quotes.Count; index++)
+            {
+                var quote = quotes[index];
+                if (quote.Status is "sent" or "answered" && string.CompareOrdinal(quote.EventDate, cutoff) < 0)
+                {
+                    quotes[index] = new Quote
+                    {
+                        Id = quote.Id,
+                        ClientId = quote.ClientId,
+                        ClientName = quote.ClientName,
+                        TargetType = quote.TargetType,
+                        TargetId = quote.TargetId,
+                        TargetName = quote.TargetName,
+                        EventId = quote.EventId,
+                        EventType = quote.EventType,
+                        EventDate = quote.EventDate,
+                        Guests = quote.Guests,
+                        RequestedServices = quote.RequestedServices,
+                        Message = quote.Message,
+                        Status = "expired",
+                        CreatedAt = quote.CreatedAt,
+                        UpdatedAt = now
+                    };
+                    expired++;
+                }
+            }
+        }
+
+        return Task.FromResult(expired);
     }
 }
 

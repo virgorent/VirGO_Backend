@@ -24,7 +24,7 @@ Cada casilla lleva evidencia. El módulo se marca *Cerrado* solo con todo en ✅
 | CA | Evidencia | Estado |
 |---|---|---|
 | CA-01 Traza de la Lambda | Captura de X-Ray | ⏳ |
-| CA-02 Subsegmento de SQS | Captura de X-Ray | ⏳ |
+| CA-02 Traza del worker | Captura de X-Ray | ⏳ |
 | CA-03 Tablero `virgo-api` | Captura de CloudWatch | ⏳ |
 | CA-04 Sin errores en local | `dotnet test` | ⏳ |
 
