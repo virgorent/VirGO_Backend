@@ -6,7 +6,7 @@
 ## 1. Forma de trabajo
 
 - **Metodología**: Spec-Driven Development (SDD).
-- **Fase actual**: gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendiente operativo: aplicar el ruleset de `main`). `VirGo-API` y `VirGo-Movil` están en fase de especificación. **Todavía no hay código.**
+- **Fase actual**: gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendiente operativo: aplicar el ruleset de `main`). `VirGo-Database` tiene implementación y endurecimiento; `VirGo-Movil` tiene la base Android y el login en progreso; `VirGo-API` continúa en especificación.
 - **Principio**: `spec → plan → task → check`. No ejecutar tareas sin aprobación explícita.
 - **DevSecOps**: ningún cambio se fusiona sin escaneo de secretos, revisión de dependencias y, cuando el proyecto ya tenga su workflow, análisis estático en verde.
 - **Todo debe alinearse** a `constitution.md`.
@@ -39,7 +39,8 @@
 | **nv-01** | Arquitectura base SDD | Cumplido (2026-11-04) |
 | **nv-02** | Gobernanza global de proyectos | Cumplido con pendiente operativo (aplicar ruleset) |
 | **VirGo-API** | Backend .NET 10 (specs `000`–`004`) | Especificación |
-| **VirGo-Movil** | App Android (spec `000`) | Especificación |
+| **VirGo-Movil** | App Android (spec `000`) | Base Android implementada; login en progreso |
+| **VirGo-Database** | Catálogo MongoDB (specs `000`–`001`) | Implementación y endurecimiento |
 
 ## 4. Convenciones
 
