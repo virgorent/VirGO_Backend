@@ -7,8 +7,8 @@
 - Proyecto independiente de base de datos; no se modifica ni duplica `VirGo-API`.
 - 22 colecciones aprobadas.
 - Sin `config`, migraciones ni locks.
-- Sin datos de negocio iniciales.
-- Sin operaciones destructivas.
+- Sin datos reales de negocio; el seed DEMO es ficticio y opcional.
+- El inicializador no ejecuta operaciones destructivas; el purge DEMO solo elimina sus propios `_id`.
 
 ### Entornos
 
@@ -17,9 +17,19 @@
 - Usuario DDL separado del usuario runtime.
 - Guardas por `NODE_ENV` y nombre de base.
 
+### Fuente de verdad
+
+- `VirGo-Database/src/catalog` es la fuente de verdad de colecciones, validadores e indices.
+- `VirGo-API/db/schema` se genera con `npm run db:export:api`; no se edita a mano.
+- El exportador es determinista y `db:export:api:check` bloquea la deriva.
+
 ### Esquema
 
 - `quotes.updatedAt` obligatorio y BSON `Date`.
+- Todos los strings libres tienen `maxLength`.
+- `passwordResets` usa `codeHash` y `attempts`; `userId` es unico.
+- `providers` usa `pricing` y `responseTime`; `basePrice` no existe.
+- `monthlyStats._id` es determinista: `<targetType>:<targetId>:<AAAA-MM>`.
 - `reviews.bookingId` obligatorio solo para `targetType: venue`.
 - Indice unico de resenas por `targetType`, `targetId`, `authorId`.
 - Indice unico de conversaciones por `clientId`, `target.type`, `target.id`.
@@ -45,6 +55,8 @@
 - `venueDates` se inserta al confirmar.
 - La cancelacion elimina `venueDates` por `venueId`, `date` y `bookingId`; si no coincide exactamente, aborta.
 - `venueDates` no tiene TTL.
+- `bookings.idempotencyKey` es opcional, maximo 100 caracteres.
+- La idempotencia de reservas se garantiza con el indice unico parcial `clientId_1_idempotencyKey_1_unique`.
 
 ### Folios
 
@@ -69,6 +81,23 @@
 - Produccion exige `--confirm-production`.
 - Conflictos de indices bloquean el apply.
 - Indices extra solo generan advertencia.
+- `apply` rechaza acciones fuera del catalogo, indices manipulados y cualquier operacion destructiva.
+- Un fallo parcial conserva el detalle de lo aplicado y se reanuda con otro plan idempotente.
+
+### Seguridad
+
+- TLS obligatorio para toda conexion a Atlas.
+- Se rechazan parametros que desactiven la validacion TLS.
+- `MONGO_ALLOW_INSECURE_TLS` solo se permite en development/test y nunca en production.
+- El usuario runtime de la API tiene `readWrite` solo sobre su base; no usa el usuario DDL.
+- El acceso de red amplio (`0.0.0.0/0`) es una excepcion temporal, no una configuracion final de produccion.
+
+### Datos DEMO
+
+- El seed usa IDs deterministas y `replaceOne` con `upsert`; es idempotente.
+- Solo se permite en development/test; production y la base `virgo` se rechazan.
+- El purge es selectivo por `_id` DEMO y no toca documentos ajenos.
+- No se ejecuta automaticamente en `plan`, `apply` ni `verify`.
 
 ## Pendientes
 

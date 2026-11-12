@@ -15,8 +15,29 @@ export const user = (overrides = {}) => ({
   role: 'client',
   phone: '5551234567',
   isVerified: false,
+  failedLoginCount: 0,
+  unreadNotices: 0,
   createdAt: now(),
   updatedAt: now(),
+  ...overrides
+});
+
+export const passwordReset = (overrides = {}) => ({
+  _id: id(),
+  userId: id(),
+  expiresAt: now(),
+  codeHash: 'hash',
+  attempts: 0,
+  ...overrides
+});
+
+export const session = (overrides = {}) => ({
+  _id: id(),
+  userId: id(),
+  tokenHash: id(),
+  createdAt: now(),
+  expiresAt: now(),
+  purgeAt: now(),
   ...overrides
 });
 
@@ -66,7 +87,8 @@ export const provider = (overrides = {}) => ({
   businessName: 'Fotografia VirGo',
   category: 'Fotografía',
   description: 'Cobertura profesional de foto y video para eventos.',
-  basePrice: money(2500),
+  pricing: 'per_event',
+  responseTime: 'Menos de 2 h',
   zones: ['Centro'],
   packages: [
     {

@@ -25,13 +25,14 @@ import {
 export const venuesValidator = jsonSchema('venues', {
   _id: uuid(),
   ownerId: uuid(),
-  name: string(),
-  shortName: string(),
+  name: string(100),
+  shortName: string(20),
   description: {
     bsonType: 'string',
-    minLength: 20
+    minLength: 20,
+    maxLength: 2000
   },
-  address: string(),
+  address: string(200),
   zone: enumOf(ZONES),
   location: object({
     type: {
@@ -58,12 +59,12 @@ export const venuesValidator = jsonSchema('venues', {
   }, ['base', 'unit', 'minHours']),
   amenities: arrayOf(enumOf(AMENITIES)),
   services: arrayOf(object({
-    name: string(),
+    name: string(100),
     included: bool(),
     price: money()
   }, ['name', 'included', 'price'])),
   photos: arrayOf(object({
-    url: string(),
+    url: string(500),
     order: int(0)
   }, ['url', 'order'])),
   setups: object({
@@ -71,8 +72,8 @@ export const venuesValidator = jsonSchema('venues', {
     auditorium: int(0),
     cocktail: int(0)
   }, ['banquet', 'auditorium', 'cocktail']),
-  floorPlanUrl: string(),
-  tour360Url: string(),
+  floorPlanUrl: string(500),
+  tour360Url: string(500),
   categories: arrayOf(enumOf(VENUE_CATEGORIES)),
   rating: object({
     average: number(0, 5),
@@ -82,7 +83,7 @@ export const venuesValidator = jsonSchema('venues', {
   status: enumOf(VENUE_STATUSES),
   allies: arrayOf(object({
     providerId: uuid(),
-    name: string(),
+    name: string(100),
     category: enumOf(PROVIDER_CATEGORIES)
   }, ['providerId', 'name', 'category'])),
   createdAt: date(),
@@ -98,14 +99,12 @@ export const venuesValidator = jsonSchema('venues', {
   'location',
   'capacity',
   'price',
-  'amenities',
   'services',
   'photos',
   'categories',
   'rating',
   'verified',
   'status',
-  'allies',
   'createdAt',
   'updatedAt'
 ]);
@@ -116,6 +115,6 @@ export const venueDatesValidator = jsonSchema('venueDates', {
   date: dateString(),
   kind: enumOf(VENUE_DATE_KINDS),
   reason: enumOf(VENUE_DATE_REASONS),
-  note: string(),
+  note: string(200),
   bookingId: uuid()
 }, ['_id', 'venueId', 'date', 'kind']);

@@ -63,7 +63,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-29 | 2026-11-04 | `monthlyStats._id` determinista | Permite el `upsert` con `$inc` |
 | ADR-30 | 2026-11-04 | **Semgrep, SonarCloud y OWASP ZAP** en cada PR | Clase del 2026-11-04 y proyecto de referencia |
 | ADR-31 | 2026-11-04 | **Mutación nocturna**, fuera de los checks requeridos | Mantiene el CI corto, como la referencia |
-| ADR-32 | 2026-11-05 | **`VirGo-Database` define la estructura**; la API no ejecuta DDL | Constitución v1.2.0 del PR #5 |
+| ADR-32 | 2026-11-05 | **`VirGo-Database/src/catalog/` es la fuente de verdad**; `db/schema/` se genera desde el catálogo y la API no ejecuta DDL | Evita divergencia y ediciones manuales; detalle verificado el 2026-11-07 |
 | ADR-33 | 2026-11-05 | Testcontainers con los validadores reales | La persistencia en memoria no detecta rechazos |
 
 ## Cambios de contrato (compartidos con Móvil)

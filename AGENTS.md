@@ -6,7 +6,7 @@
 ## 1. Forma de trabajo
 
 - **Metodología**: Spec-Driven Development (SDD).
-- **Fase actual**: gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendiente operativo: aplicar el ruleset de `main`). `VirGo-API` y `VirGo-Movil` están en fase de especificación. **Todavía no hay código.**
+- **Fase actual**: gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendiente operativo: aplicar el ruleset de `main`). `VirGo-API` tiene implementación local y cierre pendiente; `VirGo-Database` tiene implementación y endurecimiento; `VirGo-Movil` vive en el repositorio separado `virgorent/VirGO_Movil`.
 - **Principio**: `spec → plan → task → check`. No ejecutar tareas sin aprobación explícita.
 - **DevSecOps**: ningún cambio se fusiona sin escaneo de secretos, revisión de dependencias y, cuando el proyecto ya tenga su workflow, análisis estático en verde.
 - **Todo debe alinearse** a `constitution.md`.
@@ -34,13 +34,13 @@
 
 Este repositorio es el **backend**. La app móvil vive en [`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil).
 
-
 | Fase | Objetivo | Estado |
 |---|---|---|
 | **nv-00** | Constitución SDD y reglas globales | Cumplido (2026-11-04) |
 | **nv-01** | Arquitectura base SDD | Cumplido (2026-11-04) |
 | **nv-02** | Gobernanza global de proyectos | Cumplido con pendiente operativo (aplicar ruleset) |
-| **VirGo-API** | Backend .NET 10 (specs `000`–`004`) | Especificación |
+| **VirGo-API** | Backend .NET 10 (specs `000`, `003`–`098`, `900`–`901`) | Implementación local; cierre y despliegue pendientes |
+| **VirGo-Database** | Catálogo MongoDB (specs `000`–`010`) | Implementación y endurecimiento |
 
 ## 4. Convenciones
 
@@ -53,7 +53,7 @@ Este repositorio es el **backend**. La app móvil vive en [`virgorent/VirGO_Movi
 - **Sin duplicidad**: la bitácora canónica es `Memoria.md` (global) o `memoria.md` (proyecto).
 - **Sin funcionalidad**: no crear código de negocio sin spec aprobado.
 
-**Ramas:** `main` se protege con el ruleset de `.github/rulesets/main-protection.json` (aplicación manual pendiente). `rama-backend`, `rama-apis` y `rama-movil` integran por PR. Las ramas de trabajo usan `feat/NNN-modulo` o `fix/…`.
+**Ramas:** `main` se protege con el ruleset de `.github/rulesets/main-protection.json` (aplicación manual pendiente). `rama-backend` integra por PR. Las ramas de trabajo usan `feat/NNN-modulo` o `fix/…`.
 
 ## 5. Sub-agentes
 
@@ -67,7 +67,7 @@ Skills en `.opencode/skills/` guían el trabajo por fase. Cada proyecto define a
 
 - **Secretos**: Gitleaks en cada PR y push a `main`; sin secretos en código, logs, errores ni historial.
 - **Dependencias**: Dependabot semanal y `dependency-review` en PRs que cambien manifiestos; requiere Dependency graph habilitado. No fusionar con vulnerabilidades altas.
-- **SAST y pruebas**: los workflows de cada proyecto (`api-*.yml`, `movil-*.yml`) ejecutan CodeQL/linters y pruebas; hasta que existan, el ruleset solo exige `gitleaks` y `dependency review`. Antes del primer PR de código se añaden esos checks al ruleset.
+- **SAST y pruebas**: los workflows de API ejecutan CodeQL/linters y pruebas; el ruleset incluye `gitleaks`, `dependency review`, `api-build-test`, `api-iac`, `api-schema`, `CodeQL` y `database`.
 - **Mínimo privilegio**: workflows con `permissions` acotados; nube por OIDC, sin llaves de larga duración.
 - **Rama protegida**: PR obligatorio, una revisión, checks requeridos, sin force push ni borrado.
 - **Release**: artefactos firmados y verificables; credenciales solo en GitHub Secrets.

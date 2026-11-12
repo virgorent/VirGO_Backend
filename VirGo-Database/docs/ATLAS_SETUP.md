@@ -36,7 +36,12 @@ Puede implementarse con un rol personalizado de Atlas. No requiere `dropCollecti
 
 Solo lo usa la API. Debe tener `readWrite` sobre la base objetivo y no permisos DDL.
 
-No use el usuario DDL en la aplicacion.
+- `virgo-api-prod`: `readWrite` solo sobre `virgo`.
+- `virgo-api-dev`: `readWrite` solo sobre `virgo_dev`.
+- Para inspeccion de solo lectura puede existir un usuario separado con rol `read`.
+
+No use el usuario DDL en la aplicacion. El usuario runtime no debe crear
+colecciones, validadores ni indices.
 
 ## Red
 
@@ -44,13 +49,35 @@ No use el usuario DDL en la aplicacion.
 - En produccion prefiera PrivateLink o peering.
 - Evite `0.0.0.0/0` salvo en un entorno temporal y controlado.
 
-## Cadena de conexion
+### Acceso desde AWS Lambda
+
+Una Lambda fuera de VPC no tiene IP de salida fija. Abrir `0.0.0.0/0`
+simplifica el arranque, pero expone el cluster a internet: la unica barrera
+restante es TLS, una contrasena larga y el minimo privilegio del usuario.
+Antes de produccion, evalue una de estas opciones:
+
+1. Lambda dentro de VPC con subredes privadas, NAT Gateway con IP elastica y
+   esa IP en Atlas. Requiere acceso a los endpoints de SSM y, si aplica, a
+   MongoDB por PrivateLink/peering.
+2. PrivateLink o peering para que el trafico no salga a internet.
+3. Si se mantiene `0.0.0.0/0`, documente la excepcion, limite el rol del
+   usuario, active alertas y rote credenciales. No se considera una
+   configuracion definitiva de produccion.
+
+## Cadena de conexion y TLS
 
 Use TLS y la cadena que Atlas proporciona:
 
 ```text
-mongodb+srv://USUARIO:PASSWORD@CLUSTER.mongodb.net/?retryWrites=true&w=majority&appName=VirGo-Database
+mongodb+srv://USUARIO:PASSWORD@CLUSTER.mongodb.net/?retryWrites=true&w=majority&tls=true&appName=VirGo-Database
 ```
+
+El proyecto exige TLS:
+
+- `mongodb+srv://` usa TLS por defecto.
+- `mongodb://` debe incluir `tls=true` o `ssl=true`.
+- Se rechazan `tls=false`, `tlsInsecure=true`, `tlsAllowInvalidCertificates=true`, `tlsAllowInvalidHostnames=true` y `sslInvalidHostNameAllowed=true`.
+- `MONGO_ALLOW_INSECURE_TLS=true` solo sirve para MongoDB local en development/test y siempre se rechaza en production.
 
 No guarde la cadena real en el repositorio. Coloquela en `.env.development` o `.env.production`, que estan ignorados por Git.
 

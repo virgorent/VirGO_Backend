@@ -23,7 +23,7 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
 
         if (!Request.Headers.TryGetValue("Idempotency-Key", out var idempotencyKey)
             || string.IsNullOrWhiteSpace(idempotencyKey.ToString())
-            || idempotencyKey.ToString().Length > 128)
+            || idempotencyKey.ToString().Length > 100)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Idempotency-Key es obligatorio.");
         }

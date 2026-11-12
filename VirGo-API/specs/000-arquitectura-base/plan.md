@@ -141,9 +141,9 @@ VirGo-API/
 
 - Clúster Atlas M0 `virgo-dev`, base `virgo` (producción) y `virgo_dev` (desarrollo).
 - Un `MongoClient` único por proceso (singleton), creado fuera del manejador para reutilizar conexiones entre invocaciones de Lambda, con `maxPoolSize` de 10 (M0 admite 500 conexiones).
-- `MongoIndexInitializer` crea de forma idempotente validadores e índices desde `db/schema/` al arrancar. Así, al ejecutar el primer *task* de usuarios, la base y sus colecciones se crean solas.
+- La API no crea colecciones, validadores ni índices al arrancar; `VirGo-Database` aplica el catálogo de forma idempotente.
 - Documentos con `_id` y referencias como texto UUID (`BsonRepresentation(BsonType.String)`, ADR-28), nombres de campo en `camelCase` inglés y fechas en UTC.
-- La fuente de verdad es `VirGo-Database/src/catalog`; `db/schema/` es una copia generada (`010-contrato-datos`).
+- La fuente de verdad es `VirGo-Database/src/catalog/`; `db/schema/` es una copia generada (`010-contrato-datos`) que la API consume como contrato.
 
 La base no define entidades: los módulos funcionales documentan sus patrones de llave en su propio plan.
 

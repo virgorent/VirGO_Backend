@@ -5,6 +5,11 @@ import {
   COLLECTION_NAMES,
   INDEXES
 } from '../../src/catalog/index.js';
+import {
+  EVENT_TYPES,
+  PROVIDER_CATEGORIES,
+  ZONES
+} from '../../src/catalog/enums.js';
 
 const expectedCollections = [
   'users',
@@ -183,4 +188,138 @@ test('no agrega maxItems arbitrarios a arreglos variables', () => {
 
 test('counters no tiene indices adicionales', () => {
   assert.deepEqual(INDEXES.counters, []);
+});
+
+test('usa los enums aprobados para zonas, aliados y eventos', () => {
+  assert.deepEqual(ZONES, [
+    'Juriquilla',
+    'Centro',
+    'El Refugio',
+    'Santa Fe',
+    'Antea',
+    'Jurica',
+    'Corregidora',
+    'El Marqués'
+  ]);
+  assert.deepEqual(PROVIDER_CATEGORIES, [
+    'Catering',
+    'Música',
+    'Fotografía',
+    'Decoración',
+    'Mobiliario'
+  ]);
+  assert.deepEqual(EVENT_TYPES, [
+    'Boda',
+    'XV años',
+    'Cumpleaños',
+    'Corporativo',
+    'Otro'
+  ]);
+
+  const venues = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'venues').validator
+  );
+  const providers = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'providers').validator
+  );
+  const events = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'events').validator
+  );
+  const allies = findNamedProperties(venues, 'allies')[0];
+
+  assert.deepEqual(venues.properties.zone.enum, ZONES);
+  assert.deepEqual(allies.items.properties.category.enum, PROVIDER_CATEGORIES);
+  assert.deepEqual(providers.properties.category.enum, PROVIDER_CATEGORIES);
+  assert.deepEqual(events.properties.eventType.enum, EVENT_TYPES);
+});
+
+test('users, passwordResets y sessions cumplen el contrato actual', () => {
+  const users = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'users').validator
+  );
+  const resets = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'passwordResets').validator
+  );
+  const sessions = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'sessions').validator
+  );
+
+  assert.ok(users.required.includes('failedLoginCount'));
+  assert.ok(users.required.includes('unreadNotices'));
+  assert.equal(users.properties.name.maxLength, 100);
+  assert.equal(users.properties.email.maxLength, 150);
+  assert.equal(users.properties.failedLoginCount.minimum, 0);
+  assert.deepEqual(users.properties.lockoutEndsAt.bsonType, ['date', 'null']);
+
+  assert.ok(resets.required.includes('codeHash'));
+  assert.ok(resets.required.includes('attempts'));
+  assert.equal(resets.properties.attempts.maximum, 5);
+  assert.equal(resets.properties.userId.bsonType, 'string');
+
+  assert.equal(sessions.properties.tokenHash.maxLength, 88);
+  assert.equal(sessions.properties.device.maxLength, 100);
+  assert.deepEqual(sessions.properties.revokedAt.bsonType, ['date', 'null']);
+});
+
+test('providers y venues reflejan el contrato actual', () => {
+  const providers = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'providers').validator
+  );
+  const venues = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'venues').validator
+  );
+
+  assert.ok(providers.required.includes('pricing'));
+  assert.ok(providers.required.includes('responseTime'));
+  assert.equal(providers.required.includes('gallery'), false);
+  assert.equal(providers.properties.basePrice, undefined);
+  assert.deepEqual(providers.properties.pricing.enum, ['per_person', 'per_event']);
+  assert.equal(providers.properties.responseTime.maxLength, 50);
+  assert.equal(venues.required.includes('amenities'), false);
+  assert.equal(venues.required.includes('allies'), false);
+});
+
+test('bookings define idempotencia por cliente y maxLength', () => {
+  const bookings = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'bookings').validator
+  );
+  const index = INDEXES.bookings.find((item) => (
+    item.name === 'clientId_1_idempotencyKey_1_unique'
+  ));
+
+  assert.equal(bookings.required.includes('idempotencyKey'), false);
+  assert.equal(bookings.properties.idempotencyKey.maxLength, 100);
+  assert.deepEqual(index.key, { clientId: 1, idempotencyKey: 1 });
+  assert.equal(index.options.unique, true);
+  assert.deepEqual(index.options.partialFilterExpression, {
+    idempotencyKey: { $type: 'string' }
+  });
+});
+
+test('monthlyStats usa _id determinista', () => {
+  const monthly = rootSchema(
+    COLLECTIONS.find((item) => item.name === 'monthlyStats').validator
+  );
+  assert.equal(monthly.properties._id.bsonType, 'string');
+  assert.equal(
+    monthly.properties._id.pattern,
+    '^(venue|provider):[0-9a-fA-F-]{36}:[0-9]{4}-[0-9]{2}$'
+  );
+});
+
+test('declara los conteos de indices aprobados', () => {
+  const allIndexes = COLLECTIONS.flatMap((collection) => collection.indexes);
+  assert.equal(allIndexes.length, 38);
+  assert.equal(
+    allIndexes.filter((index) => index.options.unique === true).length,
+    12
+  );
+  assert.equal(
+    allIndexes.filter((index) => index.options.partialFilterExpression).length,
+    2
+  );
+  assert.equal(
+    allIndexes.filter((index) => index.options.expireAfterSeconds !== undefined).length,
+    4
+  );
 });

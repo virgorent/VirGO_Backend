@@ -7,7 +7,7 @@ Todas las colecciones usan validacion estricta. Los importes monetarios son `Dec
 | Coleccion | Proposito | Indices principales | TTL |
 | --- | --- | --- | --- |
 | `users` | Cuentas y roles | `email` unico | No |
-| `passwordResets` | Tokens de recuperacion | `userId`; `expiresAt` | `expiresAt` |
+| `passwordResets` | Codigos de recuperacion | `userId` unico; `expiresAt` | `expiresAt` |
 | `sessions` | Sesiones activas | `tokenHash` unico; `userId`; `purgeAt` | `purgeAt` |
 | `paymentCards` | Tarjetas tokenizadas | `userId`; `userId` unico parcial | No |
 | `venues` | Catalogo de venues | geo + estado; `ownerId`; estado/zona/categorias | No |
@@ -20,7 +20,7 @@ Todas las colecciones usan validacion estricta. Los importes monetarios son `Dec
 | `eventGuests` | Invitados | `eventId + status` | No |
 | `eventTasks` | Checklist | `eventId + dueDate` | No |
 | `quotes` | Cotizaciones | cliente + fecha; destino/estado/fecha | No |
-| `bookings` | Reservas | `folio` unico; cliente + fecha; venue + fecha | No |
+| `bookings` | Reservas | `folio` unico; cliente + fecha; cliente + idempotencia; venue + fecha | No |
 | `counters` | Folios secuenciales | Solo `_id` | No |
 | `favorites` | Favoritos | usuario/destino unico | No |
 | `conversations` | Conversaciones | cliente/fecha; destino/fecha; cliente/destino unico | No |
@@ -33,20 +33,23 @@ Todas las colecciones usan validacion estricta. Los importes monetarios son `Dec
 
 ### users
 
-- `_id`, `name`, `email`, `passwordHash`, `role`, `phone`, `providerId`, `isVerified`, `createdAt`, `updatedAt`.
+- `_id`, `name`, `email`, `passwordHash`, `role`, `phone`, `providerId`, `isVerified`, `createdAt`, `updatedAt`, `failedLoginCount`, `lockoutEndsAt`, `unreadNotices`, `city`, `defaultGuests`.
 - `providerId` es opcional y deriva de `providers.userId`.
+- `failedLoginCount` y `unreadNotices` son obligatorios; `lockoutEndsAt` acepta `Date` o `null`.
 - `additionalProperties: false`.
 - Indice: `email_1_unique`.
 
 ### passwordResets
 
-- `_id`, `userId`, `tokenHash`, `expiresAt`, `used`.
+- `_id`, `userId`, `codeHash`, `expiresAt`, `attempts`.
+- `attempts` va de 0 a 5. Un codigo por usuario: `userId` es unico.
 - TTL sobre `expiresAt` con `expireAfterSeconds: 0`.
-- Indices: `userId_1`, `expiresAt_ttl`.
+- Indices: `userId_1_unique`, `expiresAt_ttl`.
 
 ### sessions
 
-- `_id`, `userId`, `tokenHash`, `createdAt`, `expiresAt`, `purgeAt`.
+- `_id`, `userId`, `tokenHash`, `createdAt`, `expiresAt`, `purgeAt`, `device`, `revokedAt`.
+- `device` y `revokedAt` son opcionales; `revokedAt` acepta `Date` o `null`.
 - TTL sobre `purgeAt`.
 - Indices: `tokenHash_1_unique`, `userId_1`, `purgeAt_ttl`.
 
@@ -59,6 +62,7 @@ Todas las colecciones usan validacion estricta. Los importes monetarios son `Dec
 ### venues
 
 - Incluye `ownerId`, datos de catalogo, `location` GeoJSON, capacidad, precio, servicios, fotos, categorias, rating, estado y aliados.
+- `amenities` y `allies` son opcionales. `allies[].category` usa `PROVIDER_CATEGORIES`; `zone` usa `ZONES`.
 - `price.base` es `Decimal128`.
 - Indices: `location_2dsphere_status_1`, `ownerId_1`, `status_1_zone_1_categories_1`.
 
@@ -71,7 +75,9 @@ Todas las colecciones usan validacion estricta. Los importes monetarios son `Dec
 
 ### providers
 
-- `_id`, `userId`, `businessName`, `category`, `description`, `basePrice`, `zones`, `packages`, `gallery`, `coverUrl`, `rating`, `status`, timestamps.
+- `_id`, `userId`, `businessName`, `category`, `description`, `pricing`, `responseTime`, `zones`, `packages`, `gallery`, `coverUrl`, `rating`, `status`, timestamps.
+- `pricing` (`per_person` o `per_event`) y `responseTime` son obligatorios; `basePrice` no existe.
+- `gallery` es opcional.
 - `userId` es la relacion fuente de verdad.
 - Indices: `userId_1_unique`, `status_1_category_1_businessName_1`.
 - No se elimina fisicamente; la desactivacion logica queda pendiente.
@@ -91,6 +97,7 @@ Todas las colecciones usan validacion estricta. Los importes monetarios son `Dec
 ### monthlyStats
 
 - Destino, mes, visitas, solicitudes y reservas.
+- `_id` es determinista: `<targetType>:<targetId>:<AAAA-MM>`.
 - `visits` se conserva en el esquema aunque queda fuera del MVP funcional.
 - Indice: `targetType_1_targetId_1_month_1_unique`.
 
@@ -119,9 +126,10 @@ Todas las colecciones usan validacion estricta. Los importes monetarios son `Dec
 
 ### bookings
 
-- Folio, cliente, venue, fecha, horas, total, deposito, estado, extras, pagos, cancelacion y `rescheduledFrom`.
+- Folio, cliente, venue, fecha, horas, total, deposito, estado, extras, pagos, cancelacion, `rescheduledFrom` e `idempotencyKey`.
 - `folio` es unico. El folio se genera con `counters` y `$inc`.
-- Indices: `folio_1_unique`, `clientId_1_createdAt_-1`, `venueId_1_date_1`.
+- `idempotencyKey` es opcional y de maximo 100 caracteres.
+- Indices: `folio_1_unique`, `clientId_1_date_-1`, `clientId_1_idempotencyKey_1_unique` (parcial), `venueId_1_date_1`.
 - `pending_payment` no bloquea la fecha. `venueDates` se inserta al confirmar.
 - Cancelacion aprobada: transaccion que elimina `venueDates` por `venueId`, `date` y `bookingId`; si no coincide exactamente, se aborta.
 

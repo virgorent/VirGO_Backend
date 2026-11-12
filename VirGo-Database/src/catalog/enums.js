@@ -4,7 +4,16 @@ export const VENUE_STATUSES = ['draft', 'review', 'published'];
 
 export const PROVIDER_STATUSES = ['draft', 'published'];
 
-export const ZONES = ['Norte', 'Sur', 'Centro', 'Oriente', 'Poniente'];
+export const ZONES = [
+  'Juriquilla',
+  'Centro',
+  'El Refugio',
+  'Santa Fe',
+  'Antea',
+  'Jurica',
+  'Corregidora',
+  'El Marqués'
+];
 
 export const VENUE_CATEGORIES = [
   'Salon',
@@ -25,18 +34,14 @@ export const AMENITIES = [
 ];
 
 export const PROVIDER_CATEGORIES = [
-  'Banquete',
-  'Fotografía',
-  'Video',
+  'Catering',
   'Música',
-  'Flores',
-  'Pastelería',
-  'Mobiliario',
-  'Animación',
-  'Maquillaje'
+  'Fotografía',
+  'Decoración',
+  'Mobiliario'
 ];
 
-export const EVENT_TYPES = ['Boda', 'XV Años', 'Corporativo', 'Cumpleaños', 'Otro'];
+export const EVENT_TYPES = ['Boda', 'XV años', 'Cumpleaños', 'Corporativo', 'Otro'];
 
 export const DESIGN_THEMES = ['Boda', 'XV Años', 'Neón Party', 'Mexicano'];
 

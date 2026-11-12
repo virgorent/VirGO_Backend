@@ -5,7 +5,7 @@ export const INDEXES = {
     index('email_1_unique', { email: 1 }, { unique: true })
   ],
   passwordResets: [
-    index('userId_1', { userId: 1 }),
+    index('userId_1_unique', { userId: 1 }, { unique: true }),
     index('expiresAt_ttl', { expiresAt: 1 }, { expireAfterSeconds: 0 })
   ],
   sessions: [
@@ -82,7 +82,14 @@ export const INDEXES = {
   ],
   bookings: [
     index('folio_1_unique', { folio: 1 }, { unique: true }),
-    index('clientId_1_createdAt_-1', { clientId: 1, createdAt: -1 }),
+    index('clientId_1_date_-1', { clientId: 1, date: -1 }),
+    index('clientId_1_idempotencyKey_1_unique', {
+      clientId: 1,
+      idempotencyKey: 1
+    }, {
+      unique: true,
+      partialFilterExpression: { idempotencyKey: { $type: 'string' } }
+    }),
     index('venueId_1_date_1', { 'venue.venueId': 1, date: 1 })
   ],
   counters: [],

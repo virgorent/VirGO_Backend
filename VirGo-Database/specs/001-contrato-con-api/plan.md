@@ -1,74 +1,116 @@
-# Plan — 001 Contrato de datos con la API
+# Plan — 001 contrato-con-api
 
 | Campo | Valor |
 |---|---|
 | Módulo | `001-contrato-con-api` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
-| Fecha | 2026-11-05 |
+| Estado | Implementado, pendiente de revisión |
+| Fecha | 2026-11-07 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
+| Constitución | v1.0.0 |
 
 ## 1. Resumen técnico
 
-Se modifica el catálogo (`src/catalog`), se aplica con el inicializador existente y se agrega un exportador que genera `VirGo-API/db/schema/`. No hace falta una herramienta nueva para aplicar: `plan`, `apply` y `verify` ya existen.
+- Crear `src/export/schema.js` para transformar el catálogo al contrato de la API.
+- Crear `src/cli/export.js` con escritura y verificación (`--check`).
+- Agregar `db:export:api` y `db:export:api:check` a `package.json`.
+- Generar `VirGo-API/db/schema/*.json` y validar con `check_schema.py`.
+- Alinear campos e índices con la API y proteger la paridad con pruebas y CI.
 
-## 2. Diferencias medidas (2026-11-05)
+## 2. Contexto técnico
 
-Comparación entre el catálogo, que coincide 22 de 22 con `virgo_dev`, y `db/schema/` de la rama del PR #5.
+| Aspecto | Decisión |
+|---|---|
+| Lenguaje / framework | Node.js 20.19+, ESM. |
+| Persistencia | No requiere conexión a MongoDB para exportar. |
+| Seguridad | Sin secretos; solo lee el catálogo local. |
+| CI/CD | `database-ci.yml` ejecutará `db:export:api:check` y `check_schema.py`. |
 
-| Colección | Solo en el catálogo | Solo en `db/schema/` | ¿Bloquea las 7 APIs? |
+## 3. Constitution Check
+
+| Art. | Tema | Resultado | Cómo se cumple |
 |---|---|---|---|
-| `users` | — | `failedLoginCount`, `lockoutEndsAt`, `unreadNotices`, `city`, `defaultGuests` | **Sí:** con `additionalProperties: false`, se rechaza el registro |
-| `sessions` | — | `device`, `revokedAt` | No, se aceptan sin validar; hay que declararlos |
-| `bookings` | Índice `clientId + createdAt` | `idempotencyKey`, índices `clientId + date` y `clientId + idempotencyKey` | **Sí:** sin el índice no hay idempotencia real |
-| `events`, `quotes` | `XV Años` | `XV años` | **Sí:** `POST /quotes` con ese tipo sería rechazado |
-| `venues` | Zonas por punto cardinal; `amenities` y `allies` obligatorios | Zonas por colonia; ambos opcionales | Parcial: afecta los filtros de `GET /venues` |
-| `passwordResets` | `tokenHash`, `used` | `codeHash`, `attempts` | No |
-| `providers` | `basePrice`; `gallery` obligatorio; 9 categorías | `pricing`, `responseTime`; 5 categorías | No |
-| Todas | 0 de 77 textos con `maxLength` | Límites en los textos | No bloquea, pero incumple la regla de longitudes |
+| 2 | Principios no negociables | ✅ | La fuente de verdad queda en un solo lugar. |
+| 4 | Arquitectura | ✅ | Exportador separado del catálogo y del inicializador. |
+| 6 | Seguridad y DevSecOps | ✅ | Sin secretos y con verificación en CI. |
+| 7 | Testing y QA | ✅ | Pruebas del exportador y de paridad. |
+| 8 | CI y GitHub | ✅ | Gate de contrato en PR y `main`. |
+| 10 | Gobernanza SDD | ✅ | Spec y decisión documentados. |
 
-## 3. Decisiones
+## 4. Estructura
 
-| Decisión | Motivo |
-|---|---|
-| El catálogo es la fuente de verdad; `db/schema/` será una copia generada | Lo acordó el equipo en la constitución v1.2.0 de `VirGo-API` (PR #5), y ya coincide con la base |
-| Se agregan al catálogo los campos que la API necesita | El login no funciona sin ellos |
-| El índice `clientId + createdAt` se conserva | El inicializador no elimina índices; queda como advertencia |
+```text
+VirGo-Database/
+  src/
+    export/schema.js
+    cli/export.js
+  tests/unit/export.test.js
+  specs/001-contrato-con-api/
+VirGo-API/db/
+  schema/*.json          generado
+  tools/check_schema.py  verificación
+```
 
-## 4. Diseño
+## 5. Decisiones técnicas (ADR)
 
-| Archivo | Cambio |
-|---|---|
-| `src/catalog/validators/accounts.js` | Campos nuevos de `users` y `sessions` |
-| `src/catalog/validators/bookings.js` | `idempotencyKey` |
-| `src/catalog/indexes.js` | `clientId_1_date_-1` y `clientId_1_idempotencyKey_1_unique` |
-| `src/catalog/helpers.js` | `string(max)` con `maxLength` |
-| `src/catalog/enums.js` | Resultado de P-01 y P-02 |
-| `src/cli/export.js` | Nuevo: escribe `VirGo-API/db/schema/*.json` |
+| ADR | Decisión | Alternativas descartadas | Motivo |
+|---|---|---|---|
+| ADR-01 | Catálogo → JSON de API. | Editar ambos manualmente. | Elimina deriva. |
+| ADR-02 | JSON con LF y dos espacios. | Formato dependiente de la plataforma. | Diffs estables en CI. |
+| ADR-03 | `--check` compara texto normalizado. | Comparar solo JSON parseado. | Detecta también formato y orden. |
+| ADR-04 | `idempotencyKey` en `bookings`. | Colección de idempotencia. | Menos piezas y atomicidad nativa. |
+| ADR-05 | Script dedicado `db:export:api:check`. | Depender de `npm run ... -- --check`. | Evita diferencias de reenvío de flags en Windows. |
 
-## 5. Costo
+## 6. Diseño
 
-$0.
+### 6.1 Exportador
 
-## 6. Estrategia de pruebas
+`toApiSchema` conserva el validador y los índices del catálogo. `buildApiSchemas` produce 22 objetos. `serializeApiSchema` garantiza formato estable.
 
-| Tipo | Casos |
-|---|---|
-| Unitarias | Todo `string` libre tiene `maxLength` |
-| Integración | Fixtures con los documentos de la API (CA-01), 1500 caracteres (CA-02) e idempotencia (CA-03) |
-| Deriva | `db:verify:dev` y `check_schema.py --live` (CA-04, CA-05) |
+### 6.2 Verificación
 
-## 7. Riesgos y mitigaciones
+`checkApiSchemas` compara cada archivo esperado, detecta faltantes y reporta JSON extra. No escribe archivos.
+
+### 6.3 Idempotencia de reservas
+
+`bookings.idempotencyKey` es opcional. El índice único parcial por `clientId` e `idempotencyKey` solo indexa documentos con clave string.
+
+### 6.4 Seguridad
+
+El exportador solo lee `src/catalog` y escribe en `VirGo-API/db/schema`. No conecta a MongoDB ni usa credenciales.
+
+## 7. DevSecOps y CI/CD
+
+| Gate | Herramienta | Cuándo |
+|---|---|---|
+| Secretos | Gitleaks | PR y push a `main` |
+| Dependencias | Dependabot + dependency review | Semanal y PR |
+| Pruebas | `npm test` | PR y push |
+| Contrato | `npm run db:export:api:check` | PR y push |
+| Paridad API | `check_schema.py` | PR y push |
+
+## 8. Estrategia de pruebas
+
+| Nivel | Dónde | Qué cubre |
+|---|---|---|
+| Unitarias | `tests/unit/export.test.js` | Serialización, validación, escritura y `--check`. |
+| Integración | `tests/integration` | Índice de idempotencia y contrato aplicado. |
+| Contrato | `check_schema.py` | Strings sin `maxLength` y paridad de archivos. |
+| Humo | CLI | Exportación y verificación sobre el monorepo. |
+
+## 9. Riesgos y mitigaciones
 
 | Riesgo | Mitigación |
 |---|---|
-| El índice único de `idempotencyKey` rechaza reservaciones sin llave | Se declara `sparse`, como en `db/schema/` |
-| Se aplica a `virgo_dev` antes de acordar los enumerados | T105 depende de T101 |
+| Sobrescribir cambios manuales en la API | Revisar `git diff`; la API deja de editarse a mano. |
+| Flags npm no reenviados en Windows | Script `db:export:api:check`. |
+| Diffs por formato | Serialización determinista y comparación normalizada. |
+| Índice único con datos previos | Plan bloquea conflictos; limpieza manual. |
 
-## 8. Fases
+## 10. Fases
 
 | Fase | Contenido | Tareas |
 |---|---|---|
-| F0 | Decisiones | T101 |
-| F1 | Catálogo y pruebas | T102–T104 |
-| F2 | Aplicación | T105–T106 |
+| F0 | Exportador y CLI | T001–T002 |
+| F1 | Contrato e idempotencia | T003–T004 |
+| F2 | Pruebas, CI y handoff | T005–T007 |
