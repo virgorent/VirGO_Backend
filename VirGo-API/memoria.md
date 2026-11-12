@@ -301,3 +301,11 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Evidencia:** <https://rcof55a3c9.execute-api.us-east-1.amazonaws.com/health> responde 200; `/api/v1/venues` responde 200 conectado a Atlas.
 - **Costo:** $0.
 - **Pendiente:** usuario `virgo-api-prod` en Atlas, catálogo y datos en la base `virgo`, y despliegue por OIDC.
+
+### 2026-11-11 · Correcciones posteriores al despliegue
+
+- **Autor:** Rafael + OpenCode (`dev-dotnet`, `qa`, `seguridad`)
+- **Módulo / tareas:** `003`–`009`, `900`
+- **Qué se corrigió:** cotizaciones y reservaciones ahora exigen el rol `client`; un bloqueo de login expirado reinicia `failedLoginCount` antes del siguiente intento; CORS quedó alineado entre `appsettings.json` y `infra/template.yaml` con `http://localhost:3000`.
+- **Evidencia:** `sam validate --template-file infra/template.yaml --lint` aprobado; CodeQL remoto sin alertas activas. La compilación local de la worktree de seguimiento quedó pendiente por falta de resolución DNS hacia NuGet.
+- **Pendiente:** publicar una nueva rama/PR porque PR #5 y el PR de despliegue ya están fusionados; no desplegar desde esta cuenta.
