@@ -96,7 +96,7 @@ Mantener de forma versionada, verificable e idempotente:
 - Inicializador idempotente con modos `plan`, `validate` y `apply`.
 - Verificador de deriva.
 - CLI de administración y exportación.
-- 27 pruebas unitarias y 23 de integración.
+- 45 pruebas unitarias y 28 de integración.
 
 **NO IMPLEMENTADO**
 
@@ -246,7 +246,7 @@ La API debe usar su propio archivo de entorno, ignorado por Git, y un usuario ru
 | `npm run db:export:api` | Genera los 22 esquemas de `VirGo-API/db/schema`. |
 | `npm run db:export:api:check` | Falla si la API difiere del catálogo; no escribe. |
 | `python ../VirGo-API/db/tools/check_schema.py` | Valida límites y paridad offline. |
-| `npm test` | 27 pruebas unitarias. |
+| `npm test` | 45 pruebas unitarias. |
 | `npm run test:integration` | Pruebas contra MongoDB local; se omiten si no hay servidor. |
 
 Los comandos de producción son equivalentes, pero requieren revisión, respaldo y `--confirm-production`.

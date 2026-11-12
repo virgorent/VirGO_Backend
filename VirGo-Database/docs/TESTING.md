@@ -22,8 +22,16 @@ Verifican, sin MongoDB:
 - Idempotencia y conteos de indices.
 - Exportacion determinista, faltantes, diferencias y archivos extra.
 - Comparacion de indices y formato de planes.
+- TLS implicito en `mongodb+srv://` y explicito en `mongodb://`.
+- Rechazo de TLS desactivado, parametros inseguros y valores contradictorios.
+- Override inseguro solo en development/test y rechazo absoluto en production.
+- El resumen de configuracion no expone la URI.
+- Guardas del apply contra acciones destructivas, colecciones ajenas e indices manipulados.
+- Fallo parcial con operaciones aplicadas y accion fallida.
+- Seed DEMO con las 22 colecciones, IDs deterministas y bloqueo en production.
+- Conteo de documentos DEMO y rechazo de la base `virgo`.
 
-Resultado verificado: 27 pruebas aprobadas.
+Resultado verificado: 45 pruebas aprobadas.
 
 ## Integracion
 
@@ -70,14 +78,20 @@ Cobertura:
 - Restauracion idempotente despues de la deriva.
 - Compatibilidad con un indice equivalente creado con otro nombre.
 - Bloqueo de un indice con el mismo nombre y distinta definicion.
+- Seed DEMO idempotente sobre las 22 colecciones.
+- Limpieza DEMO selectiva que conserva documentos ajenos.
+- Repeticion del seed despues de la limpieza.
 
-Resultado verificado: 23 pruebas aprobadas contra MongoDB 8 local.
+Resultado verificado: 28 pruebas aprobadas contra MongoDB 8 local.
 
 ## CLI verificado
 
 - `plan` sobre base vacia: 22 colecciones y 38 indices.
 - `apply --yes`: 60 operaciones y verificacion OK.
 - Segunda ejecucion: sin cambios.
+- `seed-demo --mode plan`: conteos DEMO sin escribir.
+- `seed-demo --mode seed --yes`: seed idempotente en development.
+- `seed-demo --mode purge --yes`: limpieza selectiva por `_id`.
 - `verify`: OK.
 - `inspect`: inventario correcto.
 - `apply` en produccion sin `--confirm-production`: rechazado antes de conectar.

@@ -49,8 +49,8 @@
 
 | ID | Criterio |
 |---|---|
-| CA-01 | **Dado** el catálogo actual, **cuando** se ejecuta `npm test`, **entonces** las 27 pruebas unitarias pasan. |
-| CA-02 | **Dado** MongoDB local, **cuando** se ejecuta `npm run test:integration`, **entonces** las 23 pruebas pasan. |
+| CA-01 | **Dado** el catálogo actual, **cuando** se ejecuta `npm test`, **entonces** las 45 pruebas unitarias pasan. |
+| CA-02 | **Dado** MongoDB local, **cuando** se ejecuta `npm run test:integration`, **entonces** las 28 pruebas pasan. |
 | CA-03 | **Dado** el catálogo, **cuando** se ejecuta `npm run db:export:api:check`, **entonces** no hay diferencias. |
 | CA-04 | **Dado** los esquemas de la API, **cuando** se ejecuta `check_schema.py`, **entonces** reporta `22 colecciones, 0 diferencias`. |
 | CA-05 | **Dado** un `booking` repetido con el mismo `clientId` e `idempotencyKey`, **entonces** MongoDB rechaza el duplicado. |

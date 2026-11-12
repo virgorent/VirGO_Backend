@@ -33,7 +33,7 @@
 | 2 | Principios no negociables | ✅ | Spec, plan, tareas y verificación versionados. |
 | 4 | Arquitectura | ✅ | Separación catálogo, inicialización, CLI y exportación. |
 | 6 | Seguridad y DevSecOps | ✅ | Sin secretos, permisos mínimos y Gitleaks existente. |
-| 7 | Testing y QA | ✅ | 27 pruebas unitarias y 23 de integración. |
+| 7 | Testing y QA | ✅ | 45 pruebas unitarias y 28 de integración. |
 | 8 | CI y GitHub | ✅ | Workflow `database-ci.yml` planificado para PR y `main`. |
 | 10 | Gobernanza SDD | ✅ | Cambios trazados en este spec y en `docs/DECISIONS.md`. |
 

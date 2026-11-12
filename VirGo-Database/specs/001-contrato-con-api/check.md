@@ -35,8 +35,8 @@ Cada casilla lleva evidencia. El módulo se marca *Cerrado* solo con todo en ✅
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | `npm test` · 27 aprobadas. | ✅ |
-| Integración | `npm run test:integration` · 23 aprobadas. | ✅ |
+| Unitarias | `npm test` · 45 aprobadas. | ✅ |
+| Integración | `npm run test:integration` · 28 aprobadas. | ✅ |
 | Contrato | `db:export:api:check` + `check_schema.py` · OK. | ✅ |
 | Seguridad | Gitleaks en CI al abrir PR. | ⏳ |
 

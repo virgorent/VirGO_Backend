@@ -24,8 +24,8 @@ Cada casilla lleva evidencia. El módulo se marca *Cerrado* solo con todo en ✅
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | `npm test`: 27 pruebas aprobadas. | ✅ |
-| CA-02 | `npm run test:integration`: 23 pruebas aprobadas con MongoDB 8 local. | ✅ |
+| CA-01 | `npm test`: 45 pruebas aprobadas. | ✅ |
+| CA-02 | `npm run test:integration`: 28 pruebas aprobadas con MongoDB 8 local. | ✅ |
 | CA-03 | `npm run db:export:api:check`: 22 esquemas actualizados, sin diferencias. | ✅ |
 | CA-04 | `python ../VirGo-API/db/tools/check_schema.py`: `22 colecciones, 0 diferencias`. | ✅ |
 | CA-05 | Prueba `bookings idempotencyKey es unico por cliente y opcional`. | ✅ |
@@ -35,8 +35,8 @@ Cada casilla lleva evidencia. El módulo se marca *Cerrado* solo con todo en ✅
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | `npm test` · 27 aprobadas, 0 fallidas. | ✅ |
-| Integración | `npm run test:integration` · 23 aprobadas, 0 fallidas. | ✅ |
+| Unitarias | `npm test` · 45 aprobadas, 0 fallidas. | ✅ |
+| Integración | `npm run test:integration` · 28 aprobadas, 0 fallidas. | ✅ |
 | Seguridad | Gitleaks en CI al abrir PR. | ⏳ |
 | Humo | `plan`, `apply`, `verify` e `inspect` cubiertos por integración. | ✅ |
 
