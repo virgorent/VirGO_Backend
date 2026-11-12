@@ -1,0 +1,33 @@
+# Tareas — 903 Correo con Amazon SES
+
+| Campo | Valor |
+|---|---|
+| Módulo | `903-correo-ses` |
+| Versión | 0.1.0 |
+| Estado | Borrador. **Las tareas no se ejecutan hasta aprobar este archivo.** |
+| Fecha | 2026-11-11 |
+| Spec / Plan / Check | [spec.md](spec.md) · [plan.md](plan.md) · [check.md](check.md) |
+| Constitución | v1.3.0 (propuesta) |
+
+**Estados:** ⏳ Pendiente · 🔄 En curso · ✅ Hecha (con evidencia) · ⛔ Bloqueada
+
+**🧑 Requiere confirmación humana** = crea recursos en AWS o requiere abrir un correo.
+
+| ID | Tarea | Depende de | Responsable | Verificación | Estado |
+|---|---|---|---|---|---|
+| T90301 | `IEmailSender`, `EmailTemplates`, `SesEmailSender` y `LoggingEmailSender` | — | `dev-dotnet` | Pruebas unitarias | ⏳ |
+| T90302 | `EmailSendHandler` en el worker | T90301, `099`: T9903 | `dev-dotnet` | CA-03, CA-04 | ⏳ |
+| T90303 | `template.yaml`: `SenderIdentity` (`SenderEmail`) y permiso del worker | `099`: T9904 | `devops-aws` | cfn-lint, Checkov | ⏳ |
+| T90304 | 🧑 Desplegar, confirmar el correo de verificación de SES y enviar un correo de prueba | T90302, T90303 | `devops-aws` | CA-01, CA-02 | ⏳ |
+| T90305 | Completar `check.md` y registrar en `memoria.md` | T90304 | `qa` | `check.md` sin ⏳ | ⏳ |
+
+## Matriz de trazabilidad
+
+| Requerimiento / Criterio | Tareas |
+|---|---|
+| RF-01, CA-01 | T90303, T90304 |
+| RF-02, RF-03, HT-01, HT-02 | T90301, T90302 |
+| RF-04, HT-03, CA-03 | T90302 |
+| RF-05 | T90301 |
+| RNF-01 … RNF-04 | T90303 · T90302 · T90304 · T90304 |
+| CA-02, CA-04 | T90304 · T90302 |

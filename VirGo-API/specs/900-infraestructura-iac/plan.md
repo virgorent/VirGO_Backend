@@ -3,11 +3,11 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `900-infraestructura-iac` |
-| Versión | 1.0.0 |
-| Estado | Implementación local; validación y despliegue pendientes |
-| Fecha | 2026-11-03 |
+| Versión | 1.1.0 |
+| Estado | Desplegado; ampliación 1.1.0 en borrador |
+| Fecha | 2026-11-03 · ampliado el 2026-11-11 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
-| Constitución | v1.2.0 |
+| Constitución | v1.3.0 (propuesta) |
 
 ## 1. Resumen técnico
 
@@ -69,6 +69,8 @@ Se conservan ADR-01 (Lambda + HTTP API), ADR-02 (runtime), ADR-05 (OIDC), ADR-06
 | ADR-11 | **Índice TTL de MongoDB** en `sessions.purgeAt` | Borrado programado con otra Lambda | Gratis; las sesiones expiradas se borran solas |
 | ADR-12 | **Checkov** para analizar la IaC | Solo `cfn-lint` | `cfn-lint` revisa sintaxis; Checkov revisa seguridad (cifrado, IAM, logs) |
 | ADR-13 | **SNS + CloudWatch Alarms** para alertas | Sin alarmas | 10 alarmas y 1 000 correos al mes son gratis |
+| ADR-50 | Despliegue *canary* con CodeDeploy (`AutoPublishAlias: live`, `Canary10Percent5Minutes`) y *rollback* por la alarma de errores del alias | Despliegue de todo a la vez; *linear* | Limita el impacto de una versión con fallas; gratis para Lambda |
+| ADR-51 | IAM Identity Center con AWS Organizations para las personas | Usuarios de IAM con contraseña; seguir con la cuenta raíz | Credenciales temporales y MFA sin llaves permanentes; ambos servicios son gratis |
 
 ## 6. Diseño
 
@@ -134,6 +136,8 @@ Ambas se crean una vez con `aws ssm put-parameter --type SecureString` (T107). L
 | Budgets | 2 presupuestos | $0 |
 | S3 de SAM | 5 GB (12 meses o créditos) | ≈ $0 |
 | IAM, STS, CloudFormation | Sin costo | $0 |
+| CodeDeploy (Lambda) | Sin costo para Lambda | $0 |
+| IAM Identity Center y AWS Organizations | Sin costo | $0 |
 | **Total** | | **$0 USD** |
 
 ## 8. Estrategia de pruebas
@@ -165,3 +169,4 @@ Ambas se crean una vez con `aws ssm put-parameter --type SecureString` (T107). L
 | F2 | Seguridad y validación | T105–T106 |
 | F3 | Arranque en la nube | T107 |
 | F4 | Borrado y cierre | T108–T109 |
+| F5 | Ampliación 1.1.0: *canary* e IAM Identity Center | T111–T116 |
