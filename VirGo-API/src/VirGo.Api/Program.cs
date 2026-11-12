@@ -30,6 +30,15 @@ if (builder.Environment.IsProduction()
     throw new InvalidOperationException("Production requires Persistence:Provider = MongoDb.");
 }
 
+// Art. IX.1: logs en JSON; el alcance agrega CorrelationId y, en AWS, el TraceId de X-Ray (902).
+builder.Logging.ClearProviders();
+builder.Logging.AddJsonConsole(options =>
+{
+    options.IncludeScopes = true;
+    options.UseUtcTimestamp = true;
+    options.TimestampFormat = "O";
+});
+
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 builder.Services.AddProblemDetails();

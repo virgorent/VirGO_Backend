@@ -35,7 +35,7 @@ Los archivos creados, el resultado de las validaciones, la tabla de costo estima
 
 ## Lineamientos de la constitución v1.1.0
 
-- La infraestructura vive en el spec `900-infraestructura-iac` y el pipeline en `901-pipeline-cicd`.
+- La infraestructura vive en el spec `900-infraestructura-iac` y el pipeline en `901-pipeline-cicd`. Los servicios auxiliares tienen su spec: `099` (SQS), `902` (X-Ray y tablero), `903` (SES), `904` (S3 y CloudFront), `905` (Scheduler) y `906` (Bedrock, solo con gasto aprobado, Art. VII.6).
 - El **despliegue es manual**: `api-deploy.yml` solo se dispara con `workflow_dispatch` desde `main`, con el *environment* `production`, y ejecuta `tests/smoke/smoke.sh`.
 - Mantienes el **ruleset** `main-protection` y su exportación en `.github/rulesets/`.
 - Agregas `cfn-lint`, **Checkov**, **Semgrep**, **SonarCloud** y **OWASP ZAP** al CI, y la mutación en un workflow nocturno; fijas las acciones de terceros por SHA.

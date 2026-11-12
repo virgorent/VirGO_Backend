@@ -309,3 +309,35 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Qué se corrigió:** cotizaciones y reservaciones ahora exigen el rol `client`; un bloqueo de login expirado reinicia `failedLoginCount` antes del siguiente intento; CORS quedó alineado entre `appsettings.json` y `infra/template.yaml` con `http://localhost:3000`.
 - **Evidencia:** `sam validate --template-file infra/template.yaml --lint` aprobado; CodeQL remoto sin alertas activas. La compilación local de la worktree de seguimiento quedó pendiente por falta de resolución DNS hacia NuGet.
 - **Pendiente:** publicar una nueva rama/PR porque PR #5 y el PR de despliegue ya están fusionados; no desplegar desde esta cuenta.
+
+### 2026-11-11 · Servicios de AWS nuevos: colas, observabilidad, correo, medios y tareas programadas
+
+- **Autor:** Angelica + Claude Code (`dev-dotnet`, `devops-aws`)
+- **Módulo / tareas:** `099` (T9901–T9906), `902` (T90201–T90203), `903` (T90301–T90303), `904` (T90401–T90402), `905` (T90501–T90503), `900` 1.1.0 (T111); `906` solo redactado
+- **Qué se hizo:**
+  - Constitución v1.3.0 (**propuesta**): servicios nuevos en el Art. VII, regla VII.6 para servicios sin capa gratuita permanente y rastreo y tablero en IX.4 y IX.5.
+  - Cola `virgo-jobs` con cola de errores y alarma; worker `VirGo.Worker` (Lambda) con `JobDispatcher` y tres trabajos: `booking.created` (aviso en `notices`), `email.send` (SES) y `quotes.expire` (EventBridge Scheduler diario a las 00:00 de la Ciudad de México).
+  - X-Ray activo en las dos Lambdas, logs en JSON con `CorrelationId` y `TraceId`, y tablero `virgo-api`.
+  - Bucket privado de medios detrás de CloudFront con OAC.
+  - Despliegue *canary* `Canary10Percent5Minutes` con *rollback* por la alarma de errores del alias `live`.
+- **Decisiones:** ADR-37 a ADR-51. Se descartó el SDK de X-Ray para .NET: está en mantenimiento y se compiló para AWSSDK v3; el proyecto usa v4 (ADR-40). CloudTrail y IAM Access Analyzer se descartaron por decisión del equipo.
+- **Evidencia:** `dotnet build -warnaserror` sin errores; `dotnet test`: 210 de 210 tras integrar `main` (34 unitarias, 45 de integración, 22 de seguridad, 10 de contrato, 96 de base de datos y 3 de rendimiento). Prueba saboteada: sin la publicación en la cola, la prueba de integración falla. `sam validate --lint` válido.
+- **Costo estimado (Art. VII.5):**
+
+  | Servicio | Capa gratuita | Estimado al mes |
+  |---|---|---|
+  | SQS | 1 M solicitudes | $0 |
+  | Lambda del worker | Comparte 1 M solicitudes y 400 000 GB-s | $0 |
+  | X-Ray | 100 000 trazas | $0 |
+  | CloudWatch Dashboards | 3 tableros | $0 |
+  | CloudWatch Alarms (4 en total) | 10 alarmas | $0 |
+  | CodeDeploy para Lambda | Sin costo | $0 |
+  | EventBridge Scheduler | 14 M invocaciones | $0 |
+  | SES (*sandbox*) | Créditos del plan | < $0.01 |
+  | S3 de medios | Créditos del plan | < $0.03 con 1 GB |
+  | CloudFront | 1 TB y 10 M peticiones permanentes | $0 |
+  | IAM Identity Center y Organizations | Sin costo | $0 |
+  | Bedrock | **Sin capa gratuita**; apagado hasta aprobar el gasto (VII.6) | $0 mientras esté apagado |
+
+- **Pendiente:** aprobar la enmienda v1.3.0 y los specs por PR; desplegar (T9907, T90204, T90304, T90403, T90504, T112); elegir el remitente de SES (`903` P-01); activar IAM Identity Center (T113–T115); decidir el gasto de Bedrock (`906` P-01).
+

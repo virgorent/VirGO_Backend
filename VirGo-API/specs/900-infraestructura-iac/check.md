@@ -22,14 +22,16 @@ Lista de verificación del módulo (Art. I.4). Se llena conforme avanzan las tar
 | CA | Evidencia | Estado |
 |---|---|---|
 | CA-01 Validación sin errores | Salida de `sam validate --lint`, `cfn-lint` y `checkov` | ⏳ |
-| CA-02 URL `https://` y `/health` 200 | Resumen del workflow de despliegue (`901`: T209) | ⏳ |
+| CA-02 URL `https://` y `/health` 200 | Despliegue manual con `sam deploy` el 2026-11-11: <https://rcof55a3c9.execute-api.us-east-1.amazonaws.com/health> → 200. Falta el despliegue por workflow (`901`: T209) | 🔄 |
 | CA-03 Solo servicios permitidos; Atlas M0 sin método de pago | Lista de recursos del stack y captura del nivel M0 y de la facturación de Atlas | ⏳ |
-| CA-04 Presupuesto de $1 activo | Captura de AWS Budgets y del correo de confirmación | ⏳ |
+| CA-04 Presupuesto de $1 activo | `virgo-1usd` creado el 2026-11-11 (`aws budgets describe-budgets`), alertas por correo al primer centavo real y al 100 % pronosticado | ✅ |
 | CA-05 Sin secretos en el repositorio | Salida de Gitleaks sobre todo el historial | ⏳ |
 | CA-06 OIDC limitado a `main`/`production` | Política de confianza del rol y prueba de rechazo | ⏳ |
 | CA-07 Borrado completo | Salida de `sam delete` y consola sin recursos de `virgo-api-test` | ⏳ |
 | CA-08 Alarmas activas | Lista de alarmas, suscripción SNS confirmada y alertas de Atlas | ⏳ |
 | CA-09 Usuario de la API limitado y solo TLS | `mongosh` con `virgo-api-prod` sobre otra base → denegado; sin TLS → rechazado | ⏳ |
+| CA-10 Despliegue *canary* con *rollback* | Despliegue en CodeDeploy (T112) | ⏳ |
+| CA-11 IAM Identity Center con MFA | `aws sts get-caller-identity` con el rol `AWSReservedSSO_AdministratorAccess` (T115) | ⏳ |
 
 ## 3. Pruebas
 

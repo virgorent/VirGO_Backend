@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\VirGo.Domain\VirGo.Domain.csproj" />
     <ProjectReference Include="..\..\src\VirGo.Application\VirGo.Application.csproj" />
     <ProjectReference Include="..\..\src\VirGo.Infrastructure\VirGo.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\VirGo.Worker\VirGo.Worker.csproj" />
   </ItemGroup>
 
 </Project>

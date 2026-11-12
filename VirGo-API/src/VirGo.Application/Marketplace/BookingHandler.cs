@@ -1,10 +1,11 @@
 using System.Globalization;
 using VirGo.Application.Abstractions;
+using VirGo.Application.Jobs;
 using VirGo.Domain.Marketplace;
 
 namespace VirGo.Application.Marketplace;
 
-public sealed class BookingHandler(IVenueRepository venues, IBookingRepository bookings, IClock clock)
+public sealed class BookingHandler(IVenueRepository venues, IBookingRepository bookings, IClock clock, IJobPublisher jobs)
 {
     public async Task<BookingCreationResult> HandleAsync(CreateBookingCommand command, CancellationToken cancellationToken = default)
     {
@@ -77,6 +78,19 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
         {
             return new(await bookings.FindByIdempotencyKeyAsync(command.ClientId, command.IdempotencyKey, cancellationToken), false);
         }
+
+        await jobs.PublishAsync(
+            new JobMessage(
+                JobTypes.BookingCreated,
+                new Dictionary<string, string>
+                {
+                    ["bookingId"] = booking.Id,
+                    ["clientId"] = booking.ClientId,
+                    ["folio"] = booking.Folio,
+                    ["date"] = booking.Date
+                },
+                command.CorrelationId),
+            cancellationToken);
 
         return new(booking, false);
     }

@@ -25,6 +25,7 @@ public sealed record CreateBookingCommand(
     string VenueId,
     string Date,
     int Hours,
-    decimal? Deposit);
+    decimal? Deposit,
+    string? CorrelationId = null);
 
 public sealed record BookingCreationResult(Booking? Booking, bool InvalidInput);
