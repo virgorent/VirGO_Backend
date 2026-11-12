@@ -60,9 +60,16 @@ public sealed class LoginHandler
         }
 
         var now = clock.UtcNow;
-        if (user.LockoutEndsAt is { } lockoutEndsAt && lockoutEndsAt > now)
+        if (user.LockoutEndsAt is { } lockoutEndsAt)
         {
-            return new(null, LoginFailure.LockedOut, RetryAfterSeconds(lockoutEndsAt, now));
+            if (lockoutEndsAt > now)
+            {
+                return new(null, LoginFailure.LockedOut, RetryAfterSeconds(lockoutEndsAt, now));
+            }
+
+            await users.ResetLoginFailuresAsync(user.Id, now, cancellationToken);
+            user.FailedLoginCount = 0;
+            user.LockoutEndsAt = null;
         }
 
         if (!passwordHasher.Verify(user, user.PasswordHash, command.Password))

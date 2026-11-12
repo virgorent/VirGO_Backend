@@ -7,7 +7,7 @@ using VirGo.Api.Dto;
 namespace VirGo.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = "client")]
 [Route("api/v1/bookings")]
 public sealed class BookingsController(BookingHandler handler, IUserRepository users) : ControllerBase
 {
