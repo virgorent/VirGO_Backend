@@ -15,3 +15,4 @@ skip-check:
   - CKV_AWS_174 # The default *.cloudfront.net certificate does not allow setting the minimum TLS version; a custom domain is not cost-free (904).
   - CKV_AWS_310 # Origin failover needs a second bucket; media is not critical data (904).
   - CKV_AWS_305 # The distribution serves objects by path only; there is no root page (904).
+  - CKV_AWS_27 # Queues are encrypted with SSE-SQS (SqsManagedSseEnabled); Checkov only accepts KMS, and the AWS-managed SQS key would block EventBridge Scheduler from sending (099, 905).

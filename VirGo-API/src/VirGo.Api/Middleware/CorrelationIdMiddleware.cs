@@ -1,16 +1,14 @@
+using System.Text.RegularExpressions;
+
 namespace VirGo.Api.Middleware;
 
-public sealed class CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationIdMiddleware> logger)
+public sealed partial class CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationIdMiddleware> logger)
 {
     private const string HeaderName = "X-Correlation-Id";
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = context.Request.Headers[HeaderName].FirstOrDefault();
-        if (string.IsNullOrWhiteSpace(correlationId) || correlationId.Length > 100)
-        {
-            correlationId = Guid.NewGuid().ToString("D");
-        }
+        var correlationId = Sanitize(context.Request.Headers[HeaderName].FirstOrDefault());
 
         context.Items[HeaderName] = correlationId;
         context.Response.OnStarting(() =>
@@ -31,6 +29,18 @@ public sealed class CorrelationIdMiddleware(RequestDelegate next, ILogger<Correl
             await next(context);
         }
     }
+
+    /// <summary>
+    /// The header comes from the client and ends up in logs and queue messages (log forging, CWE-117).
+    /// Only 1–100 letters, digits, '.', '_' or '-' are kept; anything else is replaced by a new GUID.
+    /// </summary>
+    public static string Sanitize(string? value) =>
+        value is not null && SafeCorrelationId().IsMatch(value)
+            ? value.Replace("\r", string.Empty, StringComparison.Ordinal).Replace("\n", string.Empty, StringComparison.Ordinal)
+            : Guid.NewGuid().ToString("D");
+
+    [GeneratedRegex(@"\A[A-Za-z0-9._-]{1,100}\z", RegexOptions.CultureInvariant)]
+    private static partial Regex SafeCorrelationId();
 }
 
 /// <summary>Reads the X-Ray root id from the Lambda trace header: "Root=1-…;Parent=…;Sampled=1" → "1-…".</summary>

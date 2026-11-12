@@ -50,6 +50,26 @@ public sealed class JobsIntegrationTests(ApiFactory factory) : IClassFixture<Api
     }
 
     [Theory]
+    [InlineData("integration-test", true)]
+    [InlineData("3f2b1c4e-0d6a-4b8e-9f10-2a3b4c5d6e7f", true)]
+    [InlineData("fake\r\n2026-11-12 ERROR forged line", false)]
+    [InlineData("<script>", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void CorrelationIdKeepsOnlySafeValues(string? header, bool kept)
+    {
+        var value = CorrelationIdMiddleware.Sanitize(header);
+
+        Assert.Equal(kept, value == header);
+        Assert.DoesNotContain('\n', value);
+        Assert.DoesNotContain('\r', value);
+    }
+
+    [Fact]
+    public void CorrelationIdLongerThan100CharactersIsReplaced() =>
+        Assert.NotEqual(new string('a', 101), CorrelationIdMiddleware.Sanitize(new string('a', 101)));
+
+    [Theory]
     [InlineData("Root=1-5759e988-bd862e3fe1be46a994272793;Parent=53995c3f42cd8ad8;Sampled=1", "1-5759e988-bd862e3fe1be46a994272793")]
     [InlineData("Parent=53995c3f42cd8ad8;Root=1-abc;Sampled=0", "1-abc")]
     [InlineData("", null)]
