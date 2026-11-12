@@ -47,6 +47,9 @@
           },
           {
             "context": "CodeQL"
+          },
+          {
+            "context": "database"
           }
         ]
       }

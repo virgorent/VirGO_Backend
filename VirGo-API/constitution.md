@@ -4,7 +4,7 @@
 
 Este documento norma el proyecto Backend de VirGo. Todos los demás archivos (`AGENTS.md`, `memoria.md`, subagentes, skills y specs) deben estar alineados con él. Si un archivo lo contradice, prevalece este documento y el otro archivo se corrige.
 
-VirGo es una plataforma que conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-API/` del repositorio [`virgorent/VirGO_Backend`](https://github.com/virgorent/VirGO_Backend) y contiene solo la API que consumen la app móvil (`VirGo-Movil/`) y, en el futuro, la web.
+VirGo es una plataforma que conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-API/` del repositorio [`virgorent/VirGO_Backend`](https://github.com/virgorent/VirGO_Backend) y contiene solo la API que consumen la app móvil ([`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil)) y, en el futuro, la web.
 
 Se subordina a la constitución global de la raíz (`../constitution.md`): esta desarrolla sus principios para el proyecto. En lo técnico del proyecto manda este documento; en los principios generales, la global.
 
@@ -43,7 +43,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | Infraestructura | `VirGo.Infrastructure` | Persistencia (MongoDB), servicios de AWS, implementaciones |
 
 3. **Inyección de dependencias** con el contenedor nativo de .NET. No se instancian servicios con `new` dentro de los controladores.
-4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. La fuente de verdad de campos, validadores e índices es `db/schema/`, mantenida por `VirGo-Database`; la API consume ese contrato y no ejecuta DDL al arrancar.
+4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. La fuente de verdad de campos, validadores e índices es `VirGo-Database/src/catalog/`; `db/schema/` es una copia generada con `npm run db:export:api`. La API consume ese contrato y no ejecuta DDL al arrancar; la inicialización de colecciones, validadores e índices corresponde a `VirGo-Database`.
 5. **Ejecución dual:** la misma aplicación corre localmente con Kestrel y en AWS Lambda. No se mantienen dos bases de código.
 
 ## Artículo IV. Contrato de la API (acuerdo con Móvil)

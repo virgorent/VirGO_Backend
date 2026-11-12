@@ -18,6 +18,11 @@
     "db:verify:prod": "node src/cli/verify.js --env-file .env.production",
     "db:inspect:dev": "node src/cli/inspect.js --env-file .env.development",
     "db:inspect:prod": "node src/cli/inspect.js --env-file .env.production",
+    "db:seed:demo:plan": "node src/cli/seed-demo.js --env-file .env.development --mode plan",
+    "db:seed:demo": "node src/cli/seed-demo.js --env-file .env.development --mode seed --yes",
+    "db:seed:demo:purge": "node src/cli/seed-demo.js --env-file .env.development --mode purge --yes",
+    "db:export:api": "node src/cli/export.js",
+    "db:export:api:check": "node src/cli/export.js --check",
     "test": "node --test \"tests/unit/*.test.js\"",
     "test:integration": "node --test \"tests/integration/*.test.js\"",
     "test:all": "node --test \"tests/**/*.test.js\""

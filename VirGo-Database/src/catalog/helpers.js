@@ -16,9 +16,11 @@ export const uuid = () => ({
   pattern: UUID_PATTERN
 });
 
-export const string = () => ({
-  bsonType: 'string'
-});
+export const string = (maxLength) => {
+  const schema = { bsonType: 'string' };
+  if (maxLength !== undefined) schema.maxLength = maxLength;
+  return schema;
+};
 
 export const dateString = () => ({
   bsonType: 'string',
@@ -35,10 +37,14 @@ export const folioString = () => ({
   pattern: FOLIO_PATTERN
 });
 
-export const email = () => ({
-  bsonType: 'string',
-  pattern: EMAIL_PATTERN
-});
+export const email = (maxLength) => {
+  const schema = {
+    bsonType: 'string',
+    pattern: EMAIL_PATTERN
+  };
+  if (maxLength !== undefined) schema.maxLength = maxLength;
+  return schema;
+};
 
 export const bool = () => ({
   bsonType: 'bool'

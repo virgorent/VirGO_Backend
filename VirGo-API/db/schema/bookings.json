@@ -38,10 +38,6 @@
           "bsonType": "string",
           "maxLength": 100
         },
-        "idempotencyKey": {
-          "bsonType": "string",
-          "maxLength": 128
-        },
         "eventId": {
           "bsonType": "string",
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
@@ -49,6 +45,10 @@
         "quoteId": {
           "bsonType": "string",
           "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "idempotencyKey": {
+          "bsonType": "string",
+          "maxLength": 100
         },
         "venue": {
           "bsonType": "object",
@@ -210,14 +210,6 @@
       "options": {}
     },
     {
-      "name": "venueId_1_date_1",
-      "key": {
-        "venue.venueId": 1,
-        "date": 1
-      },
-      "options": {}
-    },
-    {
       "name": "clientId_1_idempotencyKey_1_unique",
       "key": {
         "clientId": 1,
@@ -225,8 +217,20 @@
       },
       "options": {
         "unique": true,
-        "sparse": true
+        "partialFilterExpression": {
+          "idempotencyKey": {
+            "$type": "string"
+          }
+        }
       }
+    },
+    {
+      "name": "venueId_1_date_1",
+      "key": {
+        "venue.venueId": 1,
+        "date": 1
+      },
+      "options": {}
     }
   ]
 }

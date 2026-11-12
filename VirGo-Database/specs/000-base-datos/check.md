@@ -1,45 +1,66 @@
-# Check — 000 Base de datos MongoDB
+# Check — 000 base-datos
+
+Cada casilla lleva evidencia. El módulo se marca *Cerrado* solo con todo en ✅ o ➖ justificado.
+
+**Leyenda:** ✅ Cumple · ➖ No aplica (justificar) · ⏳ Pendiente
 
 | Campo | Valor |
 |---|---|
 | Módulo | `000-base-datos` |
-| Estado del spec | Implementado; pendiente de revisión del equipo |
-| Revisó | — |
+| Estado del spec | En revisión |
+| Revisó | Pendiente de revisión humana |
 | Fecha de cierre | — |
 
-## 1. Especificación
+## 1. Especificación y gobernanza
 
-- [ ] Otra persona revisó el spec.
-- [ ] P-01 y P-02 respondidas.
+| Control | Evidencia | Estado |
+|---|---|---|
+| Spec, plan y tareas aprobados | Aprobación explícita del usuario en la sesión de trabajo | ✅ |
+| Constitution Check sin ❌ | [plan.md](plan.md) | ✅ |
+| Sin secretos en el repositorio | Revisión local; Gitleaks se ejecutará en el PR | ⏳ |
+| Preguntas abiertas respondidas | P-01 y P-02 no bloquean la implementación local | ➖ |
 
 ## 2. Criterios de aceptación
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 Catálogo igual a la base | Comparación de validadores en modo lectura, 2026-11-05: 22 de 22 | ✅ |
-| CA-02 `plan` no escribe | Salida de `npm run db:plan:dev` | ⏳ |
-| CA-03 `apply` exige `--yes` | Salida sin `--yes` | ⏳ |
-| CA-04 Sin secretos | Gitleaks en el PR #7 en verde; solo valores de ejemplo | ✅ |
-| CA-05 Pruebas | Salida de `npm test` | ⏳ |
+| CA-01 | `npm test`: 45 pruebas aprobadas. | ✅ |
+| CA-02 | `npm run test:integration`: 28 pruebas aprobadas con MongoDB 8 local. | ✅ |
+| CA-03 | `npm run db:export:api:check`: 22 esquemas actualizados, sin diferencias. | ✅ |
+| CA-04 | `python ../VirGo-API/db/tools/check_schema.py`: `22 colecciones, 0 diferencias`. | ✅ |
+| CA-05 | Prueba `bookings idempotencyKey es unico por cliente y opcional`. | ✅ |
+| CA-06 | Prueba `la segunda ejecucion es idempotente`. | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | `README.md` declara 16; falta la salida | ⏳ |
-| Integración | `README.md` declara 20; falta la salida | ⏳ |
-| Deriva | `npm run db:verify:dev` | ⏳ |
+| Unitarias | `npm test` · 45 aprobadas, 0 fallidas. | ✅ |
+| Integración | `npm run test:integration` · 28 aprobadas, 0 fallidas. | ✅ |
+| Seguridad | Gitleaks en CI al abrir PR. | ⏳ |
+| Humo | `plan`, `apply`, `verify` e `inspect` cubiertos por integración. | ✅ |
 
-## 4. PR e integración continua
+## 4. DevSecOps
 
-- [ ] PR #7 revisado por otra persona.
-- [ ] `dependency review` en verde; en el PR #7 falló.
-- [ ] `database-ci.yml` activo (T006).
+| Control | Evidencia | Estado |
+|---|---|---|
+| Gitleaks sin hallazgos | Se ejecutará en el PR. | ⏳ |
+| Dependency review sin vulnerabilidades altas | Se ejecutará en el PR. | ⏳ |
+| SAST (CodeQL / linters) en verde | No hay linter configurado en este proyecto. | ➖ |
+| Workflows con permisos mínimos | `database-ci.yml` creado con `contents: read`; ejecución pendiente en el PR. | ✅ |
+| Sin credenciales en logs ni artefactos | Revisión local de scripts y docs. | ✅ |
 
-## 5. Despliegue
+## 5. PR e integración continua
 
-➖ No aplica; `virgo_dev` ya tiene esta estructura.
+- [ ] PRs del módulo: pendiente de crear.
+- [ ] Checks requeridos en verde y una revisión.
 
-## 6. Memoria y aprendizaje
+## 6. Release
 
-- [ ] Decisiones enlazadas desde `Memoria.md`.
+- [ ] Versión y commit: pendiente.
+- [ ] Artefacto firmado y verificado: no aplica a esta entrega local.
+
+## 7. Memoria y aprendizaje
+
+- [ ] Entrada de cierre en `memoria.md`.
+- [ ] Mejoras propuestas a la constitución, `AGENTS.md`, skills o subagentes.

@@ -2,6 +2,10 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using VirGo.Application.Abstractions;
+using VirGo.Application.Auth;
+using VirGo.Domain.Auth;
 using Xunit;
 
 namespace VirGo.IntegrationTests;
@@ -160,6 +164,48 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task OwnerCannotCreateQuote()
+    {
+        using var client = factory.CreateClient();
+        var token = await CreateUserTokenAsync(UserRole.Owner);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await client.PostAsJsonAsync("/api/v1/quotes", new
+        {
+            target = new { type = "venue", id = "11111111-1111-4111-8111-111111111111" },
+            eventType = "Boda",
+            eventDate = "2027-05-15",
+            guests = 150,
+            requestedServices = RequestedServices
+        });
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task OwnerCannotCreateBooking()
+    {
+        using var client = factory.CreateClient();
+        var token = await CreateUserTokenAsync(UserRole.Owner);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/bookings")
+        {
+            Content = JsonContent.Create(new
+            {
+                venueId = "11111111-1111-4111-8111-111111111111",
+                date = "2027-05-15",
+                hours = 1
+            })
+        };
+        request.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString("D"));
+
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -396,6 +442,36 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         using var response = await client.PostAsJsonAsync(
             "/api/v1/auth/login",
             new { email = "demo@virgo.mx", password = "VirGo-local-only-password" });
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return json.RootElement.GetProperty("accessToken").GetString()!;
+    }
+
+    private async Task<string> CreateUserTokenAsync(UserRole role)
+    {
+        var email = $"{role.ToString().ToLowerInvariant()}-{Guid.NewGuid():N}@virgo.mx";
+        using var scope = factory.Services.CreateScope();
+        var users = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        var clock = scope.ServiceProvider.GetRequiredService<IClock>();
+        var user = new User
+        {
+            Id = Guid.NewGuid().ToString("D"),
+            Name = role.ToString(),
+            Email = email,
+            Phone = "+525500000000",
+            PasswordHash = string.Empty,
+            Role = role,
+            CreatedAt = clock.UtcNow,
+            UpdatedAt = clock.UtcNow
+        };
+        user.PasswordHash = passwordHasher.Hash(user, "Strong-password-123");
+        await users.AddAsync(user);
+        using var client = factory.CreateClient();
+        using var response = await client.PostAsJsonAsync("/api/v1/auth/login", new
+        {
+            email,
+            password = "Strong-password-123"
+        });
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         return json.RootElement.GetProperty("accessToken").GetString()!;
     }

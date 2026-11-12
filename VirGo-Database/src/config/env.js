@@ -11,6 +11,15 @@ export class ConfigError extends Error {
 
 const ENVIRONMENTS = new Set(['development', 'production', 'test']);
 const DB_NAME_PATTERN = /^[A-Za-z0-9_-]+$/;
+const TLS_PARAMETERS = new Set(['tls', 'ssl']);
+const INSECURE_TLS_PARAMETERS = new Set([
+  'tlsinsecure',
+  'tlsallowinvalidcertificates',
+  'tlsallowinvalidhostnames',
+  'sslinvalidhostnameallowed'
+]);
+const TRUE_VALUES = new Set(['true', '1']);
+const FALSE_VALUES = new Set(['false', '0']);
 
 const readPositiveInt = (name, fallback) => {
   const raw = process.env[name];
@@ -20,6 +29,81 @@ const readPositiveInt = (name, fallback) => {
     throw new ConfigError(`${name} debe ser un entero positivo.`);
   }
   return value;
+};
+
+const readUriParameters = (uri) => {
+  const queryIndex = uri.indexOf('?');
+  if (queryIndex === -1) return [];
+
+  const fragmentIndex = uri.indexOf('#', queryIndex);
+  const query = uri.slice(
+    queryIndex + 1,
+    fragmentIndex === -1 ? undefined : fragmentIndex
+  );
+
+  return [...new URLSearchParams(query).entries()].map(([key, value]) => [
+    key.toLowerCase(),
+    value.toLowerCase()
+  ]);
+};
+
+const resolveTlsPolicy = (uri, nodeEnv) => {
+  const parameters = readUriParameters(uri);
+  const tlsValues = parameters
+    .filter(([key]) => TLS_PARAMETERS.has(key))
+    .map(([, value]) => value);
+  const insecureParameters = parameters
+    .filter(([key, value]) => INSECURE_TLS_PARAMETERS.has(key) && TRUE_VALUES.has(value))
+    .map(([key]) => key);
+
+  if (insecureParameters.length > 0) {
+    throw new ConfigError(
+      `MONGODB_URI no puede desactivar la validacion TLS: ${insecureParameters.join(', ')}.`
+    );
+  }
+
+  const invalidTlsValue = tlsValues.find(
+    (value) => !TRUE_VALUES.has(value) && !FALSE_VALUES.has(value)
+  );
+  if (invalidTlsValue !== undefined) {
+    throw new ConfigError(
+      'Los parametros tls/ssl de MONGODB_URI solo aceptan true o false.'
+    );
+  }
+
+  const allowInsecureTls = process.env.MONGO_ALLOW_INSECURE_TLS === 'true';
+  if (allowInsecureTls && nodeEnv === 'production') {
+    throw new ConfigError('MONGO_ALLOW_INSECURE_TLS no se permite en production.');
+  }
+
+  const explicitTls = tlsValues.some((value) => TRUE_VALUES.has(value));
+  const explicitNoTls = tlsValues.some((value) => FALSE_VALUES.has(value));
+
+  if (explicitTls && explicitNoTls) {
+    throw new ConfigError('MONGODB_URI contiene valores tls/ssl contradictorios.');
+  }
+
+  const usesSrv = uri.startsWith('mongodb+srv://');
+  const tls = explicitTls || (usesSrv && !explicitNoTls);
+
+  if (tls) {
+    return {
+      tls: true,
+      allowInsecureTls: false
+    };
+  }
+
+  if (!allowInsecureTls) {
+    throw new ConfigError(
+      'MONGODB_URI debe usar TLS. Use mongodb+srv:// o agregue tls=true; '
+      + 'solo development/test pueden usar MONGO_ALLOW_INSECURE_TLS=true con un servidor local.'
+    );
+  }
+
+  return {
+    tls: false,
+    allowInsecureTls: true
+  };
 };
 
 export const loadConfig = (options = {}) => {
@@ -61,6 +145,8 @@ export const loadConfig = (options = {}) => {
     throw new ConfigError('En test, MONGODB_DB debe iniciar con virgo_test_.');
   }
 
+  const tlsPolicy = resolveTlsPolicy(uri, nodeEnv);
+
   return {
     envFile: envPath,
     nodeEnv,
@@ -71,7 +157,8 @@ export const loadConfig = (options = {}) => {
     serverSelectionTimeoutMS: readPositiveInt(
       'MONGO_SERVER_SELECTION_TIMEOUT_MS',
       10000
-    )
+    ),
+    ...tlsPolicy
   };
 };
 
@@ -81,5 +168,7 @@ export const safeConfigSummary = (config) => ({
   dbName: config.dbName,
   appName: config.appName,
   maxPoolSize: config.maxPoolSize,
-  serverSelectionTimeoutMS: config.serverSelectionTimeoutMS
+  serverSelectionTimeoutMS: config.serverSelectionTimeoutMS,
+  tls: config.tls,
+  allowInsecureTls: config.allowInsecureTls
 });

@@ -13,10 +13,12 @@ import {
   event,
   id,
   money,
+  passwordReset,
   paymentCard,
   provider,
   quote,
   review,
+  session,
   user,
   venue,
   venueDate
@@ -58,6 +60,13 @@ test('integracion contra MongoDB local', {
       .map((item) => item.name)
       .sort();
     assert.deepEqual(existing, [...COLLECTION_NAMES].sort());
+
+    let secondaryIndexes = 0;
+    for (const collectionName of COLLECTION_NAMES) {
+      const indexes = await db.collection(collectionName).listIndexes().toArray();
+      secondaryIndexes += indexes.filter((index) => index.name !== '_id_').length;
+    }
+    assert.equal(secondaryIndexes, 38);
   });
 
   await t.test('la segunda ejecucion es idempotente', async () => {
@@ -67,7 +76,7 @@ test('integracion contra MongoDB local', {
     assert.deepEqual(await applyPlan(db, plan), []);
   });
 
-  await t.test('users valida campos y email unico', async () => {
+  await t.test('users valida campos, email unico y maxLength', async () => {
     const users = db.collection('users');
     const valid = user();
     await users.insertOne(valid);
@@ -77,8 +86,37 @@ test('integracion contra MongoDB local', {
       cvv: '123'
     })));
 
+    await validationFailure(users.insertOne(user({
+      name: 'a'.repeat(101)
+    })));
+
+    await validationFailure(users.insertOne(user({
+      failedLoginCount: -1
+    })));
+
     await duplicateKey(users.insertOne(user({
       email: valid.email
+    })));
+  });
+
+  await t.test('passwordResets usa codeHash, attempts y userId unico', async () => {
+    const resets = db.collection('passwordResets');
+    const userId = id();
+    await resets.insertOne(passwordReset({ userId }));
+
+    await duplicateKey(resets.insertOne(passwordReset({ userId })));
+    await validationFailure(resets.insertOne(passwordReset({ attempts: 6 })));
+  });
+
+  await t.test('sessions acepta device y revokedAt', async () => {
+    const sessions = db.collection('sessions');
+    await sessions.insertOne(session({
+      device: 'Android 14 · Pixel 7',
+      revokedAt: null
+    }));
+
+    await validationFailure(sessions.insertOne(session({
+      tokenHash: 'a'.repeat(89)
     })));
   });
 
@@ -97,9 +135,14 @@ test('integracion contra MongoDB local', {
     })));
   });
 
-  await t.test('venues valida GeoJSON, estado y campos obligatorios', async () => {
+  await t.test('venues valida GeoJSON, estado, zona y maxLength', async () => {
     const venues = db.collection('venues');
     await venues.insertOne(venue());
+
+    const withoutOptional = venue();
+    delete withoutOptional.amenities;
+    delete withoutOptional.allies;
+    await venues.insertOne(withoutOptional);
 
     await validationFailure(venues.insertOne(venue({
       location: {
@@ -110,6 +153,14 @@ test('integracion contra MongoDB local', {
 
     await validationFailure(venues.insertOne(venue({
       status: 'invalido'
+    })));
+
+    await validationFailure(venues.insertOne(venue({
+      zone: 'Norte'
+    })));
+
+    await validationFailure(venues.insertOne(venue({
+      name: 'a'.repeat(101)
     })));
 
     await validationFailure(venues.insertOne(venue({
@@ -125,12 +176,18 @@ test('integracion contra MongoDB local', {
     delete missingUpdatedAt.updatedAt;
     await validationFailure(quotes.insertOne(missingUpdatedAt));
 
+    await quotes.insertOne(quote({ eventType: 'XV años' }));
+
     await validationFailure(quotes.insertOne(quote({
       target: {
         type: 'otro',
         id: id(),
         name: 'Destino'
       }
+    })));
+
+    await validationFailure(quotes.insertOne(quote({
+      eventType: 'XV Años'
     })));
   });
 
@@ -190,6 +247,51 @@ test('integracion contra MongoDB local', {
     })));
   });
 
+  await t.test('bookings idempotencyKey es unico por cliente y opcional', async () => {
+    const bookings = db.collection('bookings');
+    const clientId = id();
+
+    await bookings.insertOne(booking({
+      folio: 'VG-2026-0200',
+      clientId,
+      idempotencyKey: 'key-1'
+    }));
+
+    await duplicateKey(bookings.insertOne(booking({
+      folio: 'VG-2026-0201',
+      clientId,
+      idempotencyKey: 'key-1'
+    })));
+
+    await bookings.insertOne(booking({
+      folio: 'VG-2026-0202',
+      clientId: id(),
+      idempotencyKey: 'key-1'
+    }));
+
+    await bookings.insertOne(booking({
+      folio: 'VG-2026-0203',
+      clientId,
+      idempotencyKey: 'key-2'
+    }));
+
+    await bookings.insertOne(booking({
+      folio: 'VG-2026-0204',
+      clientId
+    }));
+
+    await bookings.insertOne(booking({
+      folio: 'VG-2026-0205',
+      clientId
+    }));
+
+    await validationFailure(bookings.insertOne(booking({
+      folio: 'VG-2026-0206',
+      clientId,
+      idempotencyKey: 'a'.repeat(101)
+    })));
+  });
+
   await t.test('conversations evita duplicados por cliente y destino', async () => {
     const conversations = db.collection('conversations');
     const clientId = id();
@@ -213,9 +315,14 @@ test('integracion contra MongoDB local', {
     })));
   });
 
-  await t.test('events acepta budgetPlan dinamico solo con Decimal128', async () => {
+  await t.test('events acepta XV años y budgetPlan dinamico solo con Decimal128', async () => {
     const events = db.collection('events');
     await events.insertOne(event());
+    await events.insertOne(event({ eventType: 'XV años' }));
+
+    await validationFailure(events.insertOne(event({
+      eventType: 'XV Años'
+    })));
 
     await validationFailure(events.insertOne(event({
       budgetPlan: {
@@ -224,12 +331,26 @@ test('integracion contra MongoDB local', {
     })));
   });
 
-  await t.test('providers valida userId unico y gallery sin maxItems', async () => {
+  await t.test('providers valida userId unico, pricing y gallery sin maxItems', async () => {
     const providers = db.collection('providers');
     const userId = id();
     await providers.insertOne(provider({ userId }));
 
     await duplicateKey(providers.insertOne(provider({ userId })));
+
+    const missingPricing = provider({ userId: id() });
+    delete missingPricing.pricing;
+    await validationFailure(providers.insertOne(missingPricing));
+
+    await validationFailure(providers.insertOne(provider({
+      userId: id(),
+      pricing: 'otro'
+    })));
+
+    await validationFailure(providers.insertOne(provider({
+      userId: id(),
+      businessName: 'a'.repeat(101)
+    })));
 
     const manyPhotos = Array.from({ length: 30 }, (_, index) => ({
       url: `https://example.com/${index}.jpg`,

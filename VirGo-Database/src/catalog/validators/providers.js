@@ -16,62 +16,65 @@ import {
 export const providersValidator = jsonSchema('providers', {
   _id: uuid(),
   userId: uuid(),
-  businessName: string(),
+  businessName: string(100),
   category: enumOf(PROVIDER_CATEGORIES),
   description: {
     bsonType: 'string',
-    minLength: 20
+    minLength: 20,
+    maxLength: 2000
   },
-  basePrice: money(),
-  zones: arrayOf(string()),
+  zones: arrayOf(string(50)),
   packages: arrayOf(object({
-    id: string(),
-    name: string(),
+    id: string(36),
+    name: string(100),
     price: money(),
     includes: {
       bsonType: ['string', 'array'],
       items: {
-        bsonType: 'string'
+        bsonType: 'string',
+        maxLength: 200
       }
     }
   }, ['id', 'name', 'price', 'includes'])),
   gallery: arrayOf(object({
-    url: string(),
+    url: string(500),
     order: int(0)
   }, ['url', 'order'])),
-  coverUrl: string(),
+  coverUrl: string(500),
   rating: object({
     average: number(0, 5),
     count: int(0)
   }, ['average', 'count']),
   status: enumOf(PROVIDER_STATUSES),
   createdAt: date(),
-  updatedAt: date()
+  updatedAt: date(),
+  pricing: enumOf(['per_person', 'per_event']),
+  responseTime: string(50)
 }, [
   '_id',
   'userId',
   'businessName',
   'category',
   'description',
-  'basePrice',
   'zones',
   'packages',
-  'gallery',
   'rating',
   'status',
   'createdAt',
-  'updatedAt'
+  'updatedAt',
+  'pricing',
+  'responseTime'
 ]);
 
 export const gigsValidator = jsonSchema('gigs', {
   _id: uuid(),
   providerId: uuid(),
-  eventName: string(),
-  clientName: string(),
-  place: string(),
+  eventName: string(100),
+  clientName: string(100),
+  place: string(200),
   date: dateString(),
-  start: string(),
-  end: string(),
+  start: string(5),
+  end: string(5),
   amount: money(),
   quoteId: uuid()
 }, [

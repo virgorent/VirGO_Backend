@@ -21,13 +21,14 @@ export const bookingsValidator = jsonSchema('bookings', {
   _id: uuid(),
   folio: folioString(),
   clientId: uuid(),
-  clientName: string(),
+  clientName: string(100),
   eventId: uuid(),
   quoteId: uuid(),
+  idempotencyKey: string(100),
   venue: object({
     venueId: uuid(),
-    name: string(),
-    photoUrl: string()
+    name: string(100),
+    photoUrl: string(500)
   }, ['venueId', 'name', 'photoUrl']),
   date: dateString(),
   hours: int(1),
@@ -35,15 +36,15 @@ export const bookingsValidator = jsonSchema('bookings', {
   deposit: money(),
   status: enumOf(BOOKING_STATUSES),
   extras: arrayOf(object({
-    name: string(),
+    name: string(100),
     price: money()
   }, ['name', 'price'])),
   payments: arrayOf(object({
-    paymentId: string(),
-    concept: string(),
+    paymentId: string(36),
+    concept: string(150),
     amount: money(),
     method: enumOf(PAYMENT_METHODS),
-    reference: string(),
+    reference: string(100),
     status: enumOf(PAYMENT_STATUSES),
     paidAt: date()
   }, ['paymentId', 'concept', 'amount', 'method', 'status'])),
@@ -51,7 +52,7 @@ export const bookingsValidator = jsonSchema('bookings', {
     at: date(),
     refund: money()
   }, ['at', 'refund']),
-  rescheduledFrom: string(),
+  rescheduledFrom: string(10),
   createdAt: date(),
   updatedAt: date()
 }, [

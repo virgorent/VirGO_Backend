@@ -8,6 +8,11 @@
 
 Los archivos reales estan en `.gitignore`. No los comparta ni los confirme.
 
+`MONGODB_URI` debe usar TLS. `mongodb+srv://` lo habilita por defecto; con
+`mongodb://` agregue `tls=true`. No desactive la validacion TLS. Para MongoDB
+local en development/test puede usar `MONGO_ALLOW_INSECURE_TLS=true`; production
+siempre rechaza esa variable.
+
 ## Flujo recomendado
 
 1. `plan`: muestra las operaciones exactas sin escribir.
@@ -33,6 +38,33 @@ npm run db:init:prod -- --yes
 npm run db:verify:prod
 npm run db:inspect:prod
 ```
+
+## Seed DEMO
+
+Solo para development/test. El seed usa IDs deterministas y no se ejecuta en
+production ni sobre `virgo`.
+
+```powershell
+npm run db:seed:demo:plan
+npm run db:seed:demo
+npm run db:seed:demo:purge
+```
+
+`db:seed:demo` y `db:seed:demo:purge` incluyen `--yes`; el modo `plan` no
+escribe. `purge` elimina unicamente los `_id` del DEMO y conserva cualquier otro
+documento. No se ejecuta automaticamente en `apply` ni en `verify`.
+
+## Exportacion a la API
+
+Despues de cambiar el catalogo:
+
+```powershell
+npm run db:export:api
+npm run db:export:api:check
+python ..\VirGo-API\db\tools\check_schema.py
+```
+
+`db:export:api` escribe los 22 archivos de `VirGo-API/db/schema`. `db:export:api:check` no escribe y falla si hay diferencias. No edite esos JSON a mano.
 
 ## MongoDB local para pruebas
 
@@ -67,6 +99,10 @@ const folio = `VG-${year}-${String(counter.next).padStart(4, '0')}`;
 
 El indice unico de `bookings.folio` protege contra duplicados. La secuencia no garantiza ausencia de huecos.
 
+## Idempotencia de reservas
+
+La API puede enviar `bookings.idempotencyKey` (maximo 100 caracteres). El indice unico parcial `clientId_1_idempotencyKey_1_unique` rechaza repetir la misma clave para el mismo cliente. Si el documento no tiene clave, el indice no lo considera.
+
 ## Cancelacion de reservas
 
 La regla aprobada es transaccional:
@@ -81,18 +117,33 @@ La anomalia debe registrarse fuera de la transaccion. El repositorio no implemen
 
 ## TTL
 
-- `passwordResets.expiresAt`: fecha de expiracion del token.
+- `passwordResets.expiresAt`: fecha de expiracion del codigo de recuperacion.
 - `sessions.purgeAt`: fecha de purga de la sesion.
 - `notices.purgeAt`: `createdAt + 90 dias`.
 - `assistantMessages.purgeAt`: `createdAt + 30 dias`.
 
 MongoDB elimina documentos vencidos de forma periodica; no es inmediato. No se agregan TTL a `venueDates`, `gigs` ni `contactMessages`.
 
+## Fallos parciales y reanudacion
+
+`apply` valida el plan antes de escribir y nunca ejecuta `drop`, `delete`,
+`rename` ni acciones fuera del catalogo. Si una operacion falla a mitad del
+proceso, el CLI informa cuantas operaciones ya se aplicaron. Las operaciones son
+idempotentes: corrija la causa, ejecute de nuevo `plan` y luego `apply --yes`.
+No intente "deshacer" manualmente una coleccion o un indice ya creado.
+
 ## Problemas comunes
 
 ### No existe el archivo de entorno
 
 Copie el ejemplo correspondiente y complete la URI.
+
+### TLS rechazado
+
+Use `mongodb+srv://` o agregue `tls=true` a `MONGODB_URI`. Retire
+`tlsInsecure`, `tlsAllowInvalidCertificates`, `tlsAllowInvalidHostnames` y
+`sslInvalidHostNameAllowed`. Si usa MongoDB local, habilite
+`MONGO_ALLOW_INSECURE_TLS=true` solo en development/test.
 
 ### Base de datos rechazada
 
@@ -119,4 +170,6 @@ Revise la URI, el estado del cluster y la lista de acceso de red de Atlas.
 - No ejecutar `dropDatabase`, `dropCollection`, `dropIndexes` ni `deleteMany` desde este proyecto.
 - No aplicar en produccion sin plan revisado y respaldo.
 - No usar credenciales DDL en la API.
+- No ejecutar el seed DEMO en produccion ni sobre `virgo`.
+- No desactivar TLS ni usar el override inseguro fuera de development/test.
 - No versionar archivos `.env` reales.

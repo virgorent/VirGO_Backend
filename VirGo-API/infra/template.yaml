@@ -33,22 +33,6 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       StageName: $default
-      CorsConfiguration:
-        AllowCredentials: false
-        AllowHeaders:
-           - content-type
-           - authorization
-           - x-correlation-id
-           - idempotency-key
-        AllowMethods:
-          - GET
-          - POST
-          - PUT
-          - PATCH
-          - DELETE
-          - OPTIONS
-        AllowOrigins:
-          - https://virgo.example.invalid
       DefaultRouteSettings:
         ThrottlingBurstLimit: 40
         ThrottlingRateLimit: 20

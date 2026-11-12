@@ -1,4 +1,6 @@
 using System.Net;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace VirGo.SecurityTests;
@@ -27,5 +29,31 @@ public sealed class SecurityHeaderTests(SecurityApiFactory factory) : IClassFixt
         using var response = await client.SendAsync(request);
 
         Assert.DoesNotContain("Access-Control-Allow-Origin", response.Headers.Select(header => header.Key));
+    }
+}
+
+public sealed class ProductionCorsTests(ProductionCorsApiFactory factory) : IClassFixture<ProductionCorsApiFactory>
+{
+    [Fact]
+    public async Task ProductionDoesNotAllowLocalhostOrigin()
+    {
+        using var client = factory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/health");
+        request.Headers.Add("Origin", "http://localhost:3000");
+
+        using var response = await client.SendAsync(request);
+
+        Assert.DoesNotContain("Access-Control-Allow-Origin", response.Headers.Select(header => header.Key));
+    }
+}
+
+public sealed class ProductionCorsApiFactory : WebApplicationFactory<Program>
+{
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Production");
+        builder.UseSetting("Persistence:Provider", "MongoDb");
+        builder.UseSetting("Persistence:ConnectionString", "mongodb://127.0.0.1:27017/virgo");
+        builder.UseSetting("Jwt:SigningKey", "TestingOnlySigningKeyMustBeAtLeast32Characters");
     }
 }

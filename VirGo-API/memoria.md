@@ -63,7 +63,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 | ADR-29 | 2026-11-04 | `monthlyStats._id` determinista | Permite el `upsert` con `$inc` |
 | ADR-30 | 2026-11-04 | **Semgrep, SonarCloud y OWASP ZAP** en cada PR | Clase del 2026-11-04 y proyecto de referencia |
 | ADR-31 | 2026-11-04 | **Mutación nocturna**, fuera de los checks requeridos | Mantiene el CI corto, como la referencia |
-| ADR-32 | 2026-11-05 | **`VirGo-Database` define la estructura**; la API no ejecuta DDL | Constitución v1.2.0 del PR #5 |
+| ADR-32 | 2026-11-05 | **`VirGo-Database/src/catalog/` es la fuente de verdad**; `db/schema/` se genera desde el catálogo y la API no ejecuta DDL | Evita divergencia y ediciones manuales; detalle verificado el 2026-11-07 |
 | ADR-33 | 2026-11-05 | Testcontainers con los validadores reales | La persistencia en memoria no detecta rechazos |
 
 ## Cambios de contrato (compartidos con Móvil)
@@ -302,6 +302,14 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Pendiente:** usuario `virgo-api-prod` en Atlas, catálogo y datos en la base `virgo`, y despliegue por OIDC.
 
+### 2026-11-11 · Correcciones posteriores al despliegue
+
+- **Autor:** Rafael + OpenCode (`dev-dotnet`, `qa`, `seguridad`)
+- **Módulo / tareas:** `003`–`009`, `900`
+- **Qué se corrigió:** cotizaciones y reservaciones ahora exigen el rol `client`; un bloqueo de login expirado reinicia `failedLoginCount` antes del siguiente intento; CORS quedó alineado entre `appsettings.json` y `infra/template.yaml` con `http://localhost:3000`.
+- **Evidencia:** `sam validate --template-file infra/template.yaml --lint` aprobado; CodeQL remoto sin alertas activas. La compilación local de la worktree de seguimiento quedó pendiente por falta de resolución DNS hacia NuGet.
+- **Pendiente:** publicar una nueva rama/PR porque PR #5 y el PR de despliegue ya están fusionados; no desplegar desde esta cuenta.
+
 ### 2026-11-11 · Servicios de AWS nuevos: colas, observabilidad, correo, medios y tareas programadas
 
 - **Autor:** Angelica + Claude Code (`dev-dotnet`, `devops-aws`)
@@ -313,7 +321,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
   - Bucket privado de medios detrás de CloudFront con OAC.
   - Despliegue *canary* `Canary10Percent5Minutes` con *rollback* por la alarma de errores del alias `live`.
 - **Decisiones:** ADR-37 a ADR-51. Se descartó el SDK de X-Ray para .NET: está en mantenimiento y se compiló para AWSSDK v3; el proyecto usa v4 (ADR-40). CloudTrail y IAM Access Analyzer se descartaron por decisión del equipo.
-- **Evidencia:** `dotnet build -warnaserror` sin errores; `dotnet test`: 199 de 199 (33 unitarias, 36 de integración, 21 de seguridad, 10 de contrato, 96 de base de datos y 3 de rendimiento). Prueba saboteada: sin la publicación en la cola, la prueba de integración falla. `sam validate --lint` válido.
+- **Evidencia:** `dotnet build -warnaserror` sin errores; `dotnet test`: 210 de 210 tras integrar `main` (34 unitarias, 45 de integración, 22 de seguridad, 10 de contrato, 96 de base de datos y 3 de rendimiento). Prueba saboteada: sin la publicación en la cola, la prueba de integración falla. `sam validate --lint` válido.
 - **Costo estimado (Art. VII.5):**
 
   | Servicio | Capa gratuita | Estimado al mes |

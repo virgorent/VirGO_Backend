@@ -35,6 +35,7 @@ const {
   loadConfig
 } = await import('../config/env.js');
 const {
+  ApplyError,
   applyPlan,
   buildPlan,
   formatPlan,
@@ -108,6 +109,11 @@ try {
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`Error: ${message}\n`);
+  if (error instanceof ApplyError) {
+    process.stderr.write(
+      `Operaciones aplicadas antes del fallo: ${error.results.length}\n`
+    );
+  }
   exitCode = 1;
 } finally {
   await closeDatabase(client);

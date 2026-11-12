@@ -1,70 +1,96 @@
-# Spec — 001 Contrato de datos con la API
+# Spec — 001 contrato-con-api
 
 | Campo | Valor |
 |---|---|
 | Módulo | `001-contrato-con-api` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
-| Fecha | 2026-11-05 |
-| Gobierno | Constitución global (`../../../constitution.md`) |
+| Estado | Implementado, pendiente de revisión |
+| Fecha | 2026-11-07 |
+| Constitución | v1.0.0 |
 | Plan | [plan.md](plan.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
-| Origen | Comparación del 2026-11-05 entre la base, `VirGo-API/db/schema/` y lo que escribe la API del PR #5 |
 
 ## 1. Contexto y objetivo
 
-La API del PR #5 se construyó contra `VirGo-API/db/schema/`, que difiere del catálogo en 8 colecciones. Como `users` no admite campos adicionales, la base rechazaría el registro de usuarios y el bloqueo de cuentas. Además, ningún campo de texto tiene longitud máxima.
+`VirGo-API/db/schema` era la fuente de verdad y se editaba por separado. Eso produjo divergencias en recuperación de contraseña, sesiones, usuarios, proveedores, zonas, enums e índices. El objetivo es invertir el flujo: `VirGo-Database/src/catalog` genera el contrato que consume la API.
 
-El objetivo es que el catálogo admita lo que las 7 APIs necesitan, para que puedan funcionar contra Atlas.
-
-## 2. Historias técnicas
+## 2. Historias
 
 | ID | Historia |
 |---|---|
-| HT-01 | Como **equipo Backend**, quiero que la base acepte los documentos de las 7 APIs, para desplegar sin errores de validación. |
-| HT-02 | Como **responsable de seguridad**, quiero longitud máxima en todo texto, para que una entrada enorme no llegue a la base. |
+| HT-01 | Como **responsable de datos**, quiero **generar los esquemas de la API desde el catálogo** para **eliminar ediciones manuales divergentes**. |
+| HT-02 | Como **desarrollador de la API**, quiero **un contrato estable y versionado** para **implementar sin ambigüedad**. |
+| HT-03 | Como **QA**, quiero **un comando de verificación** para **detectar deriva antes de fusionar**. |
 
 ## 3. Requerimientos funcionales
 
 | ID | Requerimiento |
 |---|---|
-| RF-01 | `users` admite `failedLoginCount`, `lockoutEndsAt`, `unreadNotices`, `city` y `defaultGuests`. |
-| RF-02 | `sessions` declara `device` y `revokedAt`. |
-| RF-03 | `bookings` admite `idempotencyKey`, con unicidad por cliente, y un índice para listar por cliente y fecha. |
-| RF-04 | Todo campo de texto libre tiene longitud máxima. |
-| RF-05 | Los valores permitidos de `eventType`, zonas y categorías son los mismos en la base y en la API. |
-| RF-06 | El catálogo puede exportar `VirGo-API/db/schema/`, para que ese directorio deje de editarse a mano. |
-| RF-07 | Los cambios se aplican sin eliminar colecciones, índices ni documentos. |
+| RF-01 | `db:export:api` genera 22 archivos en `VirGo-API/db/schema`. |
+| RF-02 | Cada archivo contiene `collection`, `validationLevel`, `validationAction`, `validator` e `indexes`. |
+| RF-03 | La salida es determinista: dos espacios, LF y salto final. |
+| RF-04 | `db:export:api:check` no escribe y detecta archivos faltantes, distintos o extra. |
+| RF-05 | `bookings` incluye `idempotencyKey` opcional de máximo 100 caracteres. |
+| RF-06 | El índice `clientId_1_idempotencyKey_1_unique` es único y parcial. |
+| RF-07 | `passwordResets` usa `codeHash` y `attempts`; `userId` es único. |
+| RF-08 | `providers` usa `pricing` y `responseTime`; no existe `basePrice`. |
+| RF-09 | `venues.allies[].category` usa `PROVIDER_CATEGORIES`; `zone` usa `ZONES`. |
+| RF-10 | `monthlyStats._id` es determinista: `<targetType>:<targetId>:<AAAA-MM>`. |
+| RF-11 | Los 22 esquemas pasan `check_schema.py` sin diferencias. |
 
 ## 4. Requerimientos no funcionales
 
 | ID | Requerimiento |
 |---|---|
-| RNF-01 | **Compatibilidad:** `virgo_dev` no tiene documentos de negocio, así que los cambios no requieren migración. |
-| RNF-02 | **Seguridad:** el cambio se aplica con el usuario DDL, no con el de la aplicación. |
+| RNF-01 | **Seguridad:** el exportador no imprime secretos ni URIs. |
+| RNF-02 | **Reproducibilidad:** mismo catálogo produce byte a byte el mismo JSON. |
+| RNF-03 | **Trazabilidad:** los cambios quedan en Git como diff revisable. |
+| RNF-04 | **Automatización:** CI ejecuta el chequeo de exportación y paridad. |
+| RNF-05 | **Compatibilidad:** no requiere MongoDB para exportar. |
 
 ## 5. Criterios de aceptación
 
 | ID | Criterio |
 |---|---|
-| CA-01 | **Dado** un usuario con los campos que escribe la API, **cuando** lo inserto, **entonces** la base lo acepta. |
-| CA-02 | **Dado** un texto de 1500 caracteres en un campo limitado, **cuando** lo inserto, **entonces** la base lo rechaza. |
-| CA-03 | **Dado** dos reservaciones con el mismo cliente e `idempotencyKey`, **cuando** inserto la segunda, **entonces** la base la rechaza. |
-| CA-04 | **Dado** el catálogo actualizado, **cuando** ejecuto `db:verify:dev`, **entonces** no hay diferencias. |
-| CA-05 | **Dado** el catálogo y `VirGo-API/db/schema/`, **cuando** los comparo, **entonces** coinciden. |
+| CA-01 | **Dado** el catálogo actual, **cuando** se ejecuta `db:export:api`, **entonces** se escriben 22 archivos. |
+| CA-02 | **Dado** los archivos generados, **cuando** se ejecuta `db:export:api:check`, **entonces** no hay diferencias. |
+| CA-03 | **Dado** un archivo alterado manualmente, **cuando** se ejecuta `--check`, **entonces** se reporta `different`. |
+| CA-04 | **Dado** un archivo extra en el directorio, **entonces** se reporta `unexpected`. |
+| CA-05 | **Dado** `check_schema.py`, **entonces** reporta `22 colecciones, 0 diferencias`. |
+| CA-06 | **Dado** una reserva duplicada por cliente y clave, **entonces** MongoDB la rechaza. |
 
-## 6. Fuera de alcance
+## 6. Seguridad y privacidad
 
-- `passwordResets` y `providers`: ningún endpoint de los 7 los usa; se deciden en sus specs (P-03 y P-04).
-- Crear la base `virgo` de producción: se hace después, con `db:init:prod`.
+| Amenaza | Control |
+|---|---|
+| Edición manual de la API | CI falla si el esquema generado difiere. |
+| Reintentos de creación de reservas | Índice parcial único por cliente y clave. |
+| Exposición de datos sensibles | El exportador solo copia el contrato; no lee documentos. |
+| Deriva de enums | Pruebas comparan contra `src/catalog/enums.js`. |
 
-## 7. Supuestos, dependencias y preguntas abiertas
+## 7. Fuera de alcance
 
-**Dependencias:** `000-base-datos`. Lo consume `VirGo-API/specs/010-contrato-datos`.
+- Implementar endpoints o lógica de negocio en la API.
+- Migrar datos existentes en Atlas.
+- Decidir la pasarela de pagos.
+- Definir el TTL de `contactMessages`.
 
-| # | Pregunta | Recomendación | Responsable |
-|---|---|---|---|
-| P-01 | Zonas: ¿`Norte, Sur, Centro, Oriente, Poniente` (base) o `Juriquilla, Centro, El Refugio…` (modelo)? | Las que muestre la maqueta | Equipo |
-| P-02 | `eventType`: ¿`XV Años` (base) o `XV años` (`db/schema`)? | `XV Años`, como en `design.theme`; ajustar la API | Esau y Gafas |
-| P-03 | `passwordResets`: ¿`tokenHash` y `used`, o `codeHash` y `attempts`? | Conservar `tokenHash` y `used`, y agregar `attempts` para frenar la fuerza bruta | Equipo |
-| P-04 | `providers`: ¿`basePrice`, o `pricing` y `responseTime`? | Decidir en el spec de proveedores | Equipo |
-| P-05 | ¿Son correctas las longitudes de la sección 8 del modelo de datos? | Propuesta pendiente de confirmar | Esau |
+## 8. Supuestos, dependencias y preguntas abiertas
+
+**Supuestos**
+
+- La API leerá los JSON generados sin transformarlos.
+- El orden de colecciones e índices del catálogo es estable.
+- Los cambios de contrato requieren revisión humana.
+
+**Dependencias**
+
+- `VirGo-Database/src/catalog`.
+- `VirGo-API/db/schema` como destino generado.
+- `VirGo-API/db/tools/check_schema.py`.
+
+**Preguntas abiertas**
+
+| # | Pregunta | Responsable |
+|---|---|---|
+| P-01 | ¿La API conservará algún archivo manual fuera de `db/schema`? | Mantenedores de API |
+| P-02 | ¿Se aplicará el nuevo índice en `virgo_dev` antes del PR? | Responsable de datos |
