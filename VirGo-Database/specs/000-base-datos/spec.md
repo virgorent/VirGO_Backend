@@ -93,3 +93,8 @@
 |---|---|---|
 | P-01 | ¿La generación de esquemas se ejecutará en CI o solo se verificará? | Mantenedores |
 | P-02 | ¿Se requiere aplicar el nuevo índice en `virgo_dev` antes de fusionar? | Responsable de datos |
+| P-03 | `docs/API-HANDOFF.zip` duplica `API-HANDOFF.md`. ¿Se quita del repositorio? | Esau |
+
+## 9. Specs por dominio
+
+Las colecciones se documentan en `002-cuentas` a `010-soporte`.

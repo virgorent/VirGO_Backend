@@ -4,7 +4,7 @@
 |---|---|
 | Módulo | `003-auth-login` |
 | Versión | 1.0.0 |
-| Estado | Borrador. **No se ejecuta hasta cerrar `000`, `001` y `002` (Art. II.2).** |
+| Estado | Borrador. **No se ejecuta hasta cerrar `000`, `900` y `901` (Art. II.2).** |
 | Fecha | 2026-11-03 |
 | Spec / Plan / Check | [spec.md](spec.md) · [plan.md](plan.md) · [check.md](check.md) |
 | Constitución | v1.1.0 |
@@ -21,7 +21,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T300 | Confirmar que los MCP `mongodb` y `github` responden y que P-01 y P-02 del spec están resueltas | `002`: T211, `010`: T1007 | `arquitecto` | Respuestas en `memoria.md` | ⏳ |
+| T300 | Confirmar que los MCP `mongodb` y `github` responden y que P-01 y P-02 del spec están resueltas | `901`: T211, `010`: T1007 | `arquitecto` | Respuestas en `memoria.md` | ⏳ |
 
 ## F1 · Dominio y aplicación
 
@@ -50,7 +50,7 @@
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
 | T308 | Pruebas unitarias y de integración de la sección 8 del plan | T307 | `qa` | `dotnet test` en verde (CA-01 a CA-07) | ⏳ |
-| T309 | Pruebas de seguridad (incluidas las longitudes de la sección 8 del plan), mutación (Stryker sobre el login) y caso nuevo en `tests/smoke/smoke.sh`; revisión de `seguridad` | T308 | `qa` + `seguridad` | `VirGo.SecurityTests` en verde; puntaje de mutación ≥ umbral de `002`; reporte sin hallazgos altos (CA-08) | ⏳ |
+| T309 | Pruebas de seguridad (incluidas las longitudes de la sección 8 del plan), mutación (Stryker sobre el login) y caso nuevo en `tests/smoke/smoke.sh`; revisión de `seguridad` | T308 | `qa` + `seguridad` | `VirGo.SecurityTests` en verde; puntaje de mutación ≥ umbral de `901`; reporte sin hallazgos altos (CA-08) | ⏳ |
 
 ## F5 · PR, despliegue y entrega
 

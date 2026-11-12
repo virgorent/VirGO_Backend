@@ -1,10 +1,10 @@
 # Constitution — VirGo API (Backend)
 
-**Versión:** 1.1.0 (propuesta, pendiente de aprobación del equipo) · **Ratificada:** 2026-10-29 · **Última enmienda:** 2026-11-03
+**Versión:** 1.2.0 · **Ratificada:** 2026-11-04 · **Última enmienda:** 2026-11-04
 
 Este documento norma el proyecto Backend de VirGo. Todos los demás archivos (`AGENTS.md`, `memoria.md`, subagentes, skills y specs) deben estar alineados con él. Si un archivo lo contradice, prevalece este documento y el otro archivo se corrige.
 
-VirGo es una plataforma que conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-API/` del repositorio [`virgorent/virGO_App`](https://github.com/virgorent/virGO_App) y contiene solo la API que consumen la app móvil (`VirGo-Movil/`) y, en el futuro, la web.
+VirGo es una plataforma que conecta a quien organiza un evento con salones y proveedores de servicios. Este proyecto vive en la carpeta `VirGo-API/` del repositorio [`virgorent/VirGO_Backend`](https://github.com/virgorent/VirGO_Backend) y contiene solo la API que consumen la app móvil ([`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil)) y, en el futuro, la web.
 
 Se subordina a la constitución global de la raíz (`../constitution.md`): esta desarrolla sus principios para el proyecto. En lo técnico del proyecto manda este documento; en los principios generales, la global.
 
@@ -20,13 +20,13 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 3. Si durante la implementación aparece algo no previsto, se actualiza primero el spec o el plan y después el código.
 4. Las especificaciones viven en `specs/NNN-nombre-del-modulo/` con exactamente cuatro archivos: `spec.md`, `plan.md`, `task.md` y `check.md`. El `check.md` es la lista de verificación del módulo: reúne la evidencia de cada criterio de aceptación, de cada tipo de prueba, del PR, del despliegue y de la memoria.
 5. **Specs atómicos.** Cada spec cubre una sola capacidad: un endpoint o recurso (por ejemplo, `login` y `logout` van en specs separados), la infraestructura o el pipeline. Si un spec necesita «y además…», se divide.
-6. Los IDs de tarea llevan el número del módulo para no repetirse: el módulo `000` usa `T001…T099`, el `001` usa `T101…T199`, el `002` usa `T201…` y así sucesivamente.
+6. Los IDs de tarea llevan el número del módulo para no repetirse: el módulo `000` usa `T001…T099`, el `900` usa `T101…T199`, el `901` usa `T201…` y así sucesivamente.
 7. Un spec pasa por los estados *Borrador → En revisión → Aprobado → Desplegado → Cerrado*. Solo se marca *Cerrado* cuando su `check.md` está completo, su código está desplegado en la URL HTTPS y quedó registrado en `memoria.md`.
 
 ## Artículo II. Modularidad e iteraciones
 
 1. El módulo `000-arquitectura-base` se construye primero. No contiene funcionalidad del negocio: solo la estructura, la configuración, la seguridad base, la infraestructura y el despliegue.
-2. Los specs funcionales se pueden **redactar** (spec, plan, task y check) antes de terminar la base, porque alimentan el contexto de la arquitectura global y de los agentes. Sus tareas **no se ejecutan** hasta que `000-arquitectura-base`, `001-infraestructura-iac` y `002-pipeline-cicd` estén cerrados.
+2. Los specs funcionales se pueden **redactar** (spec, plan, task y check) antes de terminar la base, porque alimentan el contexto de la arquitectura global y de los agentes. Sus tareas **no se ejecutan** hasta que `000-arquitectura-base`, `900-infraestructura-iac` y `901-pipeline-cicd` estén cerrados.
 3. Cada módulo funcional define sus endpoints y declara qué subagentes y skills necesita.
 4. Un módulo se cierra solo cuando todas sus tareas están verificadas y quedaron registradas en `memoria.md`. Así no quedan brechas estructurales entre iteraciones.
 
@@ -43,7 +43,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | Infraestructura | `VirGo.Infrastructure` | Persistencia (MongoDB), servicios de AWS, implementaciones |
 
 3. **Inyección de dependencias** con el contenedor nativo de .NET. No se instancian servicios con `new` dentro de los controladores.
-4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. La fuente de verdad del esquema es `VirGo-Database/src/catalog/`; `db/schema/` se genera desde ese catálogo con `npm run db:export:api`. Las colecciones, validadores e índices los crea la aplicación de forma idempotente al arrancar desde esos archivos; no se editan a mano.
+4. **Persistencia detrás de interfaces.** Hay una implementación en memoria para desarrollo y pruebas, y otra de **MongoDB** (driver oficial `MongoDB.Driver`) para la nube. El proveedor se elige por configuración. La fuente de verdad de campos, validadores e índices es `VirGo-Database/src/catalog/`; `db/schema/` es una copia generada con `npm run db:export:api`. La API consume ese contrato y no ejecuta DDL al arrancar; la inicialización de colecciones, validadores e índices corresponde a `VirGo-Database`.
 5. **Ejecución dual:** la misma aplicación corre localmente con Kestrel y en AWS Lambda. No se mantienen dos bases de código.
 
 ## Artículo IV. Contrato de la API (acuerdo con Móvil)
@@ -96,6 +96,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | API Gateway (HTTP API) | Entrada HTTPS pública |
    | AWS Lambda | Ejecución de la API |
    | MongoDB Atlas **M0** (externo a la cuenta de AWS; 512 MB) | Base de datos |
+   | Redis externo, plan gratuito (**propuesto**, `098-cache-redis`) | Caché distribuida del catálogo |
    | SSM Parameter Store (estándar) | Secretos y configuración |
    | CloudWatch Logs (retención de 7 días) | Registros |
    | AWS Budgets | Alerta de gasto |
@@ -159,3 +160,4 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 |---|---|---|
 | 1.0.0 | 2026-10-29 | Versión inicial |
 | 1.1.0 | 2026-11-03 | **Propuesta, pendiente de aprobación del equipo.** Lineamientos de la clase del 28 y 29 de octubre: `check.md` y specs atómicos (I.4–I.7), redacción anticipada de specs funcionales (II.2), `.gitignore` y escaneos DevSecOps (V.9–V.10), cinco tipos de prueba con mutación nocturna y longitudes obligatorias (VI.2, VI.4, VI.6), servicios auxiliares de AWS y **MongoDB Atlas M0 como base de datos** en lugar de DynamoDB (III.4, V.11, VII), ruleset, CD manual, repositorio único y aprendizaje tras el despliegue (VIII), servidores MCP (XI.6) y README en inglés (XII.1). |
+| 1.2.0 | 2026-11-04 | Aprobada por el equipo: `VirGo-Database` administra colecciones, validadores e índices; `VirGo-API` no ejecuta DDL ni modifica la estructura de MongoDB al arrancar, conforme a `API-HANDOFF.md`. |

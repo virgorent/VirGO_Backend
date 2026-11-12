@@ -6,8 +6,8 @@
 ## Estado actual
 
 - **Fecha inicio**: 2026-10-30
-- **Fase**: Gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendientes operativos: aplicar el ruleset de `main` y habilitar Dependency graph). `VirGo-Database` implementado y en endurecimiento; `VirGo-Movil` sigue en especificación.
-- **Objetivo**: Monorepo SDD con base MongoDB verificada y lista para integrar. La API C# existe en `origin/feat/vertical-slice-7-apis`, no en `rama-backend` ni `origin/main`; su integración requiere autorización.
+- **Fase**: Gobernanza global cerrada (`nv-00`, `nv-01` y `nv-02` cumplidos; pendientes operativos: aplicar el ruleset de `main` y habilitar Dependency graph). `VirGo-API` tiene implementación local y cierre pendiente; `VirGo-Database` está implementado y en endurecimiento; `VirGo-Movil` vive en `virgorent/VirGO_Movil`.
+- **Objetivo**: Repositorio backend SDD con API .NET, base MongoDB verificada y gobernanza compartida. La app móvil vive en un repositorio separado.
 - **Constitución global**: v1.0.0, ratificada el 2026-11-04.
 
 ## Decisiones
@@ -31,6 +31,7 @@
 | 2026-11-11 | Seed DEMO determinista y opcional, bloqueado en production y sobre `virgo` | Permite pruebas locales sin datos reales ni riesgo de contaminar producción |
 | 2026-11-11 | No inspeccionar, planificar ni aplicar sobre `virgo` sin credenciales y autorización explícitas | `virgo` es producción y no hay `.env.production` ni aprobación operativa |
 | 2026-11-11 | No integrar ni modificar la API desde `rama-backend` sin confirmar la rama de trabajo | La implementación C# solo está en `origin/feat/vertical-slice-7-apis` |
+| 2026-11-11 | `VirGo-Movil` sale de este repositorio | Indicación del curso: backend y frontend separados |
 
 ## Errores a evitar
 
@@ -50,3 +51,14 @@
 ## Notas
 
 Este archivo se irá actualizando conforme avance el proyecto.
+
+## Separación de repositorios (2026-11-11)
+
+Por indicación del curso, el backend y el frontend viven en repositorios distintos:
+
+| Repositorio | Contenido |
+|---|---|
+| [`virgorent/VirGO_Backend`](https://github.com/virgorent/VirGO_Backend) | Backend: `VirGo-API` y `VirGo-Database` |
+| [`virgorent/VirGO_Movil`](https://github.com/virgorent/VirGO_Movil) | Frontend: `VirGo-Movil` |
+
+La gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`, `.specify/`, `.opencode/`) está copiada en ambos y debe mantenerse alineada. Las entradas anteriores de esta bitácora describen el monorepo de entonces.

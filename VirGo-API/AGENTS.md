@@ -1,12 +1,12 @@
 # AGENTS.md — VirGo API (Backend)
 
-Guía base para los agentes de IA y las personas que trabajan en este proyecto (carpeta `VirGo-API/` del repositorio `virgorent/virGO_App`). Sigue lo que dice [`constitution.md`](constitution.md); si algo aquí lo contradice, gana la constitución.
+Guía base para los agentes de IA y las personas que trabajan en este proyecto (carpeta `VirGo-API/` del repositorio `virgorent/VirGO_Backend`). Sigue lo que dice [`constitution.md`](constitution.md); si algo aquí lo contradice, gana la constitución.
 
 ## Contexto del proyecto
 
 - **Qué es:** la API REST de VirGo. La consume la app móvil Android (`VirGo-Movil`).
 - **Stack:** .NET 10, ASP.NET Core Web API, AWS Lambda, API Gateway (HTTP API), MongoDB Atlas M0, AWS SAM y GitHub Actions.
-- **Estado actual:** fase de especificación. Están redactados `000-arquitectura-base`, `001-infraestructura-iac`, `002-pipeline-cicd`, `003-auth-login` y `004-auth-logout`. Todavía **no hay código**: no ejecutes tareas hasta que el `task.md` esté aprobado, y las de `003` en adelante esperan a que `000`–`002` estén cerrados (Art. II.2).
+- **Estado actual:** implementación local parcial. Existen la base `000`, las plantillas de `001`, los workflows de `002` y el vertical slice de siete endpoints (`003`–`009`); quedan pendientes la validación externa, el despliegue y el cierre formal de los specs.
 
 ## Estructura del proyecto
 
@@ -19,29 +19,31 @@ VirGo-API/
 ├── constitution.md          # Reglas globales del proyecto
 ├── AGENTS.md                # Este archivo
 ├── memoria.md               # Bitácora de actividades y decisiones
+├── API-HANDOFF.md           # Contrato versionado de API y persistencia
 ├── opencode.json            # Servidores MCP permitidos
 ├── .opencode/
 │   ├── agents/              # Subagentes del proyecto
 │   └── skills/              # Skills internas
 ├── specs/                   # Un spec atómico por carpeta: spec.md, plan.md, task.md, check.md
 │   ├── 000-arquitectura-base/
-│   ├── 001-infraestructura-iac/
-│   ├── 002-pipeline-cicd/
+│   ├── 900-infraestructura-iac/
+│   ├── 901-pipeline-cicd/
 │   ├── 003-auth-login/
 │   ├── 004-auth-logout/
+│   ├── 005-auth-register/ through 009-bookings-create/ # Vertical slice
 │   └── 010-contrato-datos/
 ├── db/                      # schema/ (copia generada desde VirGo-Database) y tools/check_schema.py
-├── src/                     # (pendiente) VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
-├── tests/                   # (pendiente) VirGo.UnitTests, VirGo.IntegrationTests, VirGo.SecurityTests, smoke/
-├── infra/                   # (pendiente) template.yaml (SAM), bootstrap.yaml
+├── src/                     # VirGo.Api, VirGo.Application, VirGo.Domain, VirGo.Infrastructure
+├── tests/                   # UnitTests, IntegrationTests, SecurityTests, smoke/
+├── infra/                   # template.yaml (SAM), bootstrap.yaml
 └── (sin .github aquí)        # GitHub solo lee `.github/` de la raíz del repositorio
 ```
 
-En la raíz del repositorio están `.github/` (pendiente: `api-ci.yml`, `api-codeql.yml`, `api-deploy.yml`, `security.yml`, `rulesets/`), la gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`) y `Modelo de datos VirGo.md`. Todos los comandos de abajo se ejecutan dentro de `VirGo-API/`.
+En la raíz del repositorio están `.github/` con los workflows y el ruleset, la gobernanza global (`constitution.md`, `AGENTS.md`, `Memoria.md`, `specs/nv-*`) y `Modelo de datos VirGo.md` como contexto histórico. Todos los comandos de abajo se ejecutan dentro de `VirGo-API/`.
 
 ## Comandos
 
-Estos comandos estarán disponibles al terminar las tareas de la arquitectura base:
+Estos comandos están disponibles para la implementación local; Python, Atlas y AWS siguen siendo dependencias externas:
 
 ```powershell
 dotnet restore
@@ -59,7 +61,7 @@ Orden del pipeline de CI: `restore → build → unitarias → integración → 
 
 1. **Spec:** el agente `arquitecto` redacta `spec.md` (qué y por qué) y lo aprueba una persona.
 2. **Plan:** el agente `arquitecto` redacta `plan.md` y llena el «Constitution Check». Lo aprueba una persona.
-3. **Tareas:** se generan en `task.md` con un ID con el número del módulo (`T001` en `000`, `T101` en `001`, `T301` en `003`…), dependencias, el subagente responsable y su criterio de verificación.
+3. **Tareas:** se generan en `task.md` con un ID con el número del módulo (`T001` en `000`, `T101` en `900`, `T301` en `003`…), dependencias, el subagente responsable y su criterio de verificación.
 4. **Check:** se crea `check.md` con la evidencia que hará falta para cada CA, cada tipo de prueba, el PR, el despliegue y la memoria.
 5. **Implementación:** se avanza una tarea a la vez, en el orden del `task.md`, en la rama `feat/NNN-modulo`. Si el CI falla, se corrige en la misma rama y sobre el mismo spec.
 6. **Despliegue:** una persona lo lanza con *Run workflow*; el humo debe quedar en verde.
@@ -120,9 +122,9 @@ Se configuran en [`opencode.json`](opencode.json) y se instalan **antes** de cod
 | MCP | Estado | Para qué | Credencial | Quién lo usa |
 |---|---|---|---|---|
 | `aws-docs` (`awslabs.aws-documentation-mcp-server`) | ✅ Permitido, activo | Consultar la documentación oficial de AWS (SAM, Lambda, SSM, capa gratuita) | Ninguna | `devops-aws`, `arquitecto` |
-| `mongodb` (`mongodb-mcp-server`, oficial de MongoDB) | ✅ Permitido, se activa en `001`: T100 | Consultar la base de datos: colecciones, documentos e índices; verificar que cada spec deja los documentos con la forma de su plan | `VIRGO_MONGO_MCP_URI`: usuario `virgo-mcp` de **solo lectura**; el MCP corre en modo solo lectura | `dev-dotnet`, `qa`, `devops-aws` |
-| `mongodb` con herramientas de Atlas | 🧑 Solo en el arranque (`001`: T101) | Crear el clúster M0, los usuarios y la lista de acceso | Cuenta de servicio de Atlas en variables de entorno, desactivada al terminar | `devops-aws` con confirmación humana |
-| `github` (servidor remoto oficial) | ✅ Permitido, se activa en `002`: T200 | Leer PRs, checks, ejecuciones de workflows y alertas de seguridad | `GITHUB_MCP_PAT`: token de grano fino solo de este repositorio | Todos |
+| `mongodb` (`mongodb-mcp-server`, oficial de MongoDB) | ✅ Permitido, se activa en `900`: T100 | Consultar la base de datos: colecciones, documentos e índices; verificar que cada spec deja los documentos con la forma de su plan | `VIRGO_MONGO_MCP_URI`: usuario `virgo-mcp` de **solo lectura**; el MCP corre en modo solo lectura | `dev-dotnet`, `qa`, `devops-aws` |
+| `mongodb` con herramientas de Atlas | 🧑 Solo en el arranque (`900`: T101) | Crear el clúster M0, los usuarios y la lista de acceso | Cuenta de servicio de Atlas en variables de entorno, desactivada al terminar | `devops-aws` con confirmación humana |
+| `github` (servidor remoto oficial) | ✅ Permitido, se activa en `901`: T200 | Leer PRs, checks, ejecuciones de workflows y alertas de seguridad | `GITHUB_MCP_PAT`: token de grano fino solo de este repositorio | Todos |
 | `dynamodb` (`awslabs.dynamodb-mcp-server`) | ⛔ No aplica | La base de datos es MongoDB (ADR-23) | — | — |
 | MCP de otras nubes | ⛔ Prohibido | Contradice el Art. VII | — | — |
 
