@@ -350,4 +350,18 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Decisión:** se quita `DeploymentPreference` y se conserva `AutoPublishAlias: live`. El *rollback* es manual con `aws lambda update-alias`. El *canary* vuelve en T117 al pasar al plan de pago (ADR-50 revisada).
 - **Aprendizaje:** antes de agregar un servicio, probar con una llamada de solo lectura (`list-*`) que el plan de la cuenta lo incluye.
 - **Segundo intento (2026-11-13):** la validación previa de CloudFormation rechazó el cambio porque la identidad de SES `anyiarguelles34@gmail.com` ya existía fuera del stack (`NAME_CONFLICT_VALIDATION`) y ya estaba verificada. Se quitó `AWS::SES::EmailIdentity` de la plantilla: la identidad es un arranque manual documentado (`903`, ADR-52, T90306).
+- **Tercer intento:** SQS rechazó la política con dos colas en una regla (*Each statement in the policy should have exactly one resource*); se separó en una política por cola.
+- **Cuarto intento: desplegado** (`UPDATE_COMPLETE`, 2026-11-13). Pruebas en la nube:
+
+  | Servicio | Evidencia |
+  |---|---|
+  | API | `/health` y `/api/v1/venues` → 200; alias `live` → versión 1; X-Ray `Active` |
+  | SQS + worker | `email.send` y `quotes.expire` procesados; `virgo-jobs` y `virgo-jobs-dlq` en 0; mapeo con `ReportBatchItemFailures` |
+  | SES | Correo `email-verification` enviado; el log muestra solo `a***@gmail.com`, sin el código |
+  | Scheduler | `virgo-quotes-expire` `ENABLED`, `cron(0 0 * * ? *)`, `America/Mexico_City`; `quotes.expire` venció 0 cotizaciones (la base no tiene datos) |
+  | S3 + CloudFront | `https://d35ii8qjvt24pn.cloudfront.net`: HTTPS 200, HTTP → 301 a HTTPS, S3 directo 403, encabezados HSTS, `nosniff` y `X-Frame-Options` |
+  | X-Ray | 4 trazas en 15 minutos |
+  | Tablero y alarmas | `virgo-api` creado; 4 alarmas en `OK` |
+
+- **Pendiente:** probar `booking.created` en la nube cuando la base `virgo` tenga salones y un cliente (T9907).
 

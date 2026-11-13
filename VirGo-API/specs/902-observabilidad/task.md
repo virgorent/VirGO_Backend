@@ -16,7 +16,7 @@
 | T90201 | `Tracing: Active` en `Globals` para la API y el worker | `099`: T9904 | `devops-aws` | `sam validate --lint`; pruebas en verde sin AWS (CA-04) | ✅ local |
 | T90202 | Agregar el `traceId` al alcance del log junto al `correlationId` | T90201 | `dev-dotnet` | Prueba unitaria | ✅ local |
 | T90203 | `VirGoDashboard` con los widgets de la sección 6.1 del plan | `099`: T9904 | `devops-aws` | `sam validate --lint`, cfn-lint | ✅ local |
-| T90204 | 🧑 Desplegar y verificar la traza, el mapa de servicios y el tablero | T90201–T90203 | `devops-aws` | CA-01 a CA-03 | ⏳ |
+| T90204 | 🧑 Desplegar y verificar la traza, el mapa de servicios y el tablero | T90201–T90203 | `devops-aws` | CA-01 a CA-03 | ✅ 2026-11-13 |
 | T90205 | Completar `check.md` y registrar en `memoria.md` | T90204 | `qa` | `check.md` sin ⏳ | ⏳ |
 
 ## Matriz de trazabilidad

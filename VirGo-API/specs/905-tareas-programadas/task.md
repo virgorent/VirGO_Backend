@@ -16,7 +16,7 @@
 | T90501 | `IQuoteExpiry`, implementación en memoria y en MongoDB | — | `dev-dotnet` | CA-01 a CA-03 | ✅ local |
 | T90502 | `QuotesExpireHandler` en el worker | T90501, `099`: T9903 | `dev-dotnet` | Prueba unitaria | ✅ local |
 | T90503 | `template.yaml`: `QuotesExpireSchedule` y `SchedulerRole` | `099`: T9904 | `devops-aws` | cfn-lint, Checkov | ✅ local |
-| T90504 | 🧑 Desplegar, revisar el horario y enviar `quotes.expire` a mano | T90502, T90503 | `devops-aws` | CA-04 y log del worker | ⏳ |
+| T90504 | 🧑 Desplegar, revisar el horario y enviar `quotes.expire` a mano | T90502, T90503 | `devops-aws` | CA-04 y log del worker | ✅ 2026-11-13 |
 | T90505 | Completar `check.md` y registrar en `memoria.md` | T90504 | `qa` | `check.md` sin ⏳ | ⏳ |
 
 ## Matriz de trazabilidad

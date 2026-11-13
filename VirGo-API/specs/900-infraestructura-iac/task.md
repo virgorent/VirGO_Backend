@@ -62,7 +62,7 @@
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
 | T111 | `template.yaml`: `AutoPublishAlias: live` y alarma `CanaryErrorsAlarm` sobre el alias. `DeploymentPreference` se quitó: el plan Free no incluye CodeDeploy | — | `devops-aws` | `sam validate --lint`, cfn-lint | ✅ local |
-| T112 | 🧑 Desplegar, verificar el alias `live` y probar el regreso a la versión anterior | T111 | `devops-aws` | CA-10 | ⏳ |
+| T112 | 🧑 Desplegar, verificar el alias `live` y probar el regreso a la versión anterior | T111 | `devops-aws` | CA-10 | ✅ 2026-11-13 (alias live → versión 1) |
 | T117 | 🧑 Al pasar la cuenta al plan de pago, volver a agregar `DeploymentPreference: Canary10Percent5Minutes` con la alarma del alias | Plan de pago | `devops-aws` | Despliegue *canary* en CodeDeploy | ⛔ |
 | T113 | 🧑 Crear la organización de AWS Organizations y activar IAM Identity Center en `us-east-1` desde la consola | — | Angelica | Consola de IAM Identity Center | ⏳ |
 | T114 | Crear el usuario `angelica-admin`, el conjunto de permisos `AdministratorAccess` (sesión de 8 h) y asignarlo a la cuenta | T113 | `devops-aws` | `aws sso-admin list-account-assignments` | ⏳ |
