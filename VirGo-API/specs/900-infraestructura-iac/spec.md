@@ -43,7 +43,7 @@ El objetivo de este módulo es dejar descrita, validada y lista para desplegar t
 | RF-10 | La infraestructura se valida automáticamente (sintaxis, buenas prácticas y seguridad) sin desplegar nada. |
 | RF-11 | Todo el stack de la aplicación se puede borrar con un solo comando. |
 | RF-12 | Antes de crear un recurso, su costo estimado queda registrado en `memoria.md`. |
-| RF-13 | Cada versión nueva de la API se despliega en modo *canary*: recibe el 10 % del tráfico durante 5 minutos y, si la alarma de errores de esa versión se activa, CodeDeploy regresa sola a la versión anterior. |
+| RF-13 | Cada despliegue publica una versión numerada de la API y mueve a ella el alias `live`; una alarma avisa si esa versión falla y se puede regresar a la anterior con un comando. El modo *canary* con CodeDeploy queda **bloqueado** mientras la cuenta esté en el plan Free de AWS, que no incluye CodeDeploy (`SubscriptionRequiredException`, 2026-11-13). |
 | RF-14 | Las personas administran la cuenta con usuarios de IAM Identity Center con MFA y credenciales temporales; la cuenta raíz solo se usa para facturación y emergencias. |
 
 ## 4. Requerimientos no funcionales
@@ -69,7 +69,7 @@ El objetivo de este módulo es dejar descrita, validada y lista para desplegar t
 | CA-06 | **Dado** un workflow fuera de `main` o de otro repositorio, **cuando** intenta asumir el rol de despliegue, **entonces** AWS lo rechaza. |
 | CA-07 | **Dado** un stack temporal de prueba, **cuando** ejecuto el comando de borrado, **entonces** no queda ningún recurso suyo. |
 | CA-08 | **Dado** el stack desplegado, **cuando** reviso las alarmas, **entonces** existen la de errores 5xx, la de errores de la función y las alertas de la base, con aviso por correo. |
-| CA-10 | **Dado** un despliegue nuevo, **cuando** abro CodeDeploy, **entonces** aparece un despliegue `Canary10Percent5Minutes` sobre el alias `live`; si la versión nueva falla, el despliegue termina en *rollback* y el alias vuelve a la versión anterior. |
+| CA-10 | **Dado** un despliegue nuevo, **cuando** reviso la Lambda, **entonces** el alias `live` apunta a la versión recién publicada; **y dado** que esa versión falla, **cuando** ejecuto `aws lambda update-alias` con la versión anterior, **entonces** la API vuelve a responder. |
 | CA-11 | **Dado** el usuario `angelica-admin`, **cuando** inicia sesión, **entonces** se le pide MFA y obtiene credenciales temporales con el conjunto de permisos `AdministratorAccess`; ninguna persona usa la cuenta raíz para trabajar. |
 
 ## 6. Fuera de alcance

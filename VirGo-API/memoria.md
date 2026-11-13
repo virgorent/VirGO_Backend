@@ -341,3 +341,12 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Pendiente:** aprobar la enmienda v1.3.0 y los specs por PR; desplegar (T9907, T90204, T90304, T90403, T90504, T112); elegir el remitente de SES (`903` P-01); activar IAM Identity Center (T113–T115); decidir el gasto de Bedrock (`906` P-01).
 
+### 2026-11-13 · El plan Free de AWS no incluye CodeDeploy
+
+- **Autor:** Angelica + Claude Code (`devops-aws`)
+- **Módulo / tareas:** `900` (T111, T112, T117)
+- **Qué pasó:** el despliegue de los servicios nuevos falló al crear la aplicación de CodeDeploy (`SubscriptionRequiredException: The AWS Access Key Id needs a subscription for the service`). CloudFormation canceló el resto y regresó el stack a la versión anterior; la API siguió respondiendo 200.
+- **Verificación:** con llamadas de solo lectura se confirmó que SQS, EventBridge Scheduler, SES, CloudFront, X-Ray, CloudWatch y S3 sí están disponibles en el plan Free; solo CodeDeploy no.
+- **Decisión:** se quita `DeploymentPreference` y se conserva `AutoPublishAlias: live`. El *rollback* es manual con `aws lambda update-alias`. El *canary* vuelve en T117 al pasar al plan de pago (ADR-50 revisada).
+- **Aprendizaje:** antes de agregar un servicio, probar con una llamada de solo lectura (`list-*`) que el plan de la cuenta lo incluye.
+

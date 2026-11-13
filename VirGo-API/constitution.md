@@ -109,7 +109,7 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | AWS Lambda (worker) | Procesa la cola en segundo plano (`099`) |
    | AWS X-Ray | Rastreo de las Lambdas, muestreo por defecto (`902-observabilidad`) |
    | CloudWatch Dashboards (hasta 3) | Tablero `virgo-api` (`902`) |
-   | CodeDeploy (para Lambda) | Despliegue *canary* con *rollback* automático (`900`) |
+   | CodeDeploy (para Lambda) | Despliegue *canary* con *rollback* automático (`900`). **No disponible en el plan Free**; hoy se usan versiones con alias `live` y *rollback* manual |
    | IAM Identity Center y AWS Organizations | Acceso de las personas con MFA y credenciales temporales (`900`) |
    | Amazon SES (*sandbox*) | Correos de recuperación y verificación (`903-correo-ses`) |
    | S3 (bucket privado de medios) y CloudFront (`PriceClass_100`) | Fotos de salones y proveedores por HTTPS (`904-medios-s3-cloudfront`) |
