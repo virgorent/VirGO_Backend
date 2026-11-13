@@ -91,11 +91,28 @@ Resources:
         deadLetterTargetArn: !GetAtt JobsDeadLetterQueue.Arn
         maxReceiveCount: 3
 
+  # SQS exige una sola cola por regla de la política.
   JobsQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
       Queues:
         - !Ref JobsQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: sqs:*
+            Resource: !GetAtt JobsQueue.Arn
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  JobsDeadLetterQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
         - !Ref JobsDeadLetterQueue
       PolicyDocument:
         Version: '2012-10-17'
@@ -104,9 +121,7 @@ Resources:
             Effect: Deny
             Principal: '*'
             Action: sqs:*
-            Resource:
-              - !GetAtt JobsQueue.Arn
-              - !GetAtt JobsDeadLetterQueue.Arn
+            Resource: !GetAtt JobsDeadLetterQueue.Arn
             Condition:
               Bool:
                 aws:SecureTransport: 'false'
