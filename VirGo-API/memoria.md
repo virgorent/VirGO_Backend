@@ -349,4 +349,5 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Verificación:** con llamadas de solo lectura se confirmó que SQS, EventBridge Scheduler, SES, CloudFront, X-Ray, CloudWatch y S3 sí están disponibles en el plan Free; solo CodeDeploy no.
 - **Decisión:** se quita `DeploymentPreference` y se conserva `AutoPublishAlias: live`. El *rollback* es manual con `aws lambda update-alias`. El *canary* vuelve en T117 al pasar al plan de pago (ADR-50 revisada).
 - **Aprendizaje:** antes de agregar un servicio, probar con una llamada de solo lectura (`list-*`) que el plan de la cuenta lo incluye.
+- **Segundo intento (2026-11-13):** la validación previa de CloudFormation rechazó el cambio porque la identidad de SES `anyiarguelles34@gmail.com` ya existía fuera del stack (`NAME_CONFLICT_VALIDATION`) y ya estaba verificada. Se quitó `AWS::SES::EmailIdentity` de la plantilla: la identidad es un arranque manual documentado (`903`, ADR-52, T90306).
 

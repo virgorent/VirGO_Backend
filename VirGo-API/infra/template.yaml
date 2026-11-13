@@ -8,10 +8,7 @@ Parameters:
   SenderEmail:
     Type: String
     Default: ''
-    Description: Verified Amazon SES sender address (903). Empty disables SES; the worker only logs emails.
-
-Conditions:
-  HasSender: !Not [!Equals [!Ref SenderEmail, '']]
+    Description: Amazon SES sender address, verified once outside the stack (903). Empty disables SES; the worker only logs emails.
 
 Globals:
   Function:
@@ -150,13 +147,6 @@ Resources:
     Properties:
       LogGroupName: /aws/lambda/virgo-worker-prod
       RetentionInDays: 7
-
-  # 903 · Remitente de SES (solo si se indica SenderEmail)
-  SenderIdentity:
-    Type: AWS::SES::EmailIdentity
-    Condition: HasSender
-    Properties:
-      EmailIdentity: !Ref SenderEmail
 
   # 905 · Tareas programadas
   SchedulerRole:

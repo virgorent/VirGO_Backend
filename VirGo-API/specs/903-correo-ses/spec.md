@@ -25,7 +25,7 @@
 
 | ID | Requerimiento |
 |---|---|
-| RF-01 | Existe una identidad de SES para el remitente (parámetro `SenderEmail`), verificada por correo. |
+| RF-01 | Existe una identidad de SES para el remitente, verificada por correo. Se crea **una sola vez fuera del stack** porque requiere abrir el correo de verificación (arranque documentado, Art. VII.4); la plantilla solo recibe la dirección en el parámetro `SenderEmail`. |
 | RF-02 | El worker procesa mensajes `email.send` con `template` (`password-reset` o `email-verification`), `to` y `code`, y envía el correo con SES. |
 | RF-03 | Las plantillas están en español, en texto plano y HTML, e indican la vigencia del código y qué hacer si no se pidió. |
 | RF-04 | Un error de SES hace fallar solo ese mensaje, que se reintenta según `099` (3 intentos y cola de errores). |
