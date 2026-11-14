@@ -118,7 +118,7 @@ Identificamos lo que el proyecto necesitaría en AWS y lo adaptamos a la capa gr
 
 | Rol | Lo asume | Puede |
 |---|---|---|
-| `virgo-github-deploy` | GitHub Actions por OIDC, solo con `sub = repo:virgorent/VirGO_Backend:environment:production` y `aud = sts.amazonaws.com` | Crear y ejecutar *change sets* del stack `virgo-api-prod`, usar la transformación de SAM, subir el paquete al bucket de SAM y pasarle `virgo-cfn-exec` a CloudFormation. Nada más |
+| `virgo-github-deploy` | GitHub Actions por OIDC, solo con `aud = sts.amazonaws.com` y `sub = repo:virgorent@352551934/VirGO_Backend@1445981483:environment:production` (formato de GitHub con los ID inmutables de la organización y el repositorio; se acepta también el formato sin ID) | Crear y ejecutar *change sets* del stack `virgo-api-prod`, usar la transformación de SAM, subir el paquete al bucket de SAM y pasarle `virgo-cfn-exec` a CloudFormation. Nada más |
 | `virgo-cfn-exec` | CloudFormation (`aws:SourceAccount` de la cuenta) | Crear y cambiar solo los recursos del stack: funciones `virgo-*`, el HTTP API, roles `virgo-api-prod-*` (con políticas administradas en lista cerrada), colas `virgo-jobs*`, grupos de logs `virgo-*`, alarmas, el tablero `virgo-api`, el tema `virgo-alerts`, el bucket `virgo-media-<cuenta>`, la distribución de CloudFront y los horarios `virgo-*` |
 
 Los únicos permisos sobre `'*'` son acciones que AWS no permite limitar por recurso: entrega de logs de API Gateway, creación de OAC de CloudFront y mapeos de eventos de Lambda (ADR-53). Las omisiones de Checkov están justificadas en el propio recurso.
