@@ -81,6 +81,39 @@ public sealed class AuthTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task DeleteAccountAnonymizesUserAndRevokesAllSessions()
+    {
+        using var client = factory.CreateClient();
+        var email = $"delete-{Guid.NewGuid():N}@virgo.test";
+        const string password = "Password-Segura-1";
+
+        using var register = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            name = "Cuenta por eliminar",
+            email,
+            password,
+            phone = "+524421234567"
+        });
+        Assert.Equal(HttpStatusCode.Created, register.StatusCode);
+
+        var firstToken = await LoginAsync(client, email, password);
+        var secondToken = await LoginAsync(client, email, password);
+        using var delete = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/users/me");
+        delete.Headers.Authorization = new AuthenticationHeaderValue("Bearer", firstToken);
+
+        using var deleteResponse = await client.SendAsync(delete);
+
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, await StatusAsync(client, firstToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, await StatusAsync(client, secondToken));
+
+        using var login = await client.PostAsJsonAsync(
+            "/api/v1/auth/login",
+            new { email, password });
+        Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
+    }
+
+    [Fact]
     public async Task LogoutKeepsASecondSessionActive()
     {
         using var client = factory.CreateClient();
@@ -98,10 +131,23 @@ public sealed class AuthTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
     private static async Task<string> LoginAsync(HttpClient client)
     {
+        return await LoginAsync(client, "demo@virgo.mx", "VirGo-local-only-password");
+    }
+
+    private static async Task<string> LoginAsync(HttpClient client, string email, string password)
+    {
         using var response = await client.PostAsJsonAsync(
             "/api/v1/auth/login",
-            new { email = "demo@virgo.mx", password = "VirGo-local-only-password" });
+            new { email, password });
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         return json.RootElement.GetProperty("accessToken").GetString()!;
+    }
+
+    private static async Task<HttpStatusCode> StatusAsync(HttpClient client, string token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/_diagnostics/secure");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var response = await client.SendAsync(request);
+        return response.StatusCode;
     }
 }

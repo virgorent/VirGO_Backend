@@ -5,7 +5,7 @@
 | Módulo | `018-delete-users-me` |
 | Endpoint | `DELETE /api/v1/users/me` |
 | Versión | 1.0.0 |
-| Estado | Borrador; **requiere decisión** |
+| Estado | En implementación |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil de usuario |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.3 |
@@ -20,7 +20,9 @@ Permitir que cada persona administre su cuenta. Este spec cubre solo `DELETE /ap
 
 | ID | Requerimiento |
 |---|---|
-| RF-01 | Perfil de usuario: baja lógica o anonimización. |
+| RF-01 | Anonimizar el perfil del usuario y desactivar su acceso, conservando referencias históricas necesarias para reservas y reseñas. |
+| RF-02 | Revocar todas las sesiones activas del usuario. |
+| RF-03 | El correo, teléfono, contraseña y preferencias personales dejan de ser recuperables desde la cuenta. |
 
 ## 3. Requerimientos no funcionales
 
@@ -32,6 +34,8 @@ Aplican los del Art. IV (contrato), V (seguridad), VI.6 (longitudes) y VII (cost
 |---|---|
 | CA-01 | **Dado** una persona autenticada con permiso, **cuando** llama a `DELETE /api/v1/users/me` con datos válidos, **entonces** recibe 204. |
 | CA-02 | **Dado** una solicitud sin token o con uno inválido, **cuando** llega, **entonces** recibe 401 en Problem Details. |
+| CA-03 | **Dado** una cuenta eliminada, **cuando** intenta iniciar sesión con sus credenciales anteriores, **entonces** recibe 401. |
+| CA-04 | **Dado** una cuenta con varias sesiones, **cuando** solicita su eliminación, **entonces** todas las sesiones quedan invalidadas. |
 
 ## 5. Fuera de alcance
 
@@ -42,4 +46,4 @@ Aplican los del Art. IV (contrato), V (seguridad), VI.6 (longitudes) y VII (cost
 
 | # | Pregunta | Responsable |
 |---|---|---|
-| P-01 | «Borrar cuenta y datos» (C39): baja lógica o anonimización. | Equipo |
+| — | Decisión aprobada: anonimización y desactivación, preservando referencias históricas. | Equipo |
