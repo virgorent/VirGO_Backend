@@ -365,3 +365,11 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Pendiente:** probar `booking.created` en la nube cuando la base `virgo` tenga salones y un cliente (T9907).
 
+### 2026-11-13 · Despliegue por GitHub con OIDC
+
+- **Autor:** Angelica + Claude Code (`devops-aws`, `seguridad`); lo pidió Rafael
+- **Módulo / tareas:** `900` (T118, T119), `901`
+- **Qué se hizo:** `bootstrap.yaml` separa dos roles (ADR-53): `virgo-github-deploy`, que solo actualiza el stack, y `virgo-cfn-exec`, que crea los recursos `virgo-*` de todos los servicios actuales. El presupuesto queda opcional porque `virgo-1usd` ya existe. `api-deploy.yml` despliega con `--role-arn`, pasa `SenderEmail` (antes se perdía el remitente) y falla si falta una variable.
+- **Evidencia:** cfn-lint sin hallazgos; Checkov 37 controles en verde y 4 omisiones justificadas en el recurso; `tests/smoke/smoke.sh` pasa contra producción.
+- **Pendiente:** crear el stack `virgo-bootstrap` y el *environment* `production` (T119).
+
