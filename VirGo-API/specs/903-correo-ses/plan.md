@@ -14,7 +14,7 @@
 - `Application` define `IEmailSender` y las plantillas `EmailTemplates`.
 - `Infrastructure` implementa `SesEmailSender` (AWSSDK.SimpleEmailV2) y `LoggingEmailSender`.
 - El worker agrega `EmailSendHandler` para el tipo `email.send`.
-- `template.yaml` agrega `AWS::SES::EmailIdentity` con el parámetro `SenderEmail` y el permiso del worker.
+- `template.yaml` recibe el parámetro `SenderEmail` y da al worker el permiso de enviar solo desde esa dirección. La identidad se crea una vez con `aws sesv2 create-email-identity` y se verifica abriendo el correo (ADR-52).
 
 ## 2. Contexto técnico
 
@@ -46,6 +46,7 @@ src/VirGo.Worker/Handlers/        # EmailSendHandler
 |---|---|---|---|
 | ADR-42 | SES en *sandbox* con un remitente verificado por correo | Dominio propio con DKIM; proveedor externo | Sin costo de dominio; suficiente para la demo |
 | ADR-43 | Enviar desde el worker vía la cola | Enviar desde la API | La API no espera a SES y los fallos se reintentan |
+| ADR-52 | La identidad de SES vive fuera del stack | `AWS::SES::EmailIdentity` en la plantilla | La verificación necesita un clic humano; si el stack la crea y se revierte, la identidad queda huérfana y bloquea el siguiente despliegue (`NAME_CONFLICT_VALIDATION`, 2026-11-13) |
 
 ## 6. Diseño
 

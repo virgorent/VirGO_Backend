@@ -8,10 +8,7 @@ Parameters:
   SenderEmail:
     Type: String
     Default: ''
-    Description: Verified Amazon SES sender address (903). Empty disables SES; the worker only logs emails.
-
-Conditions:
-  HasSender: !Not [!Equals [!Ref SenderEmail, '']]
+    Description: Amazon SES sender address, verified once outside the stack (903). Empty disables SES; the worker only logs emails.
 
 Globals:
   Function:
@@ -52,11 +49,8 @@ Resources:
       FunctionName: virgo-api-prod
       CodeUri: ../src/VirGo.Api/
       Handler: VirGo.Api
+      # Cada despliegue publica una versión y mueve el alias live. CodeDeploy (canary) no está disponible en el plan Free de AWS (ADR-50).
       AutoPublishAlias: live
-      DeploymentPreference:
-        Type: Canary10Percent5Minutes
-        Alarms:
-          - !Ref CanaryErrorsAlarm
       Environment:
         Variables:
           Jobs__QueueUrl: !Ref JobsQueue
@@ -97,11 +91,28 @@ Resources:
         deadLetterTargetArn: !GetAtt JobsDeadLetterQueue.Arn
         maxReceiveCount: 3
 
+  # SQS exige una sola cola por regla de la política.
   JobsQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
       Queues:
         - !Ref JobsQueue
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: sqs:*
+            Resource: !GetAtt JobsQueue.Arn
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  JobsDeadLetterQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
         - !Ref JobsDeadLetterQueue
       PolicyDocument:
         Version: '2012-10-17'
@@ -110,9 +121,7 @@ Resources:
             Effect: Deny
             Principal: '*'
             Action: sqs:*
-            Resource:
-              - !GetAtt JobsQueue.Arn
-              - !GetAtt JobsDeadLetterQueue.Arn
+            Resource: !GetAtt JobsDeadLetterQueue.Arn
             Condition:
               Bool:
                 aws:SecureTransport: 'false'
@@ -153,13 +162,6 @@ Resources:
     Properties:
       LogGroupName: /aws/lambda/virgo-worker-prod
       RetentionInDays: 7
-
-  # 903 · Remitente de SES (solo si se indica SenderEmail)
-  SenderIdentity:
-    Type: AWS::SES::EmailIdentity
-    Condition: HasSender
-    Properties:
-      EmailIdentity: !Ref SenderEmail
 
   # 905 · Tareas programadas
   SchedulerRole:
@@ -340,11 +342,11 @@ Resources:
       AlarmActions:
         - !Ref VirGoAlerts
 
-  # 900 · Alarma del canary: errores de la versión nueva (alias live)
+  # 900 · Errores de la versión publicada en el alias live
   CanaryErrorsAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: The new VirGo API version returned Lambda errors during the canary; CodeDeploy rolls back.
+      AlarmDescription: The VirGo API version behind the live alias returned Lambda errors; roll back with aws lambda update-alias.
       Namespace: AWS/Lambda
       MetricName: Errors
       Dimensions:

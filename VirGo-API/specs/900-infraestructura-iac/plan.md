@@ -69,7 +69,7 @@ Se conservan ADR-01 (Lambda + HTTP API), ADR-02 (runtime), ADR-05 (OIDC), ADR-06
 | ADR-11 | **Índice TTL de MongoDB** en `sessions.purgeAt` | Borrado programado con otra Lambda | Gratis; las sesiones expiradas se borran solas |
 | ADR-12 | **Checkov** para analizar la IaC | Solo `cfn-lint` | `cfn-lint` revisa sintaxis; Checkov revisa seguridad (cifrado, IAM, logs) |
 | ADR-13 | **SNS + CloudWatch Alarms** para alertas | Sin alarmas | 10 alarmas y 1 000 correos al mes son gratis |
-| ADR-50 | Despliegue *canary* con CodeDeploy (`AutoPublishAlias: live`, `Canary10Percent5Minutes`) y *rollback* por la alarma de errores del alias | Despliegue de todo a la vez; *linear* | Limita el impacto de una versión con fallas; gratis para Lambda |
+| ADR-50 | Versiones con alias `live` (`AutoPublishAlias`) y *rollback* manual con `aws lambda update-alias`. **Revisada el 2026-11-13:** el *canary* con CodeDeploy queda pendiente porque el plan Free de AWS no incluye CodeDeploy; se activa al pasar al plan de pago, sin otro cambio que agregar `DeploymentPreference` | *Canary* con CodeDeploy (bloqueado por el plan); despliegue sin versiones | Conserva versiones inmutables y un regreso rápido sin servicios de pago |
 | ADR-53 | Dos roles: GitHub solo actualiza el stack y CloudFormation crea los recursos con `virgo-cfn-exec` (`sam deploy --role-arn`) | Un solo rol de GitHub con todos los permisos | Si se roba el token de GitHub, solo se puede redesplegar VirGo; los permisos amplios nunca salen de CloudFormation |
 | ADR-51 | IAM Identity Center con AWS Organizations para las personas | Usuarios de IAM con contraseña; seguir con la cuenta raíz | Credenciales temporales y MFA sin llaves permanentes; ambos servicios son gratis |
 
@@ -141,7 +141,7 @@ Ambas se crean una vez con `aws ssm put-parameter --type SecureString` (T107). L
 | Budgets | 2 presupuestos | $0 |
 | S3 de SAM | 5 GB (12 meses o créditos) | ≈ $0 |
 | IAM, STS, CloudFormation | Sin costo | $0 |
-| CodeDeploy (Lambda) | Sin costo para Lambda | $0 |
+| CodeDeploy (Lambda) | No disponible en el plan Free; sin costo en el plan de pago | $0 (no se usa) |
 | IAM Identity Center y AWS Organizations | Sin costo | $0 |
 | **Total** | | **$0 USD** |
 

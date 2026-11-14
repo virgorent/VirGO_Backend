@@ -15,7 +15,7 @@
 |---|---|---|---|---|---|
 | T90401 | `template.yaml`: bucket, política, OAC, distribución, salida `MediaBaseUrl` y `Media__BaseUrl` | — | `devops-aws` | `sam validate --lint`, cfn-lint | ✅ local |
 | T90402 | Justificar en `.checkov.yaml` las reglas de la sección 6.1 del plan | T90401 | `seguridad` | Checkov sin fallas | ✅ local |
-| T90403 | 🧑 Desplegar y probar con una imagen: CloudFront 200, S3 directo 403, HTTP → HTTPS | T90402 | `devops-aws` | CA-01 a CA-03 | ⏳ |
+| T90403 | 🧑 Desplegar y probar con una imagen: CloudFront 200, S3 directo 403, HTTP → HTTPS | T90402 | `devops-aws` | CA-01 a CA-03 | ✅ 2026-11-13 |
 | T90404 | Registrar el costo y completar `check.md` | T90403 | `qa` | `check.md` sin ⏳ | ⏳ |
 
 ## Matriz de trazabilidad
