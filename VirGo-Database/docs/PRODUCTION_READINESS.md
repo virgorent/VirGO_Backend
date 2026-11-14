@@ -59,34 +59,45 @@ npm run db:plan:prod
 npm run db:validate:prod
 ```
 
-Revisar el plan y el inventario antes de escribir:
+Revisar el plan, las huellas y el inventario antes de escribir:
 
 ```powershell
 node src/cli/inspect.js --env-file .env.production --json
 ```
 
-Si el plan es el esperado y no hay conflictos:
+Si hay TTL pendiente, indices extra o nombres distintos, preparar archivos de
+aprobacion vinculados al `planFingerprint`:
 
 ```powershell
-npm run db:init:prod -- --yes
-npm run db:verify:prod
+npm run db:validate:prod -- --ttl-approval-file .\approvals\ttl.json --waiver-file .\approvals\waiver.json
+```
+
+Si el plan es el esperado y no hay conflictos de clave u opciones:
+
+```powershell
+npm run db:init:prod -- --yes --ttl-approval-file .\approvals\ttl.json --waiver-file .\approvals\waiver.json --plan-file .\approvals\plan.json
+npm run db:verify:prod -- --ttl-approval-file .\approvals\ttl.json --waiver-file .\approvals\waiver.json
 ```
 
 `db:init:prod` incluye `--confirm-production`. No agregar `--yes` sin revisar el
-plan. No ejecutar `seed` de DEMO en produccion. El seed solo esta permitido en
-development/test y rechaza la base `virgo`; su limpieza es selectiva por `_id`.
+plan. `--yes` y `--confirm-production` no sustituyen las aprobaciones. El plan
+queda invalidado ante un fallo parcial y debe regenerarse. No ejecutar `seed` de
+DEMO en produccion. El seed solo esta permitido en development/test y rechaza la
+base `virgo`; su limpieza es selectiva por `_id`.
 
 ## Revision del plan
 
 | Control | Criterio |
 | --- | --- |
 | Colecciones | 22 esperadas; cualquier diferencia requiere explicacion |
-| Indices secundarios | 38 esperados; conflictos bloquean el apply |
-| Indices extra | Se reportan; no se eliminan automaticamente |
+| Indices secundarios | 38 esperados; conflictos de clave u opciones bloquean el apply |
+| Indices extra o nombres distintos | Bloquean hasta contar con waiver por indice; no se renombran ni eliminan |
+| TTL faltante o adicional | En produccion requiere aprobacion especifica con `maxDeletion` suficiente |
+| Huellas | `catalogFingerprint` y `planFingerprint` deben coincidir con el estado actual |
 | Validadores | `validationLevel: strict` y `validationAction: error` |
 | Datos | El apply no inserta, actualiza ni elimina documentos |
 | Acciones destructivas | Deben ser cero; el inicializador las rechaza |
-| Fallo parcial | Informa lo aplicado; se reanuda con otro plan idempotente |
+| Fallo parcial | Informa lo aplicado, invalida el plan y exige nueva inspeccion |
 | TLS | Obligatorio; production rechaza el override inseguro |
 
 ## API runtime

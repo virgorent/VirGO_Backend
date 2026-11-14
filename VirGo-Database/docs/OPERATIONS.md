@@ -15,11 +15,96 @@ siempre rechaza esa variable.
 
 ## Flujo recomendado
 
-1. `plan`: muestra las operaciones exactas sin escribir.
-2. `validate`: falla si hay deriva.
-3. `apply`: exige `--yes`; en produccion exige `--confirm-production`.
-4. `verify`: confirma el estado final.
-5. `inspect`: muestra el inventario real de colecciones e indices.
+1. `plan`: muestra las operaciones exactas, huellas y diferencias sin escribir.
+2. `validate`: falla si hay deriva, conflictos o aprobaciones pendientes.
+3. Genere aprobaciones TTL o waivers solo si el plan las requiere.
+4. `apply`: exige `--yes`; en produccion exige `--confirm-production`.
+5. `verify`: confirma el estado final; `ok` puede ser true con excepciones
+   aprobadas, mientras `exactMatch` distingue la coincidencia exacta.
+6. `inspect`: muestra el inventario real de colecciones e indices.
+
+## Aprobaciones y huellas
+
+Cada plan incluye `catalogFingerprint` y `planFingerprint`. Las aprobaciones se
+vinculan al `planFingerprint`; si el plan cambia, deben regenerarse. Las huellas
+excluyen `generatedAt`, aprobaciones, resumen y estados de resolucion, pero
+incluyen base, entorno, cluster, catalogo, acciones, diferencias y deriva.
+
+La identidad de cluster se deriva del esquema y los hosts normalizados. No
+incluye credenciales ni parametros de conexion.
+
+### Waiver de indice extra o nombre distinto
+
+Solo se aceptan `extraIndex` y `nameMismatch`. Nunca cubren `keyMismatch`,
+`optionsMismatch` ni TTL generico.
+
+```json
+{
+  "version": 1,
+  "kind": "index-waiver",
+  "cluster": {
+    "identity": "sha256:<64 hex>",
+    "environment": "production",
+    "database": "virgo"
+  },
+  "catalogFingerprint": "sha256:<64 hex>",
+  "planFingerprint": "sha256:<64 hex>",
+  "approvedBy": "responsable-operaciones",
+  "approvedAt": "2026-11-13T00:00:00.000Z",
+  "expiresAt": "2026-12-13T00:00:00.000Z",
+  "waivers": [
+    {
+      "collection": "users",
+      "type": "nameMismatch",
+      "index": "email_1_unique",
+      "actualIndex": "email_1",
+      "reason": "Indice equivalente heredado",
+      "riskAccepted": "Inventario revisado por operaciones"
+    }
+  ]
+}
+```
+
+Para `extraIndex` omita `actualIndex`.
+
+### Aprobacion TTL
+
+En produccion, un TTL faltante o adicional requiere una aprobacion especifica.
+En development/test se registra como advertencia. `maxDeletion` debe cubrir el
+impacto estimado.
+
+```json
+{
+  "version": 1,
+  "kind": "ttl-approval",
+  "cluster": {
+    "identity": "sha256:<64 hex>",
+    "environment": "production",
+    "database": "virgo"
+  },
+  "catalogFingerprint": "sha256:<64 hex>",
+  "planFingerprint": "sha256:<64 hex>",
+  "approvedBy": "responsable-operaciones",
+  "approvedAt": "2026-11-13T00:00:00.000Z",
+  "expiresAt": "2026-12-13T00:00:00.000Z",
+  "ttlApprovals": [
+    {
+      "collection": "sessions",
+      "index": "purgeAt_ttl",
+      "type": "ttlMissing",
+      "expireAfterSeconds": 0,
+      "estimatedImpact": {
+        "documents": 0,
+        "basis": "estimatedDocumentCount"
+      },
+      "maxDeletion": 0
+    }
+  ]
+}
+```
+
+Los archivos deben ser JSON estricto: sin propiedades desconocidas, faltantes o
+duplicadas, sin fechas invalidas o expiradas y con el contexto exacto del plan.
 
 ## Comandos
 
@@ -31,13 +116,25 @@ npm run db:verify:dev
 npm run db:inspect:dev
 ```
 
+Con excepciones aprobadas:
+
+```powershell
+npm run db:validate:dev -- --waiver-file .\approvals\waiver.json
+npm run db:init:dev -- --yes --waiver-file .\approvals\waiver.json --plan-file .\approvals\plan.json
+npm run db:verify:dev -- --waiver-file .\approvals\waiver.json
+```
+
 ```powershell
 npm run db:plan:prod
-npm run db:validate:prod
-npm run db:init:prod -- --yes
-npm run db:verify:prod
+npm run db:validate:prod -- --ttl-approval-file .\approvals\ttl.json --waiver-file .\approvals\waiver.json
+npm run db:init:prod -- --yes --ttl-approval-file .\approvals\ttl.json --waiver-file .\approvals\waiver.json
+npm run db:verify:prod -- --ttl-approval-file .\approvals\ttl.json --waiver-file .\approvals\waiver.json
 npm run db:inspect:prod
 ```
+
+`--plan-file` exige que el plan actual coincida con el `planFingerprint`
+guardado. Un plan obsoleto termina con exit code 4. `--yes` y
+`--confirm-production` no sustituyen las aprobaciones.
 
 ## Seed DEMO
 
@@ -126,11 +223,13 @@ MongoDB elimina documentos vencidos de forma periodica; no es inmediato. No se a
 
 ## Fallos parciales y reanudacion
 
-`apply` valida el plan antes de escribir y nunca ejecuta `drop`, `delete`,
-`rename` ni acciones fuera del catalogo. Si una operacion falla a mitad del
-proceso, el CLI informa cuantas operaciones ya se aplicaron. Las operaciones son
-idempotentes: corrija la causa, ejecute de nuevo `plan` y luego `apply --yes`.
-No intente "deshacer" manualmente una coleccion o un indice ya creado.
+`apply` valida las huellas, las aprobaciones, cada accion y nunca ejecuta
+`drop`, `delete`, `rename` ni acciones fuera del catalogo. Si una operacion falla
+a mitad del proceso, el CLI informa cuantas operaciones ya se aplicaron e
+invalida el plan anterior; se requiere una nueva inspeccion y un nuevo plan. Las
+operaciones son idempotentes: corrija la causa, ejecute de nuevo `plan` y luego
+`apply --yes`. No intente "deshacer" manualmente una coleccion o un indice ya
+creado.
 
 ## Problemas comunes
 
@@ -151,7 +250,21 @@ Use `mongodb+srv://` o agregue `tls=true` a `MONGODB_URI`. Retire
 
 ### Conflicto de indice
 
-Existe un indice con el mismo nombre pero distinta clave u opciones. El plan se bloquea. Use `inspect` y resuelva manualmente. El inicializador no elimina indices.
+Existe un indice con el mismo nombre pero distinta clave u opciones. El plan se
+bloquea y no acepta waiver. Use `inspect` y resuelva manualmente. El
+inicializador no elimina indices.
+
+### Indice extra o con nombre distinto
+
+El plan se bloquea hasta que exista un waiver valido para ese indice. El waiver
+solo registra la excepcion: no renombra ni elimina el indice. Revise el
+inventario con `inspect` antes de aprobarlo.
+
+### TTL pendiente en produccion
+
+Un TTL faltante o adicional requiere una aprobacion TTL vinculada al plan y con
+`maxDeletion` suficiente. No use un waiver generico para TTL. Si el plan cambia,
+genere una nueva aprobacion.
 
 ### DuplicateKey al crear un indice unico
 

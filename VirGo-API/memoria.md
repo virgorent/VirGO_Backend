@@ -302,76 +302,17 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Costo:** $0.
 - **Pendiente:** usuario `virgo-api-prod` en Atlas, catálogo y datos en la base `virgo`, y despliegue por OIDC.
 
-### 2026-11-11 · Correcciones posteriores al despliegue
+### 2026-11-13 · Auditoría live de Atlas para T1004
 
-- **Autor:** Rafael + OpenCode (`dev-dotnet`, `qa`, `seguridad`)
-- **Módulo / tareas:** `003`–`009`, `900`
-- **Qué se corrigió:** cotizaciones y reservaciones ahora exigen el rol `client`; un bloqueo de login expirado reinicia `failedLoginCount` antes del siguiente intento; CORS quedó alineado entre `appsettings.json` y `infra/template.yaml` con `http://localhost:3000`.
-- **Evidencia:** `sam validate --template-file infra/template.yaml --lint` aprobado; CodeQL remoto sin alertas activas. La compilación local de la worktree de seguimiento quedó pendiente por falta de resolución DNS hacia NuGet.
-- **Pendiente:** publicar una nueva rama/PR porque PR #5 y el PR de despliegue ya están fusionados; no desplegar desde esta cuenta.
-
-### 2026-11-11 · Servicios de AWS nuevos: colas, observabilidad, correo, medios y tareas programadas
-
-- **Autor:** Angelica + Claude Code (`dev-dotnet`, `devops-aws`)
-- **Módulo / tareas:** `099` (T9901–T9906), `902` (T90201–T90203), `903` (T90301–T90303), `904` (T90401–T90402), `905` (T90501–T90503), `900` 1.1.0 (T111); `906` solo redactado
+- **Autor:** equipo + OpenCode (`qa`, `seguridad`)
+- **Módulo / tareas:** `010-contrato-datos` · T1004
 - **Qué se hizo:**
-  - Constitución v1.3.0 (**propuesta**): servicios nuevos en el Art. VII, regla VII.6 para servicios sin capa gratuita permanente y rastreo y tablero en IX.4 y IX.5.
-  - Cola `virgo-jobs` con cola de errores y alarma; worker `VirGo.Worker` (Lambda) con `JobDispatcher` y tres trabajos: `booking.created` (aviso en `notices`), `email.send` (SES) y `quotes.expire` (EventBridge Scheduler diario a las 00:00 de la Ciudad de México).
-  - X-Ray activo en las dos Lambdas, logs en JSON con `CorrelationId` y `TraceId`, y tablero `virgo-api`.
-  - Bucket privado de medios detrás de CloudFront con OAC.
-  - Despliegue *canary* `Canary10Percent5Minutes` con *rollback* por la alarma de errores del alias `live`.
-- **Decisiones:** ADR-37 a ADR-51. Se descartó el SDK de X-Ray para .NET: está en mantenimiento y se compiló para AWSSDK v3; el proyecto usa v4 (ADR-40). CloudTrail y IAM Access Analyzer se descartaron por decisión del equipo.
-- **Evidencia:** `dotnet build -warnaserror` sin errores; `dotnet test`: 210 de 210 tras integrar `main` (34 unitarias, 45 de integración, 22 de seguridad, 10 de contrato, 96 de base de datos y 3 de rendimiento). Prueba saboteada: sin la publicación en la cola, la prueba de integración falla. `sam validate --lint` válido.
-- **Costo estimado (Art. VII.5):**
-
-  | Servicio | Capa gratuita | Estimado al mes |
-  |---|---|---|
-  | SQS | 1 M solicitudes | $0 |
-  | Lambda del worker | Comparte 1 M solicitudes y 400 000 GB-s | $0 |
-  | X-Ray | 100 000 trazas | $0 |
-  | CloudWatch Dashboards | 3 tableros | $0 |
-  | CloudWatch Alarms (4 en total) | 10 alarmas | $0 |
-  | CodeDeploy para Lambda | Sin costo | $0 |
-  | EventBridge Scheduler | 14 M invocaciones | $0 |
-  | SES (*sandbox*) | Créditos del plan | < $0.01 |
-  | S3 de medios | Créditos del plan | < $0.03 con 1 GB |
-  | CloudFront | 1 TB y 10 M peticiones permanentes | $0 |
-  | IAM Identity Center y Organizations | Sin costo | $0 |
-  | Bedrock | **Sin capa gratuita**; apagado hasta aprobar el gasto (VII.6) | $0 mientras esté apagado |
-
-- **Pendiente:** aprobar la enmienda v1.3.0 y los specs por PR; desplegar (T9907, T90204, T90304, T90403, T90504, T112); elegir el remitente de SES (`903` P-01); activar IAM Identity Center (T113–T115); decidir el gasto de Bedrock (`906` P-01).
-
-### 2026-11-13 · El plan Free de AWS no incluye CodeDeploy
-
-- **Autor:** Angelica + Claude Code (`devops-aws`)
-- **Módulo / tareas:** `900` (T111, T112, T117)
-- **Qué pasó:** el despliegue de los servicios nuevos falló al crear la aplicación de CodeDeploy (`SubscriptionRequiredException: The AWS Access Key Id needs a subscription for the service`). CloudFormation canceló el resto y regresó el stack a la versión anterior; la API siguió respondiendo 200.
-- **Verificación:** con llamadas de solo lectura se confirmó que SQS, EventBridge Scheduler, SES, CloudFront, X-Ray, CloudWatch y S3 sí están disponibles en el plan Free; solo CodeDeploy no.
-- **Decisión:** se quita `DeploymentPreference` y se conserva `AutoPublishAlias: live`. El *rollback* es manual con `aws lambda update-alias`. El *canary* vuelve en T117 al pasar al plan de pago (ADR-50 revisada).
-- **Aprendizaje:** antes de agregar un servicio, probar con una llamada de solo lectura (`list-*`) que el plan de la cuenta lo incluye.
-- **Segundo intento (2026-11-13):** la validación previa de CloudFormation rechazó el cambio porque la identidad de SES `anyiarguelles34@gmail.com` ya existía fuera del stack (`NAME_CONFLICT_VALIDATION`) y ya estaba verificada. Se quitó `AWS::SES::EmailIdentity` de la plantilla: la identidad es un arranque manual documentado (`903`, ADR-52, T90306).
-- **Tercer intento:** SQS rechazó la política con dos colas en una regla (*Each statement in the policy should have exactly one resource*); se separó en una política por cola.
-- **Cuarto intento: desplegado** (`UPDATE_COMPLETE`, 2026-11-13). Pruebas en la nube:
-
-  | Servicio | Evidencia |
-  |---|---|
-  | API | `/health` y `/api/v1/venues` → 200; alias `live` → versión 1; X-Ray `Active` |
-  | SQS + worker | `email.send` y `quotes.expire` procesados; `virgo-jobs` y `virgo-jobs-dlq` en 0; mapeo con `ReportBatchItemFailures` |
-  | SES | Correo `email-verification` enviado; el log muestra solo `a***@gmail.com`, sin el código |
-  | Scheduler | `virgo-quotes-expire` `ENABLED`, `cron(0 0 * * ? *)`, `America/Mexico_City`; `quotes.expire` venció 0 cotizaciones (la base no tiene datos) |
-  | S3 + CloudFront | `https://d35ii8qjvt24pn.cloudfront.net`: HTTPS 200, HTTP → 301 a HTTPS, S3 directo 403, encabezados HSTS, `nosniff` y `X-Frame-Options` |
-  | X-Ray | 4 trazas en 15 minutos |
-  | Tablero y alarmas | `virgo-api` creado; 4 alarmas en `OK` |
-
-- **Pendiente:** probar `booking.created` en la nube cuando la base `virgo` tenga salones y un cliente (T9907).
-
-### 2026-11-13 · Despliegue por GitHub con OIDC
-
-- **Autor:** Angelica + Claude Code (`devops-aws`, `seguridad`); lo pidió Rafael
-- **Módulo / tareas:** `900` (T118, T119), `901`
-- **Qué se hizo:** `bootstrap.yaml` separa dos roles (ADR-53): `virgo-github-deploy`, que solo actualiza el stack, y `virgo-cfn-exec`, que crea los recursos `virgo-*` de todos los servicios actuales. El presupuesto queda opcional porque `virgo-1usd` ya existe. `api-deploy.yml` despliega con `--role-arn`, pasa `SenderEmail` (antes se perdía el remitente) y falla si falta una variable.
-- **Evidencia:** cfn-lint sin hallazgos; Checkov 37 controles en verde y 4 omisiones justificadas en el recurso; `tests/smoke/smoke.sh` pasa contra producción.
-- **Pendiente:** crear el stack `virgo-bootstrap` y el *environment* `production` (T119).
-- **Stack `virgo-bootstrap` creado** (`CREATE_COMPLETE`): proveedor OIDC de GitHub, `virgo-github-deploy` y `virgo-cfn-exec`.
-- **Simulación de permisos** (`aws iam simulate-principal-policy`): `virgo-cfn-exec` puede actualizar las Lambdas, el alias, SQS, roles `virgo-api-prod-*`, el HTTP API, alarmas, el tablero, el bucket de medios, CloudFront, el horario, SNS y logs, y **no** puede crear otros roles, borrar otros buckets ni lanzar EC2. `virgo-github-deploy` puede ejecutar *change sets* de `virgo-api-prod` y pasar `virgo-cfn-exec` solo a CloudFormation; **no** puede tocar otro stack ni modificar la Lambda directamente.
-
+  - Se validaron en modo solo lectura `virgo_dev` y `virgo` con `check_schema.py --live`; sin inicializadores, DDL, seeds ni CRUD.
+  - `virgo_dev`: 22 colecciones, 0 diferencias, salida 0.
+  - `virgo`: 2 colecciones presentes (`users`, `sessions`), 20 faltantes, 2 validadores diferentes, 4 índices faltantes y 26 diferencias, salida 1.
+  - TLS verificado con `tls=true`; sin `tlsInsecure` ni overrides de certificado/hostname.
+- **Evidencia:** [specs/010-contrato-datos/audit-live-atlas-2026-11-13.md](specs/010-contrato-datos/audit-live-atlas-2026-11-13.md); `check.md` y `task.md` actualizados.
+- **Decisiones:** T1004 queda verificado con la comparación live; no se reaplicó `VirGo-Database` `001`.
+- **Costo:** $0; no se crearon ni modificaron recursos, usuarios ni documentos.
+- **Aprendizaje:** `virgo` está incompleto frente al catálogo; cero diferencias en `virgo_dev` no cubre `validationLevel`, `validationAction` ni documentos.
+- **Pendiente:** T1005, T1006, T1007 y la autorización/ejecución del [plan de remediación de `virgo`](../VirGo-Database/docs/PLAN_REMEDIACION_VIRGO.md).

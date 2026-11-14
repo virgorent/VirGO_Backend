@@ -415,22 +415,82 @@ test('integracion contra MongoDB local', {
     assert.equal(result.ok, true);
   });
 
-  await t.test('acepta un indice equivalente creado con otro nombre', async () => {
+  await t.test('exige aprobacion TTL explicita en production', async () => {
+    const sessions = db.collection('sessions');
+    await sessions.dropIndex('purgeAt_ttl');
+
+    const blocked = await buildPlan(db, undefined, {
+      environment: 'production'
+    });
+    assert.equal(blocked.errors.length, 1);
+    assert.equal(blocked.errors[0].code, 'ttlMissing');
+
+    const difference = blocked.differences.find(
+      (item) => item.type === 'ttlMissing'
+    );
+    const ttlApprovalDocument = {
+      planFingerprint: blocked.planFingerprint,
+      approvedBy: 'integracion',
+      expiresAt: '2030-01-01T00:00:00.000Z',
+      ttlApprovals: [{
+        collection: 'sessions',
+        index: 'purgeAt_ttl',
+        type: 'ttlMissing',
+        expireAfterSeconds: 0,
+        estimatedImpact: difference.impact,
+        maxDeletion: difference.impact.documents
+      }]
+    };
+
+    const verification = await verifyInitialization(db, undefined, {
+      environment: 'production',
+      ttlApprovalDocument
+    });
+    assert.equal(verification.ok, false);
+    assert.equal(verification.exactMatch, false);
+    assert.equal(verification.ttlApprovals.length, 1);
+
+    const plan = await buildPlan(db, undefined, {
+      environment: 'production',
+      ttlApprovalDocument
+    });
+    await applyPlan(db, plan);
+    assert.equal((await verifyInitialization(db)).ok, true);
+  });
+
+  await t.test('bloquea un indice equivalente con otro nombre hasta aprobar waiver', async () => {
     const users = db.collection('users');
     await users.dropIndex('email_1_unique');
     await users.createIndex({ email: 1 }, { unique: true, name: 'email_1' });
 
     const plan = await buildPlan(db);
-    assert.equal(plan.errors.length, 0);
-    assert.equal(
-      plan.actions.some((action) => (
-        action.type === 'createIndex' && action.collection === 'users'
-      )),
-      false
+    assert.equal(plan.errors.length, 1);
+    assert.equal(plan.errors[0].code, 'nameMismatch');
+    assert.equal(plan.actions.length, 0);
+    await assert.rejects(
+      () => applyPlan(db, plan),
+      /conflictos o aprobaciones pendientes/
     );
 
-    const verification = await verifyInitialization(db);
+    const waiverDocument = {
+      planFingerprint: plan.planFingerprint,
+      approvedBy: 'integracion',
+      expiresAt: '2030-01-01T00:00:00.000Z',
+      waivers: [{
+        collection: 'users',
+        type: 'nameMismatch',
+        index: 'email_1_unique',
+        actualIndex: 'email_1',
+        reason: 'Indice equivalente heredado',
+        riskAccepted: 'Revisado en integracion'
+      }]
+    };
+
+    const verification = await verifyInitialization(db, undefined, {
+      waiverDocument
+    });
     assert.equal(verification.ok, true);
+    assert.equal(verification.exactMatch, false);
 
     await users.dropIndex('email_1');
     await applyPlan(db, await buildPlan(db));
@@ -447,7 +507,7 @@ test('integracion contra MongoDB local', {
     assert.equal(plan.errors[0].type, 'indexConflict');
     await assert.rejects(
       () => applyPlan(db, plan),
-      /conflictos de indices/
+      /conflictos o aprobaciones pendientes/
     );
 
     await users.dropIndex('email_1_unique');
