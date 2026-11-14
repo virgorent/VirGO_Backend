@@ -46,8 +46,9 @@ jobs:
           SENDER_EMAIL: ${{ vars.SENDER_EMAIL }}
           CFN_EXEC_ROLE_ARN: ${{ vars.AWS_CFN_EXEC_ROLE_ARN }}
         # CloudFormation crea los recursos con virgo-cfn-exec; el rol de GitHub solo actualiza el stack (900, ADR-53).
+        # Con --template-file, SAM busca samconfig.toml junto a la plantilla compilada; por eso la ruta es absoluta.
         run: >-
-          sam deploy --template-file .aws-sam/build/template.yaml --config-file infra/samconfig.toml
+          sam deploy --template-file .aws-sam/build/template.yaml --config-file "$PWD/infra/samconfig.toml"
           --role-arn "$CFN_EXEC_ROLE_ARN"
           --parameter-overrides "AlertEmail=${ALERT_EMAIL}" "SenderEmail=${SENDER_EMAIL}"
           --no-confirm-changeset --no-fail-on-empty-changeset --no-progressbar
