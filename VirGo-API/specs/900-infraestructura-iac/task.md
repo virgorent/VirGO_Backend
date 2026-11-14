@@ -3,11 +3,11 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `900-infraestructura-iac` |
-| Versión | 1.0.0 |
-| Estado | Implementación local parcial; tareas externas pendientes |
-| Fecha | 2026-11-03 |
+| Versión | 1.1.0 |
+| Estado | F0–F4 desplegadas parcialmente; F5 en borrador |
+| Fecha | 2026-11-03 · ampliado el 2026-11-11 |
 | Spec / Plan / Check | [spec.md](spec.md) · [plan.md](plan.md) · [check.md](check.md) |
-| Constitución | v1.2.0 |
+| Constitución | v1.3.0 (propuesta) |
 
 **IDs de tarea:** se conservan los anteriores (`T1NN`) para no romper las referencias; este módulo se llamaba `001`.
 
@@ -57,6 +57,20 @@
 | T108 | 🧑 Prueba de borrado con el stack temporal `virgo-api-test`: `sam deploy` y después `sam delete` | T107 | `devops-aws` | Ningún recurso de `virgo-api-test` permanece (CA-07) | ⏳ |
 | T109 | Completar `check.md`, ejecutar `verificar-constitucion`, marcar el módulo y registrar el cierre en `memoria.md` | T100–T108, T110, `901`: T209 | `qa` + `arquitecto` | `check.md` completo y resultado «Alineado» | ⏳ |
 
+## F5 · Ampliación 1.1.0: *canary* e IAM Identity Center
+
+| ID | Tarea | Depende de | Responsable | Verificación | Estado |
+|---|---|---|---|---|---|
+| T111 | `template.yaml`: `AutoPublishAlias: live` y alarma `CanaryErrorsAlarm` sobre el alias. `DeploymentPreference` se quitó: el plan Free no incluye CodeDeploy | — | `devops-aws` | `sam validate --lint`, cfn-lint | ✅ local |
+| T112 | 🧑 Desplegar, verificar el alias `live` y probar el regreso a la versión anterior | T111 | `devops-aws` | CA-10 | ✅ 2026-11-13 (alias live → versión 1) |
+| T117 | 🧑 Al pasar la cuenta al plan de pago, volver a agregar `DeploymentPreference: Canary10Percent5Minutes` con la alarma del alias | Plan de pago | `devops-aws` | Despliegue *canary* en CodeDeploy | ⛔ |
+| T113 | 🧑 Crear la organización de AWS Organizations y activar IAM Identity Center en `us-east-1` desde la consola | — | Angelica | Consola de IAM Identity Center | ⏳ |
+| T114 | Crear el usuario `angelica-admin`, el conjunto de permisos `AdministratorAccess` (sesión de 8 h) y asignarlo a la cuenta | T113 | `devops-aws` | `aws sso-admin list-account-assignments` | ⏳ |
+| T115 | 🧑 Aceptar la invitación, registrar MFA y entrar con `aws login`/`aws configure sso` | T114 | Angelica | CA-11 y `aws sts get-caller-identity` sin `root` | ⏳ |
+| T116 | Registrar en `memoria.md` y completar `check.md` | T112, T115 | `qa` | `check.md` | ⏳ |
+| T118 | `bootstrap.yaml`: roles `virgo-github-deploy` y `virgo-cfn-exec` con los permisos de los servicios de `099` y `902`–`905`; presupuesto opcional; `api-deploy.yml` con `--role-arn` y `SenderEmail` | T107 | `devops-aws` | cfn-lint y Checkov en verde | ✅ local |
+| T119 | 🧑 Crear el stack `virgo-bootstrap` y el *environment* `production` con `AWS_ROLE_ARN`, `AWS_CFN_EXEC_ROLE_ARN`, `AWS_REGION`, `ALERT_EMAIL` y `SENDER_EMAIL`; lanzar *API Deploy* | T118 | Angelica | Despliegue en verde desde GitHub con humo | 🔄 stack `virgo-bootstrap` creado el 2026-11-13; falta el *environment* |
+
 ---
 
 ## Matriz de trazabilidad
@@ -75,5 +89,8 @@
 | RF-10 Validación | T103, T106 |
 | RF-11 Borrado | T108 |
 | RF-12 Costo registrado | T104 |
+| RF-13 Despliegue *canary* | T111, T112 |
+| RF-14 IAM Identity Center | T113–T115 |
 | RNF-01 … RNF-05 | T104 · T103/T105 · T105/T106 · T108 · T103 |
 | CA-01 … CA-09 | T106 · `901`:T209 · T101/`901`:T209 · T107 · T105 · T105 · T108 · T101/`901`:T209 · T101 |
+| CA-10, CA-11 | T112 · T115 |

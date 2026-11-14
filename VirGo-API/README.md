@@ -56,8 +56,15 @@ The project follows **Spec-Driven Development**: no code without an approved spe
 | Module | Scope | Status |
 |---|---|---|
 | [`000-arquitectura-base`](specs/000-arquitectura-base/spec.md) | Solution layers, errors, configuration, base security, persistence | In review |
-| [`900-infraestructura-iac`](specs/900-infraestructura-iac/spec.md) | AWS infrastructure as code, HTTPS URL, $0 cost | Draft |
+| [`900-infraestructura-iac`](specs/900-infraestructura-iac/spec.md) | AWS infrastructure as code, HTTPS URL, $0 cost, canary deployments, IAM Identity Center | Deployed · 1.1.0 draft |
 | [`901-pipeline-cicd`](specs/901-pipeline-cicd/spec.md) | CI with DevSecOps checks, rulesets, manual CD, smoke tests | Draft |
+| [`902-observabilidad`](specs/902-observabilidad/spec.md) | AWS X-Ray tracing and CloudWatch dashboard | Draft |
+| [`903-correo-ses`](specs/903-correo-ses/spec.md) | Email with Amazon SES (sandbox) | Draft |
+| [`904-medios-s3-cloudfront`](specs/904-medios-s3-cloudfront/spec.md) | Private S3 media bucket served by CloudFront | Draft |
+| [`905-tareas-programadas`](specs/905-tareas-programadas/spec.md) | Scheduled jobs with EventBridge Scheduler | Draft |
+| [`906-ia-bedrock`](specs/906-ia-bedrock/spec.md) | AI assistant with Amazon Bedrock and a spending cap | Draft · blocked on budget |
+| [`098-cache-redis`](specs/098-cache-redis/spec.md) | Distributed cache with Redis | Local |
+| [`099-colas-sqs`](specs/099-colas-sqs/spec.md) | Job queue with Amazon SQS and a worker Lambda | Draft |
 | [`003-auth-login`](specs/003-auth-login/spec.md) | `POST /api/v1/auth/login` | Local |
 | [`004-auth-logout`](specs/004-auth-logout/spec.md) | `POST /api/v1/auth/logout` | Local |
 | [`005-auth-register`](specs/005-auth-register/spec.md) | `POST /api/v1/auth/register` | Local |

@@ -8,7 +8,7 @@ using VirGo.Api.Dto;
 namespace VirGo.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = "client")]
 [Route("api/v1/quotes")]
 public sealed class QuotesController(QuoteHandler handler, IUserRepository users) : ControllerBase
 {

@@ -7,7 +7,7 @@ using VirGo.Api.Dto;
 namespace VirGo.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = "client")]
 [Route("api/v1/bookings")]
 public sealed class BookingsController(BookingHandler handler, IUserRepository users) : ControllerBase
 {
@@ -48,7 +48,8 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
             request.VenueId,
             request.Date,
             request.Hours,
-            request.Deposit), cancellationToken);
+            request.Deposit,
+            HttpContext.Items["X-Correlation-Id"] as string), cancellationToken);
         if (result.InvalidInput)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de reservación es inválida.");

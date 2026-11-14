@@ -28,6 +28,8 @@ VirGo-API/
 │   ├── 000-arquitectura-base/
 │   ├── 900-infraestructura-iac/
 │   ├── 901-pipeline-cicd/
+│   ├── 902-observabilidad/ through 906-ia-bedrock/ # X-Ray, SES, medios, tareas programadas, Bedrock
+│   ├── 098-cache-redis/ and 099-colas-sqs/
 │   ├── 003-auth-login/
 │   ├── 004-auth-logout/
 │   ├── 005-auth-register/ through 009-bookings-create/ # Vertical slice

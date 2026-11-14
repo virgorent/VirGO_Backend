@@ -29,14 +29,28 @@ jobs:
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
       - name: Build SAM application
         run: sam build --template-file infra/template.yaml
-      - name: Require alert email
+      - name: Require environment variables
         env:
           ALERT_EMAIL: ${{ vars.ALERT_EMAIL }}
-        run: test -n "$ALERT_EMAIL"
+          SENDER_EMAIL: ${{ vars.SENDER_EMAIL }}
+          CFN_EXEC_ROLE_ARN: ${{ vars.AWS_CFN_EXEC_ROLE_ARN }}
+        run: |
+          missing=0
+          for name in ALERT_EMAIL SENDER_EMAIL CFN_EXEC_ROLE_ARN; do
+            if [ -z "${!name}" ]; then echo "::error::Missing variable $name in the production environment"; missing=1; fi
+          done
+          exit "$missing"
       - name: Deploy SAM application
         env:
           ALERT_EMAIL: ${{ vars.ALERT_EMAIL }}
-        run: sam deploy --template-file .aws-sam/build/template.yaml --config-file infra/samconfig.toml --parameter-overrides "AlertEmail=${ALERT_EMAIL}" --no-confirm-changeset --no-fail-on-empty-changeset
+          SENDER_EMAIL: ${{ vars.SENDER_EMAIL }}
+          CFN_EXEC_ROLE_ARN: ${{ vars.AWS_CFN_EXEC_ROLE_ARN }}
+        # CloudFormation crea los recursos con virgo-cfn-exec; el rol de GitHub solo actualiza el stack (900, ADR-53).
+        run: >-
+          sam deploy --template-file .aws-sam/build/template.yaml --config-file infra/samconfig.toml
+          --role-arn "$CFN_EXEC_ROLE_ARN"
+          --parameter-overrides "AlertEmail=${ALERT_EMAIL}" "SenderEmail=${SENDER_EMAIL}"
+          --no-confirm-changeset --no-fail-on-empty-changeset --no-progressbar
       - name: Read API URL
         id: stack
         run: |

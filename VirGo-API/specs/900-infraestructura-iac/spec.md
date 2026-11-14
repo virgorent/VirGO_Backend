@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `900-infraestructura-iac` |
-| Versión | 1.0.0 |
-| Estado | Implementación local; validación y despliegue pendientes |
-| Fecha | 2026-11-03 |
-| Constitución | v1.2.0. Aplica sobre todo V, VII, IX y XI |
+| Versión | 1.1.0 |
+| Estado | Desplegado (stack `virgo-api-prod`); ampliación 1.1.0 en borrador |
+| Fecha | 2026-11-03 · ampliado el 2026-11-11 |
+| Constitución | v1.3.0 (propuesta). Aplica sobre todo V, VII, IX y XI |
 | Plan | [plan.md](plan.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
 | Origen | Se separó de `000-arquitectura-base` (antes F4, T030 y T034) para que la infraestructura sea un spec atómico (Art. I.5) |
 
@@ -43,13 +43,15 @@ El objetivo de este módulo es dejar descrita, validada y lista para desplegar t
 | RF-10 | La infraestructura se valida automáticamente (sintaxis, buenas prácticas y seguridad) sin desplegar nada. |
 | RF-11 | Todo el stack de la aplicación se puede borrar con un solo comando. |
 | RF-12 | Antes de crear un recurso, su costo estimado queda registrado en `memoria.md`. |
+| RF-13 | Cada despliegue publica una versión numerada de la API y mueve a ella el alias `live`; una alarma avisa si esa versión falla y se puede regresar a la anterior con un comando. El modo *canary* con CodeDeploy queda **bloqueado** mientras la cuenta esté en el plan Free de AWS, que no incluye CodeDeploy (`SubscriptionRequiredException`, 2026-11-13). |
+| RF-14 | Las personas administran la cuenta con usuarios de IAM Identity Center con MFA y credenciales temporales; la cuenta raíz solo se usa para facturación y emergencias. |
 
 ## 4. Requerimientos no funcionales
 
 | ID | Requerimiento |
 |---|---|
 | RNF-01 | **Costo:** $0 USD al mes con tráfico de desarrollo y pruebas, usando solo la capa gratuita o los créditos del plan gratuito. |
-| RNF-02 | **Servicios:** solo los permitidos en el Art. VII (entre 10 y 15 servicios en total, incluidos los auxiliares y la base de datos externa gratuita). |
+| RNF-02 | **Servicios:** solo los permitidos en el Art. VII. Con la ampliación 1.1.0 y los specs `099` y `902`–`906` son unos 20, incluidos los auxiliares y la base de datos externa gratuita. |
 | RNF-03 | **Seguridad:** mínimo privilegio en cada rol; cero llaves de acceso de larga duración; cifrado en reposo de los secretos. |
 | RNF-04 | **Reproducibilidad:** el mismo código crea el mismo stack en cualquier cuenta con solo cambiar parámetros. |
 | RNF-05 | **Región:** `us-east-1`. |
@@ -67,12 +69,14 @@ El objetivo de este módulo es dejar descrita, validada y lista para desplegar t
 | CA-06 | **Dado** un workflow fuera de `main` o de otro repositorio, **cuando** intenta asumir el rol de despliegue, **entonces** AWS lo rechaza. |
 | CA-07 | **Dado** un stack temporal de prueba, **cuando** ejecuto el comando de borrado, **entonces** no queda ningún recurso suyo. |
 | CA-08 | **Dado** el stack desplegado, **cuando** reviso las alarmas, **entonces** existen la de errores 5xx, la de errores de la función y las alertas de la base, con aviso por correo. |
+| CA-10 | **Dado** un despliegue nuevo, **cuando** reviso la Lambda, **entonces** el alias `live` apunta a la versión recién publicada; **y dado** que esa versión falla, **cuando** ejecuto `aws lambda update-alias` con la versión anterior, **entonces** la API vuelve a responder. |
+| CA-11 | **Dado** el usuario `angelica-admin`, **cuando** inicia sesión, **entonces** se le pide MFA y obtiene credenciales temporales con el conjunto de permisos `AdministratorAccess`; ninguna persona usa la cuenta raíz para trabajar. |
 
 ## 6. Fuera de alcance
 
 - Los workflows de GitHub Actions y el ruleset (van en `901-pipeline-cicd`).
 - Las colecciones, validadores e índices los administra `VirGo-Database`; la API solo consume el contrato existente y no ejecuta DDL al arrancar.
-- Dominio propio, CDN, WAF, ambientes adicionales (*staging*) y respaldos programados.
+- Dominio propio, WAF, ambientes adicionales (*staging*) y respaldos programados. La CDN de imágenes va en `904-medios-s3-cloudfront`.
 
 ## 7. Supuestos, dependencias y preguntas abiertas
 

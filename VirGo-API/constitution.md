@@ -1,6 +1,6 @@
 # Constitution — VirGo API (Backend)
 
-**Versión:** 1.2.0 · **Ratificada:** 2026-11-04 · **Última enmienda:** 2026-11-04
+**Versión:** 1.3.0 (**propuesta**, pendiente de aprobación del equipo) · **Ratificada:** 2026-11-04 · **Última enmienda:** 2026-11-11
 
 Este documento norma el proyecto Backend de VirGo. Todos los demás archivos (`AGENTS.md`, `memoria.md`, subagentes, skills y specs) deben estar alineados con él. Si un archivo lo contradice, prevalece este documento y el otro archivo se corrige.
 
@@ -105,11 +105,22 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
    | S3 (bucket de artefactos de SAM) | Paquetes de despliegue, menos de 50 MB |
    | KMS (llave administrada `aws/ssm`) | Cifrado de los parámetros SecureString, sin llaves propias |
    | CloudWatch Alarms (hasta 10) y SNS (correo) | Alarmas de errores 5xx y de errores de la Lambda |
+   | Amazon SQS (estándar, cifrado SSE-SQS) | Cola `virgo-jobs` y su cola de errores (`099-colas-sqs`) |
+   | AWS Lambda (worker) | Procesa la cola en segundo plano (`099`) |
+   | AWS X-Ray | Rastreo de las Lambdas, muestreo por defecto (`902-observabilidad`) |
+   | CloudWatch Dashboards (hasta 3) | Tablero `virgo-api` (`902`) |
+   | CodeDeploy (para Lambda) | Despliegue *canary* con *rollback* automático (`900`). **No disponible en el plan Free**; hoy se usan versiones con alias `live` y *rollback* manual |
+   | IAM Identity Center y AWS Organizations | Acceso de las personas con MFA y credenciales temporales (`900`) |
+   | Amazon SES (*sandbox*) | Correos de recuperación y verificación (`903-correo-ses`) |
+   | S3 (bucket privado de medios) y CloudFront (`PriceClass_100`) | Fotos de salones y proveedores por HTTPS (`904-medios-s3-cloudfront`) |
+   | EventBridge Scheduler | Tareas programadas (`905-tareas-programadas`) |
+   | Amazon Bedrock (**con límite de gasto aprobado**, apagado por defecto) | Asistente de IA (`906-ia-bedrock`); ver VII.6 |
 
 2. **Prohibido** sin enmendar este documento: NAT Gateway, ALB/ELB, EC2 encendido 24/7, RDS, ECS/Fargate, nombres de dominio de pago, cualquier recurso con costo por hora y cualquier nivel de Atlas distinto de M0 (Flex, M10 o superiores, respaldos o funciones de pago).
 3. **Obligatorio:** una alerta de AWS Budgets de **$1 USD** con aviso por correo, throttling configurado en API Gateway y la organización de Atlas **sin método de pago registrado**, para que no pueda generar cargos.
 4. Toda la infraestructura de AWS se define como código (AWS SAM/CloudFormation). Nada se crea a mano en la consola, salvo el arranque inicial documentado en el plan: el stack `bootstrap` y el clúster M0 de Atlas con sus usuarios y lista de acceso (creados una sola vez, con el MCP de MongoDB o la interfaz de Atlas, y registrados en `memoria.md`).
 5. Antes de crear un recurso nuevo se registra su costo estimado en `memoria.md`.
+6. Un servicio **sin capa gratuita permanente** (hoy, Amazon Bedrock) solo se activa con un gasto máximo mensual aprobado por el equipo y registrado en `memoria.md`, un presupuesto de AWS propio con alertas al 50 % y al 100 %, y una bandera de apagado que por defecto lo deja inactivo.
 
 ## Artículo VIII. Integración y entrega continuas
 
@@ -126,6 +137,8 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 1. Los logs son estructurados, en JSON, con un `correlationId` en cada solicitud.
 2. Hay un endpoint `/health` público, sin datos sensibles.
 3. Los errores 5xx quedan registrados con contexto suficiente para reproducirlos.
+4. Las Lambdas tienen activo el rastreo de AWS X-Ray; las trazas no incluyen cuerpos de petición, tokens ni datos personales.
+5. Existe un tablero de CloudWatch, definido como código, con el tráfico, los errores, la latencia y el estado de las colas.
 
 ## Artículo X. Memoria y trazabilidad
 
@@ -161,3 +174,4 @@ Se subordina a la constitución global de la raíz (`../constitution.md`): esta 
 | 1.0.0 | 2026-10-29 | Versión inicial |
 | 1.1.0 | 2026-11-03 | **Propuesta, pendiente de aprobación del equipo.** Lineamientos de la clase del 28 y 29 de octubre: `check.md` y specs atómicos (I.4–I.7), redacción anticipada de specs funcionales (II.2), `.gitignore` y escaneos DevSecOps (V.9–V.10), cinco tipos de prueba con mutación nocturna y longitudes obligatorias (VI.2, VI.4, VI.6), servicios auxiliares de AWS y **MongoDB Atlas M0 como base de datos** en lugar de DynamoDB (III.4, V.11, VII), ruleset, CD manual, repositorio único y aprendizaje tras el despliegue (VIII), servidores MCP (XI.6) y README en inglés (XII.1). |
 | 1.2.0 | 2026-11-04 | Aprobada por el equipo: `VirGo-Database` administra colecciones, validadores e índices; `VirGo-API` no ejecuta DDL ni modifica la estructura de MongoDB al arrancar, conforme a `API-HANDOFF.md`. |
+| 1.3.0 | 2026-11-11 | **Propuesta, pendiente de aprobación del equipo.** Servicios nuevos en el Art. VII (SQS, worker, X-Ray, Dashboards, CodeDeploy, IAM Identity Center, SES, S3 de medios con CloudFront, EventBridge Scheduler y Bedrock con límite), regla VII.6 para servicios sin capa gratuita permanente, y rastreo y tablero en IX.4 y IX.5. Specs afectados: `099`, `900` (1.1.0) y `902`–`906`. |

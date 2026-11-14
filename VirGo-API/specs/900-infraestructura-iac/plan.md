@@ -3,11 +3,11 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `900-infraestructura-iac` |
-| Versión | 1.0.0 |
-| Estado | Implementación local; validación y despliegue pendientes |
-| Fecha | 2026-11-03 |
+| Versión | 1.1.0 |
+| Estado | Desplegado; ampliación 1.1.0 en borrador |
+| Fecha | 2026-11-03 · ampliado el 2026-11-11 |
 | Spec | [spec.md](spec.md) · Tareas: [task.md](task.md) · Verificación: [check.md](check.md) |
-| Constitución | v1.2.0 |
+| Constitución | v1.3.0 (propuesta) |
 
 ## 1. Resumen técnico
 
@@ -69,6 +69,9 @@ Se conservan ADR-01 (Lambda + HTTP API), ADR-02 (runtime), ADR-05 (OIDC), ADR-06
 | ADR-11 | **Índice TTL de MongoDB** en `sessions.purgeAt` | Borrado programado con otra Lambda | Gratis; las sesiones expiradas se borran solas |
 | ADR-12 | **Checkov** para analizar la IaC | Solo `cfn-lint` | `cfn-lint` revisa sintaxis; Checkov revisa seguridad (cifrado, IAM, logs) |
 | ADR-13 | **SNS + CloudWatch Alarms** para alertas | Sin alarmas | 10 alarmas y 1 000 correos al mes son gratis |
+| ADR-50 | Versiones con alias `live` (`AutoPublishAlias`) y *rollback* manual con `aws lambda update-alias`. **Revisada el 2026-11-13:** el *canary* con CodeDeploy queda pendiente porque el plan Free de AWS no incluye CodeDeploy; se activa al pasar al plan de pago, sin otro cambio que agregar `DeploymentPreference` | *Canary* con CodeDeploy (bloqueado por el plan); despliegue sin versiones | Conserva versiones inmutables y un regreso rápido sin servicios de pago |
+| ADR-53 | Dos roles: GitHub solo actualiza el stack y CloudFormation crea los recursos con `virgo-cfn-exec` (`sam deploy --role-arn`) | Un solo rol de GitHub con todos los permisos | Si se roba el token de GitHub, solo se puede redesplegar VirGo; los permisos amplios nunca salen de CloudFormation |
+| ADR-51 | IAM Identity Center con AWS Organizations para las personas | Usuarios de IAM con contraseña; seguir con la cuenta raíz | Credenciales temporales y MFA sin llaves permanentes; ambos servicios son gratis |
 
 ## 6. Diseño
 
@@ -111,10 +114,14 @@ Identificamos lo que el proyecto necesitaría en AWS y lo adaptamos a la capa gr
 | 11 | CloudWatch Alarms + alertas de Atlas | `Api5xxAlarm`, `LambdaErrorsAlarm`; en Atlas: conexiones > 400 y espacio > 400 MB | Avisos de fallas |
 | 12 | SNS + AWS Budgets | `virgo-alerts` y presupuesto de $1 | Correo de alarmas y de gasto |
 
-### 6.2 Rol de despliegue (`virgo-github-deploy`)
+### 6.2 Roles de despliegue (`virgo-github-deploy` y `virgo-cfn-exec`)
 
-- Confianza: `token.actions.githubusercontent.com`, condición `sub = repo:virgorent/VirGO_Backend:ref:refs/heads/main` y `aud = sts.amazonaws.com`. El *environment* `production` de `901` usa `sub = repo:virgorent/VirGO_Backend:environment:production`; se permite solo ese valor.
-- Permisos: CloudFormation sobre `virgo-api-*`, `iam:PassRole` solo del rol de la Lambda, S3 del bucket de SAM y `ssm:GetParameter` de `/virgo/prod/*`. Nada de `*:*`.
+| Rol | Lo asume | Puede |
+|---|---|---|
+| `virgo-github-deploy` | GitHub Actions por OIDC, solo con `sub = repo:virgorent/VirGO_Backend:environment:production` y `aud = sts.amazonaws.com` | Crear y ejecutar *change sets* del stack `virgo-api-prod`, usar la transformación de SAM, subir el paquete al bucket de SAM y pasarle `virgo-cfn-exec` a CloudFormation. Nada más |
+| `virgo-cfn-exec` | CloudFormation (`aws:SourceAccount` de la cuenta) | Crear y cambiar solo los recursos del stack: funciones `virgo-*`, el HTTP API, roles `virgo-api-prod-*` (con políticas administradas en lista cerrada), colas `virgo-jobs*`, grupos de logs `virgo-*`, alarmas, el tablero `virgo-api`, el tema `virgo-alerts`, el bucket `virgo-media-<cuenta>`, la distribución de CloudFront y los horarios `virgo-*` |
+
+Los únicos permisos sobre `'*'` son acciones que AWS no permite limitar por recurso: entrega de logs de API Gateway, creación de OAC de CloudFront y mapeos de eventos de Lambda (ADR-53). Las omisiones de Checkov están justificadas en el propio recurso.
 
 ### 6.3 Llave JWT y cadena de conexión
 
@@ -134,6 +141,8 @@ Ambas se crean una vez con `aws ssm put-parameter --type SecureString` (T107). L
 | Budgets | 2 presupuestos | $0 |
 | S3 de SAM | 5 GB (12 meses o créditos) | ≈ $0 |
 | IAM, STS, CloudFormation | Sin costo | $0 |
+| CodeDeploy (Lambda) | No disponible en el plan Free; sin costo en el plan de pago | $0 (no se usa) |
+| IAM Identity Center y AWS Organizations | Sin costo | $0 |
 | **Total** | | **$0 USD** |
 
 ## 8. Estrategia de pruebas
@@ -165,3 +174,4 @@ Ambas se crean una vez con `aws ssm put-parameter --type SecureString` (T107). L
 | F2 | Seguridad y validación | T105–T106 |
 | F3 | Arranque en la nube | T107 |
 | F4 | Borrado y cierre | T108–T109 |
+| F5 | Ampliación 1.1.0: *canary* e IAM Identity Center | T111–T116 |
