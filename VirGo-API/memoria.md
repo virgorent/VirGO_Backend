@@ -371,6 +371,7 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Módulo / tareas:** `900` (T118, T119), `901`
 - **Qué se hizo:** `bootstrap.yaml` separa dos roles (ADR-53): `virgo-github-deploy`, que solo actualiza el stack, y `virgo-cfn-exec`, que crea los recursos `virgo-*` de todos los servicios actuales. El presupuesto queda opcional porque `virgo-1usd` ya existe. `api-deploy.yml` despliega con `--role-arn`, pasa `SenderEmail` (antes se perdía el remitente) y falla si falta una variable.
 - **Evidencia:** cfn-lint sin hallazgos; Checkov 37 controles en verde y 4 omisiones justificadas en el recurso; `tests/smoke/smoke.sh` pasa contra producción.
-- **Pendiente:** crear el stack `virgo-bootstrap` y el *environment* `production` (T119).- **Stack `virgo-bootstrap` creado** (`CREATE_COMPLETE`): proveedor OIDC de GitHub, `virgo-github-deploy` y `virgo-cfn-exec`.
+- **Pendiente:** crear el stack `virgo-bootstrap` y el *environment* `production` (T119).
+- **Stack `virgo-bootstrap` creado** (`CREATE_COMPLETE`): proveedor OIDC de GitHub, `virgo-github-deploy` y `virgo-cfn-exec`.
 - **Simulación de permisos** (`aws iam simulate-principal-policy`): `virgo-cfn-exec` puede actualizar las Lambdas, el alias, SQS, roles `virgo-api-prod-*`, el HTTP API, alarmas, el tablero, el bucket de medios, CloudFront, el horario, SNS y logs, y **no** puede crear otros roles, borrar otros buckets ni lanzar EC2. `virgo-github-deploy` puede ejecutar *change sets* de `virgo-api-prod` y pasar `virgo-cfn-exec` solo a CloudFormation; **no** puede tocar otro stack ni modificar la Lambda directamente.
 
