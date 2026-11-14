@@ -341,3 +341,11 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Pendiente:** aprobar la enmienda v1.3.0 y los specs por PR; desplegar (T9907, T90204, T90304, T90403, T90504, T112); elegir el remitente de SES (`903` P-01); activar IAM Identity Center (T113–T115); decidir el gasto de Bedrock (`906` P-01).
 
+### 2026-11-13 · Despliegue por GitHub con OIDC
+
+- **Autor:** Angelica + Claude Code (`devops-aws`, `seguridad`); lo pidió Rafael
+- **Módulo / tareas:** `900` (T118, T119), `901`
+- **Qué se hizo:** `bootstrap.yaml` separa dos roles (ADR-53): `virgo-github-deploy`, que solo actualiza el stack, y `virgo-cfn-exec`, que crea los recursos `virgo-*` de todos los servicios actuales. El presupuesto queda opcional porque `virgo-1usd` ya existe. `api-deploy.yml` despliega con `--role-arn`, pasa `SenderEmail` (antes se perdía el remitente) y falla si falta una variable.
+- **Evidencia:** cfn-lint sin hallazgos; Checkov 37 controles en verde y 4 omisiones justificadas en el recurso; `tests/smoke/smoke.sh` pasa contra producción.
+- **Pendiente:** crear el stack `virgo-bootstrap` y el *environment* `production` (T119).
+
