@@ -1,10 +1,11 @@
 import { buildPlan } from './plan.js';
 
-export const verifyInitialization = async (db, collections) => {
-  const plan = await buildPlan(db, collections);
+export const verifyInitialization = async (db, collections, options = {}) => {
+  const plan = await buildPlan(db, collections, options);
 
   return {
-    ok: !plan.drift,
+    ok: plan.errors.length === 0 && plan.actions.length === 0,
+    exactMatch: plan.exactMatch,
     plan,
     missingCollections: plan.collections
       .filter((collection) => !collection.exists)
@@ -24,11 +25,28 @@ export const verifyInitialization = async (db, collections) => {
         collection: collection.name,
         indexes: collection.mismatchedIndexes.map(({ desired }) => desired.name)
       })),
+    nameMismatches: plan.collections
+      .filter((collection) => collection.nameMismatches.length > 0)
+      .map((collection) => ({
+        collection: collection.name,
+        indexes: collection.nameMismatches.map(({ desired, existing }) => ({
+          desired: desired.name,
+          actual: existing.name
+        }))
+      })),
     extraIndexes: plan.collections
       .filter((collection) => collection.extraIndexes.length > 0)
       .map((collection) => ({
         collection: collection.name,
         indexes: collection.extraIndexes.map((index) => index.name)
-      }))
+      })),
+    blockingIssues: plan.errors,
+    warnings: plan.warnings,
+    waivedIssues: plan.differences.filter(
+      (difference) => difference.status === 'waived'
+    ),
+    ttlApprovals: plan.differences.filter(
+      (difference) => difference.status === 'approved'
+    )
   };
 };

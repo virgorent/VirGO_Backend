@@ -1,18 +1,94 @@
 import { isDeepStrictEqual } from 'node:util';
 import { COLLECTIONS_BY_NAME } from '../catalog/index.js';
+import {
+  catalogFingerprint,
+  computePlanFingerprint
+} from './approvals.js';
 
 const VALIDATION_LEVEL = 'strict';
 const VALIDATION_ACTION = 'error';
 const ALLOWED_ACTIONS = new Set(['createCollection', 'collMod', 'createIndex']);
+const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/;
+const INDEX_METADATA = new Set(['v', 'key', 'name', 'ns', 'background']);
+
+const indexOptions = (index) => (
+  index.options ?? Object.fromEntries(
+    Object.entries(index).filter(([key]) => !INDEX_METADATA.has(key))
+  )
+);
+
+const isTtlIndex = (index) => (
+  indexOptions(index).expireAfterSeconds !== undefined
+);
 
 export class ApplyError extends Error {
-  constructor(message, { cause, results, failedAction } = {}) {
+  constructor(message, {
+    cause,
+    results,
+    failedAction,
+    planFingerprint
+  } = {}) {
     super(message, { cause });
     this.name = 'ApplyError';
     this.results = results ?? [];
     this.failedAction = failedAction ?? null;
+    this.planFingerprint = planFingerprint ?? null;
+    this.planInvalidated = true;
+    this.requiresReinspection = true;
   }
 }
+
+const assertPlanFingerprints = (plan) => {
+  if (typeof plan.catalogFingerprint !== 'string'
+    || !SHA256_PATTERN.test(plan.catalogFingerprint)) {
+    throw new Error('El plan no tiene un catalogFingerprint valido.');
+  }
+
+  if (typeof plan.planFingerprint !== 'string'
+    || !SHA256_PATTERN.test(plan.planFingerprint)) {
+    throw new Error('El plan no tiene un planFingerprint valido.');
+  }
+
+  if (plan.catalogFingerprint !== catalogFingerprint()) {
+    throw new Error(
+      'El catalogFingerprint del plan no coincide con el catalogo actual.'
+    );
+  }
+
+  if (plan.planFingerprint !== computePlanFingerprint(plan)) {
+    throw new Error(
+      'El planFingerprint no coincide con el contenido del plan. '
+      + 'Recalcule el plan antes de aplicar.'
+    );
+  }
+};
+
+const assertTtlApproval = (plan, action, declared) => {
+  if (!action.requiresTtlApproval && !isTtlIndex(declared)) return;
+  if (plan.environment !== 'production') return;
+
+  if (!action.ttlApproval) {
+    throw new Error(
+      `El indice TTL ${action.index.name} de ${action.collection} requiere `
+      + 'una aprobacion TTL valida en production.'
+    );
+  }
+
+  const expectedExpire = indexOptions(declared).expireAfterSeconds;
+  if (action.ttlApproval.expireAfterSeconds !== expectedExpire) {
+    throw new Error(
+      `La aprobacion TTL de ${action.index.name} no coincide con `
+      + 'expireAfterSeconds del catalogo.'
+    );
+  }
+
+  if (!Number.isInteger(action.ttlApproval.maxDeletion)
+    || action.ttlApproval.maxDeletion < 0) {
+    throw new Error(
+      `La aprobacion TTL de ${action.index.name} no tiene un maxDeletion valido.`
+    );
+  }
+};
 
 const assertSafePlan = (plan) => {
   if (!plan || typeof plan !== 'object' || !Array.isArray(plan.actions)) {
@@ -23,9 +99,12 @@ const assertSafePlan = (plan) => {
     throw new Error('El plan no tiene una lista de errores valida.');
   }
 
+  assertPlanFingerprints(plan);
+
   if (plan.errors.length > 0) {
     throw new Error(
-      'El plan contiene conflictos de indices. No se aplicaron cambios.'
+      'El plan contiene conflictos o aprobaciones pendientes. '
+      + 'No se aplicaron cambios.'
     );
   }
 
@@ -67,6 +146,8 @@ const assertSafePlan = (plan) => {
         `El indice ${action.index.name} no coincide con el catalogo de ${action.collection}.`
       );
     }
+
+    assertTtlApproval(plan, action, declared);
   }
 };
 
@@ -153,11 +234,13 @@ export const applyPlan = async (db, plan) => {
       `Fallo al aplicar ${currentAction?.type ?? 'accion'} en `
       + `${currentAction?.collection ?? 'desconocida'}: ${message}. `
       + `Operaciones aplicadas antes del fallo: ${results.length}. `
-      + 'Las operaciones aplicadas son idempotentes; corrija la causa y reejecute plan/apply.',
+      + 'Las operaciones aplicadas son idempotentes, pero el plan anterior '
+      + 'queda invalidado; ejecute plan de nuevo antes de reintentar.',
       {
         cause: error,
         results,
-        failedAction: currentAction
+        failedAction: currentAction,
+        planFingerprint: plan.planFingerprint
       }
     );
   }

@@ -301,3 +301,18 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Evidencia:** <https://rcof55a3c9.execute-api.us-east-1.amazonaws.com/health> responde 200; `/api/v1/venues` responde 200 conectado a Atlas.
 - **Costo:** $0.
 - **Pendiente:** usuario `virgo-api-prod` en Atlas, catálogo y datos en la base `virgo`, y despliegue por OIDC.
+
+### 2026-11-13 · Auditoría live de Atlas para T1004
+
+- **Autor:** equipo + OpenCode (`qa`, `seguridad`)
+- **Módulo / tareas:** `010-contrato-datos` · T1004
+- **Qué se hizo:**
+  - Se validaron en modo solo lectura `virgo_dev` y `virgo` con `check_schema.py --live`; sin inicializadores, DDL, seeds ni CRUD.
+  - `virgo_dev`: 22 colecciones, 0 diferencias, salida 0.
+  - `virgo`: 2 colecciones presentes (`users`, `sessions`), 20 faltantes, 2 validadores diferentes, 4 índices faltantes y 26 diferencias, salida 1.
+  - TLS verificado con `tls=true`; sin `tlsInsecure` ni overrides de certificado/hostname.
+- **Evidencia:** [specs/010-contrato-datos/audit-live-atlas-2026-11-13.md](specs/010-contrato-datos/audit-live-atlas-2026-11-13.md); `check.md` y `task.md` actualizados.
+- **Decisiones:** T1004 queda verificado con la comparación live; no se reaplicó `VirGo-Database` `001`.
+- **Costo:** $0; no se crearon ni modificaron recursos, usuarios ni documentos.
+- **Aprendizaje:** `virgo` está incompleto frente al catálogo; cero diferencias en `virgo_dev` no cubre `validationLevel`, `validationAction` ni documentos.
+- **Pendiente:** T1005, T1006, T1007 y la autorización/ejecución del [plan de remediación de `virgo`](../VirGo-Database/docs/PLAN_REMEDIACION_VIRGO.md).

@@ -10,8 +10,9 @@ Este repositorio no contiene la API de VirGo. No crea ni modifica `VirGo-API`, n
 - Validadores estrictos con `validationLevel: strict` y `validationAction: error`.
 - 38 indices secundarios: 12 unicos, 2 parciales y 4 TTL.
 - Inicializador idempotente con modos `plan`, `validate` y `apply`.
-- Verificador de deriva y exportador determinista de esquemas para `VirGo-API`.
-- 45 pruebas unitarias y 28 pruebas de integracion verificadas contra MongoDB 8 local.
+- Huellas de catalogo y plan, waivers por indice y aprobaciones TTL.
+- Verificador de deriva con `ok` y `exactMatch`, y exportador determinista de esquemas para `VirGo-API`.
+- 82 pruebas unitarias y 29 de integracion verificadas contra MongoDB 8 local.
 - Seed DEMO idempotente con IDs deterministas y limpieza selectiva; nunca se ejecuta en production.
 - TLS obligatorio para Atlas; el override inseguro solo se permite en development/test local.
 - Sin credenciales ni secretos en el repositorio.
@@ -62,6 +63,7 @@ Desarrollo:
 
 ```powershell
 npm run db:plan:dev
+npm run db:validate:dev
 npm run db:init:dev -- --yes
 npm run db:verify:dev
 npm run db:inspect:dev
@@ -71,11 +73,18 @@ Produccion:
 
 ```powershell
 npm run db:plan:prod
+npm run db:validate:prod
 npm run db:init:prod -- --yes
 npm run db:verify:prod
 ```
 
 `db:init:prod` incluye `--confirm-production`. Aun asi, revise siempre el plan y tenga un respaldo antes de aplicar. El inicializador nunca elimina colecciones, indices ni documentos.
+
+Si el plan reporta un indice extra, un nombre distinto o un TTL pendiente en
+produccion, genere el archivo de waiver o de aprobacion TTL correspondiente y
+vinculado al `planFingerprint`. Use `--waiver-file`, `--ttl-approval-file` y
+`--plan-file`. `--yes` no sustituye estas aprobaciones. Consulte
+[Operacion](docs/OPERATIONS.md).
 
 Tambien puede invocar el CLI directamente:
 
@@ -165,8 +174,10 @@ docs/                  Arquitectura, Atlas, operaciones y decisiones
 - La conexion exige TLS y rechaza parametros que desactiven su validacion.
 - No se imprimen URIs ni credenciales.
 - No se eliminan colecciones, indices ni documentos.
-- `apply` valida que cada accion pertenezca al catalogo antes de escribir.
-- Un fallo parcial informa las operaciones aplicadas y puede reanudarse con otro plan.
+- `apply` valida huellas, aprobaciones y que cada accion pertenezca al catalogo antes de escribir.
+- Los waivers solo cubren indices extra o nombres distintos; no cubren conflictos de clave, opciones ni TTL.
+- En produccion, TTL faltante o adicional exige aprobacion especifica con limite de impacto.
+- Un fallo parcial informa las operaciones aplicadas, invalida el plan y exige una nueva inspeccion.
 - El seed DEMO esta bloqueado en production y su limpieza solo borra IDs conocidos.
 - Se recomienda un usuario DDL separado del usuario runtime.
 

@@ -79,10 +79,17 @@
 - `plan` y `validate` de solo lectura.
 - `apply` exige `--yes`.
 - Produccion exige `--confirm-production`.
-- Conflictos de indices bloquean el apply.
-- Indices extra solo generan advertencia.
+- Conflictos de clave u opciones bloquean el apply y no aceptan waiver.
+- Indices extra y nombres distintos requieren waiver aprobado por indice.
+- En produccion, TTL faltante o adicional requiere aprobacion TTL especifica;
+  en development/test se registra como advertencia.
+- `verify.ok` indica ausencia de bloqueos y acciones pendientes;
+  `verify.exactMatch` indica coincidencia exacta sin excepciones.
 - `apply` rechaza acciones fuera del catalogo, indices manipulados y cualquier operacion destructiva.
-- Un fallo parcial conserva el detalle de lo aplicado y se reanuda con otro plan idempotente.
+- Un fallo parcial conserva el detalle de lo aplicado, invalida el plan y exige
+  una nueva inspeccion y un nuevo plan idempotente.
+- No se usa firma criptografica por ahora; las aprobaciones se vinculan por
+  `planFingerprint` y contexto de cluster, entorno y base.
 
 ### Seguridad
 
