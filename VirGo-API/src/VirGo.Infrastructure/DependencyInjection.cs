@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<LoginHandler>();
         services.AddScoped<RegisterHandler>();
         services.AddScoped<LogoutHandler>();
+        services.AddScoped<DeleteAccountHandler>();
         services.AddScoped<QuoteHandler>();
         services.AddScoped<BookingHandler>();
 

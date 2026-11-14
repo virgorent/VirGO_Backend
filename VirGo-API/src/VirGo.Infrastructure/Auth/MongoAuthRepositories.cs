@@ -58,6 +58,31 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
         await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
     }
 
+    public async Task<bool> AnonymizeAsync(
+        string userId,
+        string email,
+        string phone,
+        string passwordHash,
+        DateTime now,
+        CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", userId);
+        var update = Builders<BsonDocument>.Update
+            .Set("name", "Cuenta eliminada")
+            .Set("email", email)
+            .Set("phone", phone)
+            .Set("passwordHash", passwordHash)
+            .Set("isVerified", false)
+            .Set("failedLoginCount", 0)
+            .Set("unreadNotices", 0)
+            .Set("updatedAt", new BsonDateTime(now))
+            .Unset("providerId")
+            .Unset("city")
+            .Unset("defaultGuests");
+        var result = await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+        return result.MatchedCount == 1;
+    }
+
     public async Task<User?> RecordFailedLoginAsync(
         string userId,
         DateTime now,
@@ -164,6 +189,12 @@ public sealed class MongoSessionRepository(IMongoDatabase database) : ISessionRe
             Builders<BsonDocument>.Filter.Eq("userId", userId));
         var result = await sessions.DeleteOneAsync(filter, cancellationToken);
         return result.DeletedCount == 1;
+    }
+
+    public async Task DeleteAllAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("userId", userId);
+        await sessions.DeleteManyAsync(filter, cancellationToken);
     }
 
     private static Session Map(BsonDocument document)

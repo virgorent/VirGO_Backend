@@ -379,3 +379,12 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Segundo y tercer intento desde GitHub:** OIDC ya funcionó (`AssumeRoleWithWebIdentity` OK), pero `sam deploy` falló dentro del runner: con `--template-file .aws-sam/build/template.yaml`, SAM busca `samconfig.toml` junto a la plantilla compilada. Se pasa la ruta absoluta (`$PWD/infra/samconfig.toml`).
 - Al reproducirlo con `--no-execute-changeset`, `virgo-cfn-exec` no podía usar la transformación de SAM (la transformación corre con el rol de servicio). Se agregó `cloudformation:CreateChangeSet` sobre `transform/Serverless-2016-10-31` y se actualizó `virgo-bootstrap`. Con eso el *change set* se creó con el rol de ejecución; se borró sin ejecutarlo para que el despliegue lo haga GitHub.
 
+### 2026-11-14 · Borrado de cuenta para prueba cerrada
+
+- **Autor:** Rafael + OpenCode (`dev-dotnet`, `qa`, `seguridad`)
+- **Módulo / tareas:** `018` (T1801, T1802)
+- **Decisión:** anonimización y desactivación; se conservan referencias históricas de reservas y reseñas.
+- **Qué se hizo:** `DELETE /api/v1/users/me` anonimiza la identidad, invalida la contraseña y revoca todas las sesiones activas. No cambia el schema de MongoDB.
+- **Evidencia:** build correcto; `AuthTests` 6/6, `MobileContractTests` 11/11 e `InputSecurityTests` 19/19.
+- **Pendiente:** PR, revisión humana, humo HTTPS y entrega del contrato a Móvil.
+

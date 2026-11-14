@@ -19,6 +19,14 @@ public interface IUserRepository
 
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
 
+    Task<bool> AnonymizeAsync(
+        string userId,
+        string email,
+        string phone,
+        string passwordHash,
+        DateTime now,
+        CancellationToken cancellationToken = default);
+
     Task<User?> RecordFailedLoginAsync(
         string userId,
         DateTime now,
@@ -36,6 +44,8 @@ public interface ISessionRepository
     Task AddAsync(Session session, CancellationToken cancellationToken = default);
 
     Task<bool> DeleteAsync(string sessionId, string userId, CancellationToken cancellationToken = default);
+
+    Task DeleteAllAsync(string userId, CancellationToken cancellationToken = default);
 }
 
 public interface IPasswordHasher
