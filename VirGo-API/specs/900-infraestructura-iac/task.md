@@ -69,7 +69,7 @@
 | T115 | 🧑 Aceptar la invitación, registrar MFA y entrar con `aws login`/`aws configure sso` | T114 | Angelica | CA-11 y `aws sts get-caller-identity` sin `root` | ⏳ |
 | T116 | Registrar en `memoria.md` y completar `check.md` | T112, T115 | `qa` | `check.md` | ⏳ |
 | T118 | `bootstrap.yaml`: roles `virgo-github-deploy` y `virgo-cfn-exec` con los permisos de los servicios de `099` y `902`–`905`; presupuesto opcional; `api-deploy.yml` con `--role-arn` y `SenderEmail` | T107 | `devops-aws` | cfn-lint y Checkov en verde | ✅ local |
-| T119 | 🧑 Crear el stack `virgo-bootstrap` y el *environment* `production` con `AWS_ROLE_ARN`, `AWS_CFN_EXEC_ROLE_ARN`, `AWS_REGION`, `ALERT_EMAIL` y `SENDER_EMAIL`; lanzar *API Deploy* | T118 | Angelica | Despliegue en verde desde GitHub con humo | ⏳ |
+| T119 | 🧑 Crear el stack `virgo-bootstrap` y el *environment* `production` con `AWS_ROLE_ARN`, `AWS_CFN_EXEC_ROLE_ARN`, `AWS_REGION`, `ALERT_EMAIL` y `SENDER_EMAIL`; lanzar *API Deploy* | T118 | Angelica | Despliegue en verde desde GitHub con humo | 🔄 stack `virgo-bootstrap` creado el 2026-11-13; falta el *environment* |
 
 ---
 
