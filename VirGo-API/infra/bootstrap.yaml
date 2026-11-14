@@ -8,6 +8,12 @@ Parameters:
     Type: String
     Default: virgorent/VirGO_Backend
     Description: GitHub repository allowed to deploy the API.
+  GitHubRepositoryWithIds:
+    Type: String
+    Default: virgorent@352551934/VirGO_Backend@1445981483
+    Description: >-
+      Same repository with GitHub's immutable owner and repository IDs, as GitHub now sends it in the
+      OIDC sub claim. A repository recreated with the same name gets new IDs and cannot deploy.
   StackName:
     Type: String
     Default: virgo-api-prod
@@ -52,7 +58,9 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubRepository}:environment:production
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubRepositoryWithIds}:environment:production
+                  - !Sub repo:${GitHubRepository}:environment:production
       Policies:
         - PolicyName: VirGoDeployment
           PolicyDocument:
@@ -136,6 +144,10 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
+              - Sid: UseTheSamTransform
+                Effect: Allow
+                Action: cloudformation:CreateChangeSet
+                Resource: !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31
               - Sid: Functions
                 Effect: Allow
                 Action: lambda:*
