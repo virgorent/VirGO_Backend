@@ -27,11 +27,21 @@ Verifican, sin MongoDB:
 - Override inseguro solo en development/test y rechazo absoluto en production.
 - El resumen de configuracion no expone la URI.
 - Guardas del apply contra acciones destructivas, colecciones ajenas e indices manipulados.
-- Fallo parcial con operaciones aplicadas y accion fallida.
+- Rechazo de planes sin huellas, con `planFingerprint` obsoleto o con
+  `catalogFingerprint` de otro catalogo.
+- Aprobaciones TTL por plan, impacto y `maxDeletion`; TTL como advertencia fuera
+  de produccion.
+- Waivers de `extraIndex` y `nameMismatch`; rechazo de waivers para
+  `keyMismatch`, `optionsMismatch` y TTL.
+- JSON estricto: propiedades faltantes, desconocidas y duplicadas; fechas
+  invalidas o expiradas; contexto y huellas incorrectas.
+- Identidad de cluster estable sin credenciales ni query.
+- `verify.ok` frente a `verify.exactMatch` con excepciones aprobadas.
+- Fallo parcial con operaciones aplicadas, accion fallida e invalidacion del plan.
 - Seed DEMO con las 22 colecciones, IDs deterministas y bloqueo en production.
 - Conteo de documentos DEMO y rechazo de la base `virgo`.
 
-Resultado verificado: 45 pruebas aprobadas.
+Resultado verificado: 82 pruebas aprobadas.
 
 ## Integracion
 
@@ -76,13 +86,17 @@ Cobertura:
 - TTL aprobados.
 - Deteccion de coleccion faltante sin modificarla.
 - Restauracion idempotente despues de la deriva.
-- Compatibilidad con un indice equivalente creado con otro nombre.
+- Bloqueo de un indice equivalente con otro nombre hasta aprobar un waiver.
 - Bloqueo de un indice con el mismo nombre y distinta definicion.
+- TTL faltante en production bloqueado hasta aprobar la excepcion; luego se
+  restaura el indice.
 - Seed DEMO idempotente sobre las 22 colecciones.
 - Limpieza DEMO selectiva que conserva documentos ajenos.
 - Repeticion del seed despues de la limpieza.
 
-Resultado verificado: 28 pruebas aprobadas contra MongoDB 8 local.
+Resultado verificado: 29 pruebas aprobadas contra MongoDB 8 local, incluida la
+creacion del esquema, las nuevas guardas, la aprobacion TTL y el waiver de nombre
+distinto. El MongoDB local se detuvo al terminar.
 
 ## CLI verificado
 
