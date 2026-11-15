@@ -81,6 +81,48 @@ public sealed class AuthTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task PublicProfileReturnsOnlyPublicFieldsWithoutAuthentication()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(
+            "/api/v1/users/8f6b8b48-f5d0-4f65-8fb0-2a7f0f6ab4b1/public");
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var root = body.RootElement;
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("8f6b8b48-f5d0-4f65-8fb0-2a7f0f6ab4b1", root.GetProperty("id").GetString());
+        Assert.Equal("VirGo Demo", root.GetProperty("name").GetString());
+        Assert.Equal("client", root.GetProperty("role").GetString());
+        Assert.False(root.GetProperty("isVerified").GetBoolean());
+        Assert.DoesNotContain("email", root.EnumerateObject().Select(property => property.Name), StringComparer.OrdinalIgnoreCase);
+        Assert.DoesNotContain("phone", root.EnumerateObject().Select(property => property.Name), StringComparer.OrdinalIgnoreCase);
+        Assert.DoesNotContain("passwordHash", root.EnumerateObject().Select(property => property.Name), StringComparer.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task PublicProfileReturnsNotFoundForUnknownUser()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(
+            "/api/v1/users/11111111-1111-4111-8111-111111111111/public");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PublicProfileTreatsInjectionPayloadAsAnUnknownId()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(
+            "/api/v1/users/%24ne%3Anull/public");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task LogoutKeepsASecondSessionActive()
     {
         using var client = factory.CreateClient();

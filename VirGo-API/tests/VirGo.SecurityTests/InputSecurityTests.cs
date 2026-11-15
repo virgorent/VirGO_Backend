@@ -85,6 +85,24 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    [Fact]
+    public async Task PublicProfileDoesNotRequireAToken()
+    {
+        using var response = await client.GetAsync(
+            "/api/v1/users/8f6b8b48-f5d0-4f65-8fb0-2a7f0f6ab4b1/public");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PublicProfileRejectsOperatorInjectionAsAnUnknownId()
+    {
+        using var response = await client.GetAsync(
+            "/api/v1/users/%24where%3A%22this.passwordHash%22/public");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     [Theory]
     [InlineData("not-a-token")]
     [InlineData("eyJhbGciOiJub25lIn0.eyJzdWIiOiIxIn0.")]
