@@ -9,6 +9,9 @@ export const parseCliArgs = (argv) => {
       mode: { type: 'string', default: 'plan' },
       yes: { type: 'boolean', default: false },
       'confirm-production': { type: 'boolean', default: false },
+      'ttl-approval-file': { type: 'string' },
+      'waiver-file': { type: 'string' },
+      'plan-file': { type: 'string' },
       json: { type: 'boolean', default: false },
       help: { type: 'boolean', short: 'h', default: false }
     }

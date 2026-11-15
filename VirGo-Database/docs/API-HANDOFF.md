@@ -96,7 +96,7 @@ Mantener de forma versionada, verificable e idempotente:
 - Inicializador idempotente con modos `plan`, `validate` y `apply`.
 - Verificador de deriva.
 - CLI de administración y exportación.
-- 45 pruebas unitarias y 28 de integración.
+- 82 pruebas unitarias y 29 de integración verificadas contra MongoDB 8 local.
 
 **NO IMPLEMENTADO**
 
@@ -172,7 +172,7 @@ La configuración de `VirGo-Database` rechaza cualquier otra combinación de ent
 4. `verify`: vuelve a leer y confirma el estado final.
 5. `inspect`: muestra el inventario real de colecciones e índices.
 
-El inicializador no elimina colecciones, índices ni documentos. Los conflictos de índices bloquean la aplicación; los índices extra solo generan advertencia.
+El inicializador no elimina colecciones, índices ni documentos. Los conflictos de clave u opciones bloquean la aplicación y no aceptan waiver. Los índices extra y los nombres distintos bloquean hasta contar con un waiver aprobado por índice.
 
 ### 2.5 Límites de la arquitectura actual
 
@@ -246,7 +246,7 @@ La API debe usar su propio archivo de entorno, ignorado por Git, y un usuario ru
 | `npm run db:export:api` | Genera los 22 esquemas de `VirGo-API/db/schema`. |
 | `npm run db:export:api:check` | Falla si la API difiere del catálogo; no escribe. |
 | `python ../VirGo-API/db/tools/check_schema.py` | Valida límites y paridad offline. |
-| `npm test` | 45 pruebas unitarias. |
+| `npm test` | 82 pruebas unitarias. |
 | `npm run test:integration` | Pruebas contra MongoDB local; se omiten si no hay servidor. |
 
 Los comandos de producción son equivalentes, pero requieren revisión, respaldo y `--confirm-production`.
@@ -1595,7 +1595,8 @@ MongoDB no elimina documentos en el instante exacto de expiración. La API debe 
 **IMPLEMENTADO**
 
 - Un índice con el mismo nombre pero distinta clave u opciones bloquea `apply`.
-- Un índice extra solo genera advertencia.
+- Un índice extra o con nombre distinto bloquea `apply` hasta aprobar un waiver vinculado al plan.
+- En producción, un TTL faltante o adicional exige aprobación TTL específica.
 - El inicializador no elimina índices.
 - Un `DuplicateKey` al crear un índice único requiere limpieza manual y revisada.
 - No se deben crear índices desde la API al arrancar.

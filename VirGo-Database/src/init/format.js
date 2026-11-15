@@ -8,7 +8,12 @@ const formatAction = (action) => {
     return `+ collMod ${action.collection} (validator, validationLevel=strict, validationAction=error)`;
   }
   if (action.type === 'createIndex') {
-    return `+ createIndex ${action.collection} ${describeIndex(action.index)}`;
+    const approval = action.requiresTtlApproval
+      ? action.ttlApproval
+        ? ' [TTL aprobado]'
+        : ' [TTL sin aprobacion]'
+      : '';
+    return `+ createIndex ${action.collection} ${describeIndex(action.index)}${approval}`;
   }
   return `+ ${action.type} ${action.collection}`;
 };
@@ -16,6 +21,10 @@ const formatAction = (action) => {
 export const formatPlan = (plan) => {
   const lines = [
     `Base de datos: ${plan.database}`,
+    `Entorno: ${plan.environment ?? 'no especificado'}`,
+    `Cluster: ${plan.clusterIdentity ?? 'no especificado'}`,
+    `Catalogo: ${plan.catalogFingerprint ?? 'no disponible'}`,
+    `Plan: ${plan.planFingerprint ?? 'no disponible'}`,
     `Colecciones declaradas: ${plan.summary.collections}`,
     `Plan: ${plan.summary.createCollections} colecciones por crear, `
       + `${plan.summary.updateValidators} validadores por actualizar, `
@@ -34,14 +43,14 @@ export const formatPlan = (plan) => {
     }
   }
 
-  if (plan.warnings.length > 0) {
+  if (plan.warnings?.length > 0) {
     lines.push('', 'Advertencias:');
     for (const warning of plan.warnings) {
       lines.push(`~ ${warning.collection}: ${warning.message}`);
     }
   }
 
-  if (plan.errors.length > 0) {
+  if (plan.errors?.length > 0) {
     lines.push('', 'Conflictos bloqueantes:');
     for (const error of plan.errors) {
       lines.push(`! ${error.collection}: ${error.message}`);
@@ -54,7 +63,9 @@ export const formatPlan = (plan) => {
 export const formatVerification = (result) => {
   const lines = [
     `Base de datos: ${result.plan.database}`,
-    `Verificacion: ${result.ok ? 'OK' : 'DRIFT'}`
+    `Entorno: ${result.plan.environment ?? 'no especificado'}`,
+    `Verificacion: ${result.ok ? 'OK' : 'DRIFT'}`,
+    `Coincidencia exacta: ${result.exactMatch ? 'SI' : 'NO'}`
   ];
 
   if (result.missingCollections.length > 0) {
@@ -73,8 +84,23 @@ export const formatVerification = (result) => {
     lines.push(`Indices conflictivos en ${item.collection}: ${item.indexes.join(', ')}`);
   }
 
+  for (const item of result.nameMismatches ?? []) {
+    const indexes = item.indexes
+      .map(({ desired, actual }) => `${desired} (real: ${actual})`)
+      .join(', ');
+    lines.push(`Indices con nombre distinto en ${item.collection}: ${indexes}`);
+  }
+
   for (const item of result.extraIndexes) {
     lines.push(`Indices adicionales en ${item.collection}: ${item.indexes.join(', ')}`);
+  }
+
+  for (const warning of result.warnings ?? []) {
+    lines.push(`Advertencia en ${warning.collection}: ${warning.message}`);
+  }
+
+  for (const issue of result.blockingIssues ?? []) {
+    lines.push(`Bloqueo en ${issue.collection}: ${issue.message}`);
   }
 
   return lines.join('\n');

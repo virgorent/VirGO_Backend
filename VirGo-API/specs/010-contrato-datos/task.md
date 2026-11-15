@@ -27,7 +27,7 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T1004 | 🧑 Aplicar `VirGo-Database` `001` a `virgo_dev` | `VirGo-Database` `001`: T105 | Esau | `check_schema.py --live`: 0 diferencias (CA-02) | ⏳ |
+| T1004 | 🧑 Aplicar `VirGo-Database` `001` a `virgo_dev` | `VirGo-Database` `001`: T105 | Esau | `check_schema.py --live --db virgo_dev`: 22 colecciones, 0 diferencias (2026-11-13); verificado, no reaplicado | ✅ |
 | T1005 | Job `api-schema`: regenerar desde el catálogo y fallar si `db/schema/` difiere | `VirGo-Database` `001`: T104 | `devops-aws` | PR con un cambio a mano falla (CA-04) | ⏳ |
 
 ## F2 · Pruebas reales y cierre
