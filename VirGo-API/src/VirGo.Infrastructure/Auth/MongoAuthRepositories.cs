@@ -5,9 +5,10 @@ using VirGo.Domain.Auth;
 
 namespace VirGo.Infrastructure.Auth;
 
-public sealed class MongoUserRepository(IMongoDatabase database) : IUserRepository
+public sealed class MongoUserRepository(IMongoDatabase database, IMongoClient client) : IUserRepository
 {
     private readonly IMongoCollection<BsonDocument> users = database.GetCollection<BsonDocument>("users");
+    private readonly IMongoCollection<BsonDocument> sessions = database.GetCollection<BsonDocument>("sessions");
 
     public async Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
@@ -79,8 +80,27 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
             .Unset("providerId")
             .Unset("city")
             .Unset("defaultGuests");
-        var result = await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
-        return result.MatchedCount == 1;
+        using var session = await client.StartSessionAsync(cancellationToken: cancellationToken);
+        return await session.WithTransactionAsync(
+            async (transactionSession, transactionCancellationToken) =>
+            {
+                var result = await users.UpdateOneAsync(
+                    transactionSession,
+                    filter,
+                    update,
+                    cancellationToken: transactionCancellationToken);
+                if (result.MatchedCount != 1)
+                {
+                    return false;
+                }
+
+                await sessions.DeleteManyAsync(
+                    transactionSession,
+                    Builders<BsonDocument>.Filter.Eq("userId", userId),
+                    cancellationToken: transactionCancellationToken);
+                return true;
+            },
+            cancellationToken: cancellationToken);
     }
 
     public async Task<User?> RecordFailedLoginAsync(

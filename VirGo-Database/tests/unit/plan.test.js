@@ -66,6 +66,22 @@ test('detecta diferencias en unique, TTL, parcial y orden de key', () => {
   }), false);
 });
 
+test('ignora opciones administradas por MongoDB', () => {
+  const expected = {
+    name: 'location_2dsphere_status_1',
+    key: { location: '2dsphere', status: 1 },
+    options: {}
+  };
+  const actual = {
+    name: 'location_2dsphere_status_1',
+    key: { location: '2dsphere', status: 1 },
+    v: 2,
+    '2dsphereIndexVersion': 3
+  };
+
+  assert.equal(indexesEquivalent(expected, actual), true);
+});
+
 test('describeIndex incluye las opciones relevantes', () => {
   const text = describeIndex({
     name: 'userId_1_default_unique',

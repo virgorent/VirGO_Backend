@@ -341,6 +341,21 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Pendiente:** aprobar la enmienda v1.3.0 y los specs por PR; desplegar (T9907, T90204, T90304, T90403, T90504, T112); elegir el remitente de SES (`903` P-01); activar IAM Identity Center (T113–T115); decidir el gasto de Bedrock (`906` P-01).
 
+### 2026-11-13 · Auditoría live de Atlas para T1004
+
+- **Autor:** equipo + OpenCode (`qa`, `seguridad`)
+- **Módulo / tareas:** `010-contrato-datos` · T1004
+- **Qué se hizo:**
+  - Se validaron en modo solo lectura `virgo_dev` y `virgo` con `check_schema.py --live`; sin inicializadores, DDL, seeds ni CRUD.
+  - `virgo_dev`: 22 colecciones, 0 diferencias, salida 0.
+  - `virgo`: 2 colecciones presentes (`users`, `sessions`), 20 faltantes, 2 validadores diferentes, 4 índices faltantes y 26 diferencias, salida 1.
+  - TLS verificado con `tls=true`; sin `tlsInsecure` ni overrides de certificado/hostname.
+- **Evidencia:** [specs/010-contrato-datos/audit-live-atlas-2026-11-13.md](specs/010-contrato-datos/audit-live-atlas-2026-11-13.md); `check.md` y `task.md` actualizados.
+- **Decisiones:** T1004 queda verificado con la comparación live; no se reaplicó `VirGo-Database` `001`.
+- **Costo:** $0; no se crearon ni modificaron recursos, usuarios ni documentos.
+- **Aprendizaje:** `virgo` está incompleto frente al catálogo; cero diferencias en `virgo_dev` no cubre `validationLevel`, `validationAction` ni documentos.
+- **Pendiente:** T1005, T1006, T1007 y la autorización/ejecución del [plan de remediación de `virgo`](../VirGo-Database/docs/PLAN_REMEDIACION_VIRGO.md).
+
 ### 2026-11-13 · El plan Free de AWS no incluye CodeDeploy
 
 - **Autor:** Angelica + Claude Code (`devops-aws`)
@@ -378,7 +393,6 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Aprendizaje:** cuando OIDC falla, CloudTrail (`lookup-events` con `AssumeRoleWithWebIdentity`) muestra el `sub` real que envió GitHub; no hay que adivinarlo.
 - **Segundo y tercer intento desde GitHub:** OIDC ya funcionó (`AssumeRoleWithWebIdentity` OK), pero `sam deploy` falló dentro del runner: con `--template-file .aws-sam/build/template.yaml`, SAM busca `samconfig.toml` junto a la plantilla compilada. Se pasa la ruta absoluta (`$PWD/infra/samconfig.toml`).
 - Al reproducirlo con `--no-execute-changeset`, `virgo-cfn-exec` no podía usar la transformación de SAM (la transformación corre con el rol de servicio). Se agregó `cloudformation:CreateChangeSet` sobre `transform/Serverless-2016-10-31` y se actualizó `virgo-bootstrap`. Con eso el *change set* se creó con el rol de ejecución; se borró sin ejecutarlo para que el despliegue lo haga GitHub.
-
 ### 2026-11-14 · Borrado de cuenta para prueba cerrada
 
 - **Autor:** Rafael + OpenCode (`dev-dotnet`, `qa`, `seguridad`)
@@ -387,4 +401,3 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Qué se hizo:** `DELETE /api/v1/users/me` anonimiza la identidad, invalida la contraseña y revoca todas las sesiones activas. No cambia el schema de MongoDB.
 - **Evidencia:** build correcto; `AuthTests` 6/6, `MobileContractTests` 11/11 e `InputSecurityTests` 19/19.
 - **Pendiente:** PR, revisión humana, humo HTTPS y entrega del contrato a Móvil.
-

@@ -4,10 +4,6 @@ Description: >-
   execution role. Created once by a person; every later deploy runs from GitHub Actions.
 
 Parameters:
-  GitHubRepository:
-    Type: String
-    Default: virgorent/VirGO_Backend
-    Description: GitHub repository allowed to deploy the API.
   GitHubRepositoryWithIds:
     Type: String
     Default: virgorent@352551934/VirGO_Backend@1445981483
@@ -58,9 +54,7 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub:
-                  - !Sub repo:${GitHubRepositoryWithIds}:environment:production
-                  - !Sub repo:${GitHubRepository}:environment:production
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubRepositoryWithIds}:environment:production
       Policies:
         - PolicyName: VirGoDeployment
           PolicyDocument:

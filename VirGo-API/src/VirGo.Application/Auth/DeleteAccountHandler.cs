@@ -19,6 +19,10 @@ public sealed class DeleteAccountHandler(
         var now = clock.UtcNow;
         var anonymizedEmail = $"deleted+{user.Id}@invalid.virgo";
         var anonymizedPassword = passwordHasher.Hash(user, Guid.NewGuid().ToString("N"));
+
+        // Revoke sessions before changing the account so a partial failure cannot leave an anonymized account authenticated.
+        await sessions.DeleteAllAsync(user.Id, cancellationToken);
+
         var anonymized = await users.AnonymizeAsync(
             user.Id,
             anonymizedEmail,
@@ -32,7 +36,6 @@ public sealed class DeleteAccountHandler(
             return false;
         }
 
-        await sessions.DeleteAllAsync(user.Id, cancellationToken);
         return true;
     }
 }
