@@ -69,6 +69,7 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
 
     [Theory]
     [InlineData("/api/v1/users/me", "GET")]
+    [InlineData("/api/v1/users/me", "DELETE")]
     [InlineData("/api/v1/auth/logout", "POST")]
     [InlineData("/api/v1/quotes", "POST")]
     [InlineData("/api/v1/bookings", "POST")]

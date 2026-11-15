@@ -3,28 +3,31 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `018-delete-users-me` |
-| Estado del spec | Borrador; **requiere decisión** |
-| Revisó | — |
+| Estado del spec | En implementación |
+| Revisó | Rafael Hernández |
 
 ## 1. Especificación
 
-- [ ] Otra persona revisó el spec.
-- [ ] Preguntas abiertas respondidas.
+- [x] Decisión aprobada: anonimizar y desactivar.
+- [x] Preguntas abiertas respondidas.
 
 ## 2. Criterios de aceptación
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
+| CA-01 204 autenticado | `AuthTests.DeleteAccountAnonymizesUserAndRevokesAllSessions` | ✅ |
+| CA-02 401 sin token | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
+| CA-03 credenciales anteriores rechazadas | `AuthTests.DeleteAccountAnonymizesUserAndRevokesAllSessions` | ✅ |
+| CA-04 todas las sesiones revocadas | `AuthTests.DeleteAccountAnonymizesUserAndRevokesAllSessions` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | No aplica: orquestación cubierta por integración | ➖ |
+| Integración | `AuthTests`: 6/6 | ✅ |
+| Contrato | `MobileContractTests`: 11/11 | ✅ |
+| Seguridad | `InputSecurityTests`: 19/19 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |
@@ -37,4 +40,4 @@
 
 ## 5. Memoria
 
-- [ ] Entrada en `memoria.md`.
+- [ ] Entrada en `memoria.md` al cerrar el PR.

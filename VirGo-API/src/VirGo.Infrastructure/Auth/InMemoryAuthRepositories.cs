@@ -68,6 +68,39 @@ public sealed class InMemoryUserRepository : IUserRepository
         return Task.CompletedTask;
     }
 
+    public Task<bool> AnonymizeAsync(
+        string userId,
+        string email,
+        string phone,
+        string passwordHash,
+        DateTime now,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var current = users.Values.FirstOrDefault(candidate => candidate.Id == userId);
+        if (current is null)
+        {
+            return Task.FromResult(false);
+        }
+
+        users.TryRemove(current.Email, out _);
+        users[email] = new User
+        {
+            Id = current.Id,
+            Name = "Cuenta eliminada",
+            Email = email,
+            Phone = phone,
+            PasswordHash = passwordHash,
+            Role = current.Role,
+            IsVerified = false,
+            FailedLoginCount = 0,
+            UnreadNotices = 0,
+            CreatedAt = current.CreatedAt,
+            UpdatedAt = now
+        };
+        return Task.FromResult(true);
+    }
+
     public Task<User?> RecordFailedLoginAsync(
         string userId,
         DateTime now,
@@ -147,5 +180,16 @@ public sealed class InMemorySessionRepository : ISessionRepository
         }
 
         return Task.FromResult(sessions.TryRemove(sessionId, out _));
+    }
+
+    public Task DeleteAllAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        foreach (var session in sessions.Values.Where(session => session.UserId == userId))
+        {
+            sessions.TryRemove(session.Id, out _);
+        }
+
+        return Task.CompletedTask;
     }
 }

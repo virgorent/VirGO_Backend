@@ -8,7 +8,9 @@ namespace VirGo.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/users")]
-public sealed class UsersController(IUserRepository users) : ControllerBase
+public sealed class UsersController(
+    IUserRepository users,
+    DeleteAccountHandler deleteAccountHandler) : ControllerBase
 {
     [HttpGet("me")]
     [Authorize]
@@ -32,6 +34,20 @@ public sealed class UsersController(IUserRepository users) : ControllerBase
                 role = user.Role.ToString().ToLowerInvariant(),
                 isVerified = user.IsVerified
             });
+    }
+
+    [HttpDelete("me")]
+    [Authorize]
+    public async Task<IActionResult> DeleteMe(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue("sub");
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        await deleteAccountHandler.HandleAsync(userId, cancellationToken);
+        return NoContent();
     }
 
     [HttpGet("{id}/public")]
