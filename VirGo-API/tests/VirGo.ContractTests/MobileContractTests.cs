@@ -15,6 +15,7 @@ public sealed class MobileContractTests(ContractApiFactory factory) : IClassFixt
     [InlineData("/api/v1/auth/logout", "post")]
     [InlineData("/api/v1/users/me", "get")]
     [InlineData("/api/v1/users/me", "delete")]
+    [InlineData("/api/v1/users/{id}/public", "get")]
     [InlineData("/api/v1/venues", "get")]
     [InlineData("/api/v1/quotes", "post")]
     [InlineData("/api/v1/bookings", "post")]
