@@ -5,15 +5,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.1.0" />
-    <PackageReference Include="AWSSDK.SQS" Version="4.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
+    <PackageReference Include="AWSSDK.SimpleEmailV2" Version="4.1.0.2" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.15" />
     <PackageReference Include="Scrutor" Version="6.1.0" />
-    <PackageReference Include="MongoDB.Driver" Version="3.13.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+    <PackageReference Include="MongoDB.Driver" Version="3.14.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
   </ItemGroup>
 
   <PropertyGroup>
