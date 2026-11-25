@@ -473,6 +473,22 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task ClientCanReadBookingQueries()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var list = await client.GetAsync("/api/v1/bookings");
+        using var listBody = JsonDocument.Parse(await list.Content.ReadAsStringAsync());
+        using var missingFolio = await client.GetAsync("/api/v1/bookings/by-folio/VG-2099-9999");
+
+        Assert.Equal(HttpStatusCode.OK, list.StatusCode);
+        Assert.True(listBody.RootElement.TryGetProperty("data", out _));
+        Assert.Equal(HttpStatusCode.NotFound, missingFolio.StatusCode);
+    }
+
     private static async Task<string> LoginAsync(HttpClient client)
     {
         using var response = await client.PostAsJsonAsync(
