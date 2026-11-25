@@ -401,3 +401,70 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Qué se hizo:** `DELETE /api/v1/users/me` anonimiza la identidad, invalida la contraseña y revoca todas las sesiones activas. No cambia el schema de MongoDB.
 - **Evidencia:** build correcto; `AuthTests` 6/6, `MobileContractTests` 11/11 e `InputSecurityTests` 19/19.
 - **Pendiente:** PR, revisión humana, humo HTTPS y entrega del contrato a Móvil.
+
+### 2026-11-15 · Perfil, contraseña y readiness
+
+- **Autor:** equipo + OpenCode (`dev-dotnet`, `qa`, `seguridad`)
+- **Módulo / tareas:** `015` (T1501), `016` (T1601), `024` (T2401), `025` (T2501), `026` (T2601), `027` (T2701), `031` (T3101), `034` (T3401), `035` (T3501), `036` (T3601), `037` (T3701, T3702), `038` (T3801), `039` (T3901), `040` (T4001), `041` (T4101), `043` (T4301), `044` (T4401), `045` (T4501), `046` (T4601), `048` (T4801), `049` (T4901), `050` (T5001), `051` (T5101), `052` (T5201), `053` (T5301), `054` (T5401), `055` (T5501), `090` (T9001), `091` (T9101), `092` (T9201), `093` (T9301), `096` (T9601), `097` (T9701, T9702)
+- **Qué se hizo:** se implementaron `PATCH /api/v1/users/me`, `PATCH /api/v1/users/me/password`, `GET /api/v1/venues/{id}`, `GET /api/v1/venues/mine`, `POST /api/v1/venues`, `PATCH /api/v1/venues/{id}`, `GET /api/v1/venues/{id}/availability`, `GET /api/v1/notices`, `PATCH /api/v1/notices/{id}/read`, `POST /api/v1/notices/read-all`, `GET /api/v1/assistant/messages`, `POST /api/v1/contact`, `GET /api/v1/providers`, `GET /api/v1/providers/{id}`, `GET /api/v1/providers/me`, `POST /api/v1/providers`, `PATCH /api/v1/providers/me`, `GET /api/v1/providers/me/gigs`, `POST /api/v1/providers/me/gigs`, `PATCH /api/v1/providers/me/gigs/{id}`, `GET /api/v1/events`, `POST /api/v1/events`, `GET /api/v1/events/{id}` y `GET /api/v1/health/ready`. El catálogo y detalle de proveedores filtran publicaciones por categoría, zona, precio, rating y texto, con cursor y límite, y no exponen campos internos; el perfil propio requiere el rol `provider`, se resuelve por `sub` y puede mostrar `status`; la creación genera perfiles `draft`, rechaza duplicados con 409, valida límites y actualiza `users.providerId`; la edición conserva `status` y rating; la agenda filtra gigs por el proveedor autenticado y ordena por fecha y hora; la creación y edición de gigs validan fechas, horarios, importes, UUIDs y rechazan empalmes con 409; eventos filtra por `ownerId` o `collaborators.userId`, su detalle aplica el mismo ownership, y su creación valida datos base y guarda snapshot de salones publicados. Contacto valida nombre, correo y mensaje, persiste el mensaje con `userId` opcional y queda protegido por el rate limiter global. El historial del asistente filtra por usuario autenticado, respeta `purgeAt`, ordena por fecha y limita a 50 mensajes. El marcado individual y masivo de avisos filtra por usuario autenticado, son idempotentes y no revelan avisos ajenos. La disponibilidad valida rangos `from`/`to`, confirma que el salón esté publicado y no expone notas ni `bookingId`. La creación y actualización de venues validan contra el esquema, restringen el rol `owner`, aplican ownership por `sub`, preservan campos controlados por servidor e invalidan caché. El readiness verifica MongoDB cuando la persistencia es Atlas; `/health` se conserva como liveness.
+- **Evidencia:** build Release sin advertencias; integración 80/80, contrato pendiente por bloqueo intermitente de Control de aplicaciones, seguridad 38/38 y unitarias 35/35.
+- **Pendiente:** pruebas de repositorio con Testcontainers, revisión humana, PR, despliegue y humo HTTPS.
+
+### 2026-11-16 · Colaboradores y consulta de cotizaciones
+
+- **Autor:** equipo + OpenCode (`dev-dotnet`, `qa`, `seguridad`)
+- **Módulo / tareas:** `056` a `061`
+- **Qué se hizo:** se implementaron `GET/POST /api/v1/events/{id}/collaborators`, `PATCH/DELETE /api/v1/events/{id}/collaborators/{userId}`, `GET /api/v1/quotes` y `GET /api/v1/quotes/{id}`. Los colaboradores usan el evento embebido, validan UUID, nombre, correo y permiso `view`/`edit`, limitan la administración al dueño y filtran la lectura por usuario o colaboración. Las cotizaciones filtran por cliente o por salones propiedad del proveedor autenticado, tanto en InMemory como en MongoDB.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.
+
+### 2026-11-16 · Envío de mensajes al asistente
+
+- **Módulo / tarea:** `094`
+- **Qué se hizo:** se implementó `POST /api/v1/assistant/messages`, validando texto de hasta 4000 caracteres, aislando el historial por usuario y fijando purga a 30 días. Se añadió persistencia InMemory y MongoDB.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.
+- **Pendiente:** `095` continúa bloqueada por decisión previa.
+
+### 2026-11-16 · Estabilización para Móvil
+
+- **Qué se hizo:** se corrigieron los nombres `{userId}` de las rutas OpenAPI de colaboradores, la creación de gigs para validar entradas antes de resolver el perfil, y la respuesta `201` de creación de gigs. Se ajustaron pruebas de integración para crear su perfil proveedor y no depender de estado compartido.
+- **Evidencia:** suite completa verde: Database `96/96`, Unit `35/35`, Contract `85/85`, Performance `3/3`, Security `48/48`, Integration `95/95`; build Release `0/0`.
+- **Pendiente:** separar cambios en PRs pequeños después de que el equipo apruebe los specs; pagos/tarjetas, chat y asistente siguen fuera de producción.
+
+### 2026-11-16 · Bloqueos de disponibilidad
+
+- **Módulo / tareas:** `032` y `033`
+- **Qué se hizo:** se implementaron creación y eliminación de bloqueos manuales de fechas para salones. Se valida propiedad, fecha ISO, motivo, nota de máximo 200 caracteres y conflictos con fechas ya ocupadas; se evita eliminar fechas reservadas.
+- **Persistencia:** soporte InMemory y MongoDB con identificadores de bloqueo.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.
+- **Pendiente:** `062` a `065` (respuesta, aceptación, rechazo y expiración de cotizaciones), luego reservas `066` a `071`.
+
+### 2026-11-16 · Cotizaciones, reservas y reseñas
+
+- **Módulo / tareas:** `062` a `075`
+- **Qué se hizo:** se añadieron las transiciones `answered`, `accepted`, `rejected` y `expired` de cotizaciones, con autorización por rol y respuesta persistida. Se implementaron consulta de reservas por usuario/proveedor, detalle, folio, cancelación, pagos idempotentes y listado de pagos. Se agregaron reseñas públicas para salones/proveedores, creación única por persona/destino y respuestas del propietario.
+- **Persistencia:** soporte InMemory y MongoDB para cotizaciones, reservas/pagos y reseñas.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.
+- **Pendiente:** `076–077` permanecen bloqueadas por decisión previa; siguiente bloque no bloqueado: `078–085` (estadísticas, favoritos y conversaciones).
+
+### 2026-11-16 · Estadísticas y favoritos
+
+- **Módulo / tareas:** `078` a `083`
+- **Qué se hizo:** se añadieron estadísticas de salones, proveedores y resumen general, restringidas al propietario. Se implementaron favoritos para salones y proveedores con snapshots de nombre, foto y rating, unicidad por usuario/destino, listado y eliminación.
+- **Persistencia:** repositorios InMemory y MongoDB con registro en DI.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.
+- **Pendiente:** `084–089` conversaciones y mensajes; `076–077` siguen bloqueadas.
+
+### 2026-11-16 · Conversaciones y mensajes
+
+- **Módulo / tareas:** `084` a `089`
+- **Qué se hizo:** se implementaron conversaciones por cliente/destino, creación única por cliente y destino, detalle, listado de mensajes, envío de mensajes de hasta 2000 caracteres y marcado de mensajes entrantes como leídos. Todas las operaciones verifican que el usuario sea cliente o destino de la conversación.
+- **Persistencia:** repositorios InMemory y MongoDB registrados en DI.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.
+- **Pendiente:** `076–077` siguen bloqueadas; siguiente bloque operativo: avisos ya implementados, y revisión de grupos restantes `098–099`/infraestructura.
+
+### 2026-11-16 · Tarjetas de pago
+
+- **Módulo / tareas:** `019` a `023`
+- **Qué se hizo:** se implementaron listado, alta, edición, eliminación y selección de tarjeta predeterminada. La respuesta pública nunca serializa `gatewayToken`; cada usuario solo puede operar sus propias tarjetas y se mantiene una sola predeterminada.
+- **Persistencia:** repositorios InMemory y MongoDB registrados en DI.
+- **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.

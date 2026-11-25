@@ -5,7 +5,7 @@
 | Módulo | `093-get-assistant-messages` |
 | Endpoint | `GET /api/v1/assistant/messages` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Asistente IA |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.15 |
@@ -23,6 +23,8 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.15. Los errores siguen el Art. 
 ## 2. Reglas
 
 - El historial se borra solo a los 30 días.
+- Los mensajes con `purgeAt` vencido no se devuelven aunque el TTL de Mongo aún no los haya eliminado.
+- La respuesta contiene `id`, `role`, `text` y `createdAt`; no expone `userId` ni `purgeAt`.
 
 ## 3. Datos
 

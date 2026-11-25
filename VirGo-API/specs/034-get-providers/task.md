@@ -5,7 +5,7 @@
 | Módulo | `034-get-providers` |
 | Endpoint | `GET /api/v1/providers` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Catálogo de proveedores |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -16,6 +16,6 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T3401 | Implementar `GET /api/v1/providers` | `000`, `010` | `dev-dotnet` | Prueba de integración: 200 (CA-01) | ⏳ |
+| T3401 | Implementar `GET /api/v1/providers` | `000`, `010` | `dev-dotnet` | Prueba de integración: 200 (CA-01) | ✅ |
 | T3402 | Pruebas de repositorio, integración y seguridad | T3401 | `qa` + `seguridad` | Todos los CA en verde | ⏳ |
 | T3403 | PR, despliegue, humo y entrega del contrato a Móvil | T3402 | `devops-aws` + `arquitecto` | Humo por HTTPS; `check.md` completo | ⏳ |

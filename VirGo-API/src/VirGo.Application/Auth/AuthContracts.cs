@@ -34,3 +34,7 @@ public sealed record RegisterOutcome(User? User, RegisterFailure? Failure)
 {
     public bool IsSuccess => User is not null;
 }
+
+public sealed record UpdateProfileCommand(string? Name, string? Phone, string? City, int? DefaultGuests);
+
+public sealed record ChangePasswordCommand(string CurrentPassword, string NewPassword);

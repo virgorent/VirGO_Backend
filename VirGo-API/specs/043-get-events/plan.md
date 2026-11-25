@@ -5,7 +5,7 @@
 | Módulo | `043-get-events` |
 | Endpoint | `GET /api/v1/events` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Eventos |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -22,7 +22,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.7. Los errores siguen el Art. I
 
 ## 2. Reglas
 
-- Sin reglas adicionales a las del Art. IV.
+- La búsqueda usa `ownerId` o `collaborators.userId` del `sub` autenticado y ordena por fecha.
 
 ## 3. Datos
 

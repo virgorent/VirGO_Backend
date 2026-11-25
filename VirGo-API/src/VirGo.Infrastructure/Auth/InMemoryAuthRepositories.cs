@@ -28,6 +28,7 @@ public sealed class InMemoryUserRepository : IUserRepository
             IsVerified = false,
             FailedLoginCount = 0,
             UnreadNotices = 0,
+            DefaultGuests = 0,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -66,6 +67,20 @@ public sealed class InMemoryUserRepository : IUserRepository
         cancellationToken.ThrowIfCancellationRequested();
         users[user.Email] = user;
         return Task.CompletedTask;
+    }
+
+    public Task<bool> SetProviderIdAsync(string userId, string providerId, DateTime updatedAt, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var user = users.Values.FirstOrDefault(candidate => candidate.Id == userId);
+        if (user is null)
+        {
+            return Task.FromResult(false);
+        }
+
+        user.ProviderId = providerId;
+        user.UpdatedAt = updatedAt;
+        return Task.FromResult(true);
     }
 
     public Task<bool> AnonymizeAsync(

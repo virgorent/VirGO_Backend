@@ -5,7 +5,7 @@
 | Módulo | `045-get-events-id` |
 | Endpoint | `GET /api/v1/events/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Eventos |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -21,6 +21,7 @@ Permitir crear y planear un evento en un solo lugar. Este spec cubre solo `GET /
 | ID | Requerimiento |
 |---|---|
 | RF-01 | Eventos: detalle con permisos. |
+| RF-02 | El detalle solo se devuelve cuando el usuario es propietario o colaborador. |
 
 ## 3. Requerimientos no funcionales
 

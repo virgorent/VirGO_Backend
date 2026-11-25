@@ -10,3 +10,5 @@ public sealed record CreateQuoteRequest(
     string? Message);
 
 public sealed record QuoteTargetRequest(string? Type, string? Id);
+
+public sealed record QuoteResponseRequest(decimal? Total, decimal? Deposit, string? Message);

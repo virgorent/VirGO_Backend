@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `036-get-providers-me` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,16 +15,16 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
+| CA-01 | `VerticalSliceTests.ProviderCanReadOwnProfile` | ✅ |
+| CA-02 | `InputSecurityTests.ProviderOwnProfileRequiresAuthentication` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 | ✅ |
+| Integración | `VerticalSliceTests`: incluido en 78/78 | ✅ |
+| Seguridad | `InputSecurityTests`: incluido en 37/37 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |

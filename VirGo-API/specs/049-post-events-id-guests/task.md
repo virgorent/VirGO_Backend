@@ -5,7 +5,7 @@
 | Módulo | `049-post-events-id-guests` |
 | Endpoint | `POST /api/v1/events/:id/guests` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Invitados |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -16,6 +16,6 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T4901 | Implementar `POST /api/v1/events/:id/guests` | `000`, `010` | `dev-dotnet` | Prueba de integración: 201 (CA-01) | ⏳ |
+| T4901 | Implementar `POST /api/v1/events/:id/guests` | `000`, `010` | `dev-dotnet` | Prueba de integración: 201 (CA-01) | ✅ |
 | T4902 | Pruebas de repositorio, integración y seguridad | T4901 | `qa` + `seguridad` | Todos los CA en verde | ⏳ |
 | T4903 | PR, despliegue, humo y entrega del contrato a Móvil | T4902 | `devops-aws` + `arquitecto` | Humo por HTTPS; `check.md` completo | ⏳ |

@@ -5,7 +5,7 @@
 | Módulo | `048-get-events-id-guests` |
 | Endpoint | `GET /api/v1/events/:id/guests` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Invitados |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -22,6 +22,7 @@ Administrar los invitados de un evento. Este spec cubre solo `GET /api/v1/events
 |---|---|
 | RF-01 | Invitados: listar invitados. |
 | RF-02 | Requiere permiso sobre el evento: `view` para leer y `edit` para escribir. |
+| RF-03 | Los invitados se filtran por el `eventId` autorizado y no se exponen a usuarios ajenos. |
 
 ## 3. Requerimientos no funcionales
 

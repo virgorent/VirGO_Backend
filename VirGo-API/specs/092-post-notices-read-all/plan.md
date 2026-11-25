@@ -5,7 +5,7 @@
 | Módulo | `092-post-notices-read-all` |
 | Endpoint | `POST /api/v1/notices/read-all` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Notificaciones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.14 |
@@ -23,6 +23,8 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.14. Los errores siguen el Art. 
 ## 2. Reglas
 
 - Sin reglas adicionales a las del Art. IV.
+- La respuesta `200` contiene `{ "updatedCount": 0 }` o la cantidad de avisos no leídos actualizados.
+- La actualización filtra siempre por `userId` y `read: false`.
 
 ## 3. Datos
 

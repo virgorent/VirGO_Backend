@@ -5,7 +5,7 @@
 | Módulo | `093-get-assistant-messages` |
 | Endpoint | `GET /api/v1/assistant/messages` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Asistente IA |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.15 |
@@ -22,6 +22,7 @@ Conversar con el asistente de planeación. Este spec cubre solo `GET /api/v1/ass
 |---|---|
 | RF-01 | Asistente IA: historial propio. |
 | RF-02 | El historial se borra solo a los 30 días. |
+| RF-03 | Solo se devuelve el historial del usuario autenticado, ordenado del más reciente al más antiguo y limitado a 50 mensajes. |
 
 ## 3. Requerimientos no funcionales
 

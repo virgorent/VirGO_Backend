@@ -5,7 +5,7 @@
 | Módulo | `015-patch-users-me` |
 | Endpoint | `PATCH /api/v1/users/me` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil de usuario |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.3 |

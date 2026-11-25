@@ -5,7 +5,7 @@
 | Módulo | `035-get-providers-id` |
 | Endpoint | `GET /api/v1/providers/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Catálogo de proveedores |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -22,7 +22,8 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.6. Los errores siguen el Art. I
 
 ## 2. Reglas
 
-- Sin reglas adicionales a las del Art. IV.
+- El `id` debe ser un UUID; un valor inválido se trata como recurso inexistente.
+- La consulta filtra por `_id` y `status=published` en MongoDB.
 
 ## 3. Datos
 

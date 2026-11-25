@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `024-get-venues-id` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,15 +15,16 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
+| CA-01 | `VerticalSliceTests.PublicVenueDetailHidesPrice` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
 | Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Integración | `VerticalSliceTests`: 57/57 | ✅ |
+| Contrato | `MobileContractTests`: 17/17 | ✅ |
+| Seguridad | `InputSecurityTests`: 28/28 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |

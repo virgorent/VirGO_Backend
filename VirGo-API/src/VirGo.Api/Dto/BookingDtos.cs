@@ -7,3 +7,5 @@ public sealed record CreateBookingRequest(
     string? Date,
     int Hours,
     decimal? Deposit);
+
+public sealed record CreatePaymentRequest(decimal? Amount);

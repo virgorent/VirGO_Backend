@@ -4,6 +4,7 @@ using System.Text.Json;
 using Amazon.Lambda.AspNetCoreServer.Hosting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
@@ -140,6 +141,24 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
+app.MapGet("/api/v1/health/ready", async (
+    HealthCheckService healthChecks,
+    CancellationToken cancellationToken) =>
+{
+    var report = await healthChecks.CheckHealthAsync(
+        check => check.Tags.Contains("ready"),
+        cancellationToken);
+    var payload = new
+    {
+        status = report.Status.ToString().ToLowerInvariant(),
+        checks = report.Entries.ToDictionary(
+            entry => entry.Key,
+            entry => entry.Value.Status.ToString().ToLowerInvariant())
+    };
+    return report.Status == HealthStatus.Healthy
+        ? Results.Ok(payload)
+        : Results.Json(payload, statusCode: StatusCodes.Status503ServiceUnavailable);
+});
 app.MapOpenApi();
 app.MapControllers();
 

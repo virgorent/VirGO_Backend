@@ -5,7 +5,7 @@
 | Módulo | `096-post-contact` |
 | Endpoint | `POST /api/v1/contact` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Contacto |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.16 |
@@ -23,6 +23,8 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.16. Los errores siguen el Art. 
 ## 2. Reglas
 
 - Tiene límite de solicitudes.
+- La respuesta `201` contiene el UUID generado del mensaje.
+- El límite se aplica mediante el rate limiter global por dirección IP.
 
 ## 3. Datos
 

@@ -74,6 +74,19 @@ public sealed class CacheTests
     }
 
     [Fact]
+    public async Task OwnedVenueListIsCachedPerOwner()
+    {
+        var inner = new CountingVenues();
+        var repository = new CachedVenueRepository(inner, Service(new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()))));
+
+        await repository.ListOwnedAsync("owner-1");
+        await repository.ListOwnedAsync("owner-1");
+        await repository.ListOwnedAsync("owner-2");
+
+        Assert.Equal(2, inner.OwnedCalls);
+    }
+
+    [Fact]
     public async Task MissingVenueIsCachedAsMissing()
     {
         var inner = new CountingVenues();
@@ -124,6 +137,7 @@ public sealed class CacheTests
     {
         public int ListCalls { get; private set; }
         public int FindCalls { get; private set; }
+        public int OwnedCalls { get; private set; }
         public Venue? Venue { get; init; }
 
         public Task<IReadOnlyList<Venue>> ListPublishedAsync(string? zone, string? category, CancellationToken cancellationToken = default)
@@ -137,6 +151,18 @@ public sealed class CacheTests
             FindCalls++;
             return Task.FromResult(Venue);
         }
+
+        public Task<IReadOnlyList<Venue>> ListOwnedAsync(string ownerId, CancellationToken cancellationToken = default)
+        {
+            OwnedCalls++;
+            return Task.FromResult<IReadOnlyList<Venue>>([]);
+        }
+
+        public Task<Venue> CreateAsync(CreateVenueCommand command, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Venue ?? Sample());
+
+        public Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Venue);
     }
 
     private sealed class BrokenCache(Exception? failure = null) : IDistributedCache

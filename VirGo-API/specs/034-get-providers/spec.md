@@ -5,7 +5,7 @@
 | Módulo | `034-get-providers` |
 | Endpoint | `GET /api/v1/providers` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Catálogo de proveedores |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -23,6 +23,7 @@ Permitir buscar y comparar proveedores publicados. Este spec cubre solo `GET /ap
 | RF-01 | Catálogo de proveedores: catálogo publicado. |
 | RF-02 | Filtros: `category`, `zone`, `minPrice`, `maxPrice`, `rating`, `q`, `cursor`, `limit`. |
 | RF-03 | La comparación (B18) se resuelve en la app. |
+| RF-04 | Solo se devuelven proveedores `published`; no se exponen `userId` ni `status`. |
 
 ## 3. Requerimientos no funcionales
 

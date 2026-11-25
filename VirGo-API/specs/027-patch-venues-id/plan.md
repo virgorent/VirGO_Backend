@@ -5,7 +5,7 @@
 | Módulo | `027-patch-venues-id` |
 | Endpoint | `PATCH /api/v1/venues/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -24,6 +24,8 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.5. Los errores siguen el Art. I
 
 - Solo el rol `owner` y solo sobre sus salones.
 - Ignora `rating`, `verified`, `createdAt` y `updatedAt` enviados por el cliente.
+- Actualiza solo los campos enviados; `updatedAt` lo genera el servidor.
+- La lista de zonas y categorías sigue `db/schema/venues.json`.
 
 ## 3. Datos
 

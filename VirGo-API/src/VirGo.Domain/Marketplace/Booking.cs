@@ -16,6 +16,16 @@ public sealed class Booking
     public required decimal Deposit { get; init; }
     public required string Folio { get; init; }
     public required string Status { get; init; }
+    public BookingPayment[] Payments { get; init; } = [];
     public required DateTime CreatedAt { get; init; }
     public required DateTime UpdatedAt { get; init; }
+}
+
+public sealed class BookingPayment
+{
+    public required string Id { get; init; }
+    public required string IdempotencyKey { get; init; }
+    public required decimal Amount { get; init; }
+    public required string Status { get; init; }
+    public required DateTime CreatedAt { get; init; }
 }

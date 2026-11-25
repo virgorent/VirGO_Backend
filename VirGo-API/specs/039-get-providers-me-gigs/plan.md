@@ -5,7 +5,7 @@
 | Módulo | `039-get-providers-me-gigs` |
 | Endpoint | `GET /api/v1/providers/me/gigs` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Agenda del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -23,6 +23,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.6. Los errores siguen el Art. I
 ## 2. Reglas
 
 - Solo sobre la agenda propia.
+- La consulta filtra `gigs.providerId` usando el perfil asociado al usuario autenticado y ordena por fecha y hora de inicio.
 
 ## 3. Datos
 

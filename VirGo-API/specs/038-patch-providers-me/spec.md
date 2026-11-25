@@ -5,7 +5,7 @@
 | Módulo | `038-patch-providers-me` |
 | Endpoint | `PATCH /api/v1/providers/me` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -22,6 +22,7 @@ Permitir que el proveedor publique y mantenga su perfil. Este spec cubre solo `P
 |---|---|
 | RF-01 | Perfil del proveedor: actualizar el perfil. |
 | RF-02 | Solo el rol `provider`. |
+| RF-03 | `status`, `rating` y `userId` permanecen controlados por servidor. |
 
 ## 3. Requerimientos no funcionales
 

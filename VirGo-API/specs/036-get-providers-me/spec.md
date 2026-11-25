@@ -5,7 +5,7 @@
 | Módulo | `036-get-providers-me` |
 | Endpoint | `GET /api/v1/providers/me` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -22,6 +22,7 @@ Permitir que el proveedor publique y mantenga su perfil. Este spec cubre solo `G
 |---|---|
 | RF-01 | Perfil del proveedor: perfil propio. |
 | RF-02 | Solo el rol `provider`. |
+| RF-03 | El perfil se resuelve por el `sub` autenticado y no expone `userId`. |
 
 ## 3. Requerimientos no funcionales
 

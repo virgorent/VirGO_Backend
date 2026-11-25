@@ -5,7 +5,7 @@
 | Módulo | `025-get-venues-mine` |
 | Endpoint | `GET /api/v1/venues/mine` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -23,6 +23,8 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.5. Los errores siguen el Art. I
 ## 2. Reglas
 
 - Solo el rol `owner` y solo sobre sus salones.
+- La respuesta incluye el estado del salón; el `ownerId` no se expone.
+- La consulta filtra por el `sub` del token y nunca acepta un propietario desde la URL o el cuerpo.
 
 ## 3. Datos
 

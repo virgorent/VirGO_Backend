@@ -18,6 +18,17 @@ public sealed class BaseApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task ReadinessReturnsOk()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync("/api/v1/health/ready");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
     public async Task OpenApiIsPublished()
     {
         using var client = factory.CreateClient();

@@ -5,7 +5,7 @@
 | Módulo | `097-get-health-ready` |
 | Endpoint | `GET /api/v1/health/ready` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Salud y operación |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.17 |
@@ -43,4 +43,4 @@ Aplican los del Art. IV (contrato), V (seguridad), VI.6 (longitudes) y VII (cost
 
 | # | Pregunta | Responsable |
 |---|---|---|
-| P-01 | `000` define `/health`; hay que decidir si se conserva o se reemplaza. | Equipo |
+| P-01 | Se conserva `/health` como liveness y se agrega `/api/v1/health/ready` como readiness con verificación de dependencias. | Equipo |

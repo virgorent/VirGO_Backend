@@ -5,7 +5,7 @@
 | Módulo | `051-delete-events-id-guests-guestid` |
 | Endpoint | `DELETE /api/v1/events/:id/guests/:guestId` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Invitados |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -22,6 +22,7 @@ Administrar los invitados de un evento. Este spec cubre solo `DELETE /api/v1/eve
 |---|---|
 | RF-01 | Invitados: eliminar un invitado. |
 | RF-02 | Requiere permiso sobre el evento: `view` para leer y `edit` para escribir. |
+| RF-03 | El borrado filtra simultáneamente por `eventId` y `guestId`. |
 
 ## 3. Requerimientos no funcionales
 

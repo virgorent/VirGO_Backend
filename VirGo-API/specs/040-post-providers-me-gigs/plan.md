@@ -5,7 +5,7 @@
 | Módulo | `040-post-providers-me-gigs` |
 | Endpoint | `POST /api/v1/providers/me/gigs` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Agenda del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -24,6 +24,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.6. Los errores siguen el Art. I
 
 - Solo sobre la agenda propia.
 - Avisa de empalmes en la semana (H74).
+- Los empalmes del mismo proveedor, fecha y rango horario responden 409.
 
 ## 3. Datos
 

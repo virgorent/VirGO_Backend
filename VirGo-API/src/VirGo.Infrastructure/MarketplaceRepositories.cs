@@ -9,40 +9,114 @@ namespace VirGo.Infrastructure;
 
 public sealed class InMemoryVenueRepository : IVenueRepository
 {
-    private readonly Venue venue = new()
-    {
-        Id = "11111111-1111-4111-8111-111111111111",
-        OwnerId = "22222222-2222-4222-8222-222222222222",
-        Name = "VirGo Demo Venue",
-        ShortName = "Demo Venue",
-        Description = "Venue de demostración para el flujo inicial de VirGo.",
-        Address = "Centro, Querétaro",
-        Zone = "Centro",
-        Capacity = 150,
-        BasePrice = 45000m,
-        PriceUnit = "day",
-        MinimumHours = 1,
-        Categories = ["Salon"],
-        Amenities = ["Estacionamiento"],
-        Photos = [],
-        Status = "published",
-        RatingAverage = 5m,
-        RatingCount = 1
-    };
+    private readonly List<Venue> venues =
+    [
+        new Venue
+        {
+            Id = "11111111-1111-4111-8111-111111111111",
+            OwnerId = "22222222-2222-4222-8222-222222222222",
+            Name = "VirGo Demo Venue",
+            ShortName = "Demo Venue",
+            Description = "Venue de demostración para el flujo inicial de VirGo.",
+            Address = "Centro, Querétaro",
+            Zone = "Centro",
+            Capacity = 150,
+            BasePrice = 45000m,
+            PriceUnit = "day",
+            MinimumHours = 1,
+            Categories = ["Salon"],
+            Amenities = ["Estacionamiento"],
+            Photos = [],
+            Status = "published",
+            RatingAverage = 5m,
+            RatingCount = 1
+        }
+    ];
 
     public Task<IReadOnlyList<Venue>> ListPublishedAsync(string? zone, string? category, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var matches = string.IsNullOrWhiteSpace(zone) || string.Equals(zone, venue.Zone, StringComparison.OrdinalIgnoreCase);
-        matches &= string.IsNullOrWhiteSpace(category) || venue.Categories.Contains(category, StringComparer.OrdinalIgnoreCase);
-        return Task.FromResult<IReadOnlyList<Venue>>(matches ? [venue] : []);
+        var result = venues.Where(venue =>
+            (string.IsNullOrWhiteSpace(zone) || string.Equals(zone, venue.Zone, StringComparison.OrdinalIgnoreCase))
+            && (string.IsNullOrWhiteSpace(category) || venue.Categories.Contains(category, StringComparer.OrdinalIgnoreCase))
+            && venue.Status == "published").ToArray();
+        return Task.FromResult<IReadOnlyList<Venue>>(result);
     }
 
     public Task<Venue?> FindPublishedAsync(string id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult<Venue?>(venue.Id == id ? venue : null);
+        return Task.FromResult<Venue?>(venues.FirstOrDefault(venue => venue.Id == id && venue.Status == "published"));
     }
+
+    public Task<IReadOnlyList<Venue>> ListOwnedAsync(string ownerId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<IReadOnlyList<Venue>>(venues.Where(venue => venue.OwnerId == ownerId).ToArray());
+    }
+
+    public Task<Venue> CreateAsync(CreateVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var venue = ToVenue(command, Guid.NewGuid().ToString("D"));
+        venues.Add(venue);
+        return Task.FromResult(venue);
+    }
+
+    public Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = venues.FindIndex(venue => venue.Id == command.VenueId && venue.OwnerId == command.OwnerId);
+        if (index < 0)
+        {
+            return Task.FromResult<Venue?>(null);
+        }
+
+        var current = venues[index];
+        var updated = new Venue
+        {
+            Id = current.Id,
+            OwnerId = current.OwnerId,
+            Name = command.Name ?? current.Name,
+            ShortName = command.ShortName ?? current.ShortName,
+            Description = command.Description ?? current.Description,
+            Address = command.Address ?? current.Address,
+            Zone = command.Zone ?? current.Zone,
+            Capacity = command.Capacity ?? current.Capacity,
+            BasePrice = command.BasePrice ?? current.BasePrice,
+            PriceUnit = command.PriceUnit ?? current.PriceUnit,
+            MinimumHours = command.MinimumHours ?? current.MinimumHours,
+            Categories = command.Categories ?? current.Categories,
+            Amenities = command.Amenities ?? current.Amenities,
+            Photos = command.Photos?.Select(photo => photo.Url).ToArray() ?? current.Photos,
+            Status = current.Status,
+            RatingAverage = current.RatingAverage,
+            RatingCount = current.RatingCount
+        };
+        venues[index] = updated;
+        return Task.FromResult<Venue?>(updated);
+    }
+
+    private static Venue ToVenue(CreateVenueCommand command, string id) => new()
+    {
+        Id = id,
+        OwnerId = command.OwnerId,
+        Name = command.Name,
+        ShortName = command.ShortName,
+        Description = command.Description,
+        Address = command.Address,
+        Zone = command.Zone,
+        Capacity = command.Capacity,
+        BasePrice = command.BasePrice,
+        PriceUnit = command.PriceUnit,
+        MinimumHours = command.MinimumHours,
+        Categories = command.Categories,
+        Amenities = command.Amenities,
+        Photos = command.Photos.Select(photo => photo.Url).ToArray(),
+        Status = "draft",
+        RatingAverage = 0m,
+        RatingCount = 0
+    };
 }
 
 public sealed class InMemoryQuoteRepository : IQuoteRepository, IQuoteExpiry
@@ -59,6 +133,43 @@ public sealed class InMemoryQuoteRepository : IQuoteRepository, IQuoteExpiry
         }
 
         return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<Quote>> ListVisibleAsync(string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            var visible = quotes.Where(quote => quote.ClientId == clientId || targetIds.Contains(quote.TargetId, StringComparer.Ordinal)).OrderByDescending(quote => quote.CreatedAt).Take(100).ToArray();
+            return Task.FromResult<IReadOnlyList<Quote>>(visible);
+        }
+    }
+
+    public Task<Quote?> FindVisibleAsync(string id, string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            return Task.FromResult(quotes.FirstOrDefault(quote => quote.Id == id && (quote.ClientId == clientId || targetIds.Contains(quote.TargetId, StringComparer.Ordinal))));
+        }
+    }
+
+    public Task<Quote?> UpdateAsync(Quote quote, string expectedStatus, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            var index = quotes.FindIndex(item => item.Id == quote.Id && item.Status == expectedStatus);
+            if (index < 0) return Task.FromResult<Quote?>(null);
+            quotes[index] = quote;
+            return Task.FromResult<Quote?>(quote);
+        }
+    }
+
+    public Task<Quote?> FindByIdAsync(string id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(quotes.FirstOrDefault(quote => quote.Id == id));
     }
 
     public IReadOnlyList<Quote> Snapshot()
@@ -95,6 +206,7 @@ public sealed class InMemoryQuoteRepository : IQuoteRepository, IQuoteExpiry
                         Guests = quote.Guests,
                         RequestedServices = quote.RequestedServices,
                         Message = quote.Message,
+                        Response = quote.Response,
                         Status = "expired",
                         CreatedAt = quote.CreatedAt,
                         UpdatedAt = now
@@ -114,6 +226,24 @@ public sealed class InMemoryBookingRepository : IBookingRepository
     private readonly Dictionary<int, int> folios = [];
     private readonly Dictionary<string, Booking> idempotentBookings = new(StringComparer.Ordinal);
     private readonly Lock gate = new();
+
+    public Task<IReadOnlyList<Booking>> ListVisibleAsync(string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult<IReadOnlyList<Booking>>(bookings.Where(booking => booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal)).OrderByDescending(booking => booking.CreatedAt).Take(100).ToArray());
+    }
+
+    public Task<Booking?> FindVisibleAsync(string id, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(bookings.FirstOrDefault(booking => booking.Id == id && (booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal))));
+    }
+
+    public Task<Booking?> FindByFolioVisibleAsync(string folio, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(bookings.FirstOrDefault(booking => booking.Folio == folio && (booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal))));
+    }
 
     public Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
     {
@@ -152,6 +282,40 @@ public sealed class InMemoryBookingRepository : IBookingRepository
         return Task.CompletedTask;
     }
 
+    public Task<Booking?> UpdateStatusAsync(string id, string userId, string status, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            var index = bookings.FindIndex(booking => booking.Id == id && booking.ClientId == userId && booking.Status != "cancelled");
+            if (index < 0) return Task.FromResult<Booking?>(null);
+            var current = bookings[index];
+            var updated = Copy(current, status, current.Payments);
+            bookings[index] = updated;
+            return Task.FromResult<Booking?>(updated);
+        }
+    }
+
+    public Task<Booking?> AddPaymentAsync(string id, string userId, IReadOnlyCollection<string> venueIds, BookingPayment payment, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            var index = bookings.FindIndex(booking => booking.Id == id && (booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal)));
+            if (index < 0) return Task.FromResult<Booking?>(null);
+            var current = bookings[index];
+            if (current.Payments.Any(existing => existing.IdempotencyKey == payment.IdempotencyKey)) return Task.FromResult<Booking?>(current);
+            var updated = Copy(current, "confirmed", [.. current.Payments, payment]);
+            bookings[index] = updated;
+            return Task.FromResult<Booking?>(updated);
+        }
+    }
+
+    private static Booking Copy(Booking booking, string status, BookingPayment[] payments) => new()
+    {
+        Id = booking.Id, ClientId = booking.ClientId, IdempotencyKey = booking.IdempotencyKey, ClientName = booking.ClientName, QuoteId = booking.QuoteId, EventId = booking.EventId, VenueId = booking.VenueId, VenueName = booking.VenueName, Date = booking.Date, Hours = booking.Hours, Total = booking.Total, Deposit = booking.Deposit, Folio = booking.Folio, Status = status, Payments = payments, CreatedAt = booking.CreatedAt, UpdatedAt = DateTime.UtcNow
+    };
+
     private static string Key(string clientId, string idempotencyKey) => $"{clientId}\u001f{idempotencyKey}";
 }
 
@@ -184,6 +348,115 @@ public sealed class MongoVenueRepository(IMongoDatabase database) : IVenueReposi
             Builders<BsonDocument>.Filter.Eq("_id", id),
             Builders<BsonDocument>.Filter.Eq("status", "published"));
         var document = await venues.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<IReadOnlyList<Venue>> ListOwnedAsync(string ownerId, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("ownerId", ownerId);
+        var documents = await venues.Find(filter).Limit(100).ToListAsync(cancellationToken);
+        return documents.Select(Map).ToArray();
+    }
+
+    public async Task<Venue> CreateAsync(CreateVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        var id = Guid.NewGuid().ToString("D");
+        var now = DateTime.UtcNow;
+        var document = new BsonDocument
+        {
+            ["_id"] = id,
+            ["ownerId"] = command.OwnerId,
+            ["name"] = command.Name,
+            ["shortName"] = command.ShortName,
+            ["description"] = command.Description,
+            ["address"] = command.Address,
+            ["zone"] = command.Zone,
+            ["location"] = new BsonDocument
+            {
+                ["type"] = "Point",
+                ["coordinates"] = new BsonArray(command.Coordinates.Select(value => new BsonDouble(value)))
+            },
+            ["capacity"] = command.Capacity,
+            ["price"] = new BsonDocument
+            {
+                ["base"] = new BsonDecimal128(command.BasePrice),
+                ["unit"] = command.PriceUnit,
+                ["minHours"] = command.MinimumHours
+            },
+            ["services"] = new BsonArray(command.Services.Select(service => new BsonDocument
+            {
+                ["name"] = service.Name,
+                ["included"] = service.Included,
+                ["price"] = new BsonDecimal128(service.Price)
+            })),
+            ["photos"] = new BsonArray(command.Photos.Select(photo => new BsonDocument
+            {
+                ["url"] = photo.Url,
+                ["order"] = photo.Order
+            })),
+            ["categories"] = new BsonArray(command.Categories),
+            ["amenities"] = new BsonArray(command.Amenities),
+            ["rating"] = new BsonDocument { ["average"] = 0m, ["count"] = 0 },
+            ["verified"] = false,
+            ["status"] = "draft",
+            ["createdAt"] = new BsonDateTime(now),
+            ["updatedAt"] = new BsonDateTime(now)
+        };
+
+        await venues.InsertOneAsync(document, cancellationToken: cancellationToken);
+        return Map(document);
+    }
+
+    public async Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        var updates = new List<UpdateDefinition<BsonDocument>>();
+        var updateBuilder = Builders<BsonDocument>.Update;
+        if (command.Name is not null) updates.Add(updateBuilder.Set("name", command.Name));
+        if (command.ShortName is not null) updates.Add(updateBuilder.Set("shortName", command.ShortName));
+        if (command.Description is not null) updates.Add(updateBuilder.Set("description", command.Description));
+        if (command.Address is not null) updates.Add(updateBuilder.Set("address", command.Address));
+        if (command.Zone is not null) updates.Add(updateBuilder.Set("zone", command.Zone));
+        if (command.Coordinates is not null)
+        {
+            updates.Add(updateBuilder.Set("location", new BsonDocument
+            {
+                ["type"] = "Point",
+                ["coordinates"] = new BsonArray(command.Coordinates.Select(value => new BsonDouble(value)))
+            }));
+        }
+        if (command.Capacity is not null) updates.Add(updateBuilder.Set("capacity", command.Capacity.Value));
+        if (command.BasePrice is not null) updates.Add(updateBuilder.Set("price.base", new BsonDecimal128(command.BasePrice.Value)));
+        if (command.PriceUnit is not null) updates.Add(updateBuilder.Set("price.unit", command.PriceUnit));
+        if (command.MinimumHours is not null) updates.Add(updateBuilder.Set("price.minHours", command.MinimumHours.Value));
+        if (command.Services is not null)
+        {
+            updates.Add(updateBuilder.Set("services", new BsonArray(command.Services.Select(service => new BsonDocument
+            {
+                ["name"] = service.Name,
+                ["included"] = service.Included,
+                ["price"] = new BsonDecimal128(service.Price)
+            }))));
+        }
+        if (command.Photos is not null)
+        {
+            updates.Add(updateBuilder.Set("photos", new BsonArray(command.Photos.Select(photo => new BsonDocument
+            {
+                ["url"] = photo.Url,
+                ["order"] = photo.Order
+            }))));
+        }
+        if (command.Categories is not null) updates.Add(updateBuilder.Set("categories", new BsonArray(command.Categories)));
+        if (command.Amenities is not null) updates.Add(updateBuilder.Set("amenities", new BsonArray(command.Amenities)));
+        updates.Add(updateBuilder.Set("updatedAt", new BsonDateTime(DateTime.UtcNow)));
+
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("_id", command.VenueId),
+            Builders<BsonDocument>.Filter.Eq("ownerId", command.OwnerId));
+        var document = await venues.FindOneAndUpdateAsync(
+            filter,
+            updateBuilder.Combine(updates),
+            new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After },
+            cancellationToken);
         return document is null ? null : Map(document);
     }
 
@@ -242,15 +515,122 @@ public sealed class MongoQuoteRepository(IMongoDatabase database) : IQuoteReposi
         {
             document["message"] = quote.Message;
         }
+        if (quote.Response is not null)
+        {
+            document["response"] = new BsonDocument
+            {
+                ["total"] = new BsonDecimal128(quote.Response.Total),
+                ["deposit"] = quote.Response.Deposit is null ? BsonNull.Value : new BsonDecimal128(quote.Response.Deposit.Value),
+                ["message"] = quote.Response.Message is null ? BsonNull.Value : quote.Response.Message
+            };
+        }
 
         return quotes.InsertOneAsync(document, cancellationToken: cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Quote>> ListVisibleAsync(string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        var filters = new List<FilterDefinition<BsonDocument>> { Builders<BsonDocument>.Filter.Eq("clientId", clientId) };
+        if (targetIds.Count > 0) filters.Add(Builders<BsonDocument>.Filter.In("target.id", targetIds));
+        var documentFilter = Builders<BsonDocument>.Filter.Or(filters);
+        var documents = await quotes.Find(documentFilter).SortByDescending(document => document["createdAt"]).Limit(100).ToListAsync(cancellationToken);
+        return documents.Select(Map).ToArray();
+    }
+
+    public async Task<Quote?> FindVisibleAsync(string id, string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", clientId);
+        if (targetIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("target.id", targetIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), visibility);
+        var document = await quotes.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Quote?> UpdateAsync(Quote quote, string expectedStatus, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", quote.Id), Builders<BsonDocument>.Filter.Eq("status", expectedStatus));
+        var update = Builders<BsonDocument>.Update.Set("status", quote.Status).Set("updatedAt", new BsonDateTime(quote.UpdatedAt));
+        if (quote.Response is not null)
+        {
+            update = update.Set("response", new BsonDocument
+            {
+                ["total"] = new BsonDecimal128(quote.Response.Total),
+                ["deposit"] = quote.Response.Deposit is null ? BsonNull.Value : new BsonDecimal128(quote.Response.Deposit.Value),
+                ["message"] = quote.Response.Message is null ? BsonNull.Value : quote.Response.Message
+            });
+        }
+        var result = await quotes.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+        return result.ModifiedCount == 0 ? null : quote;
+    }
+
+    public async Task<Quote?> FindByIdAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var document = await quotes.Find(Builders<BsonDocument>.Filter.Eq("_id", id)).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    private static Quote Map(BsonDocument document)
+    {
+        var target = document.GetValue("target", new BsonDocument()).AsBsonDocument;
+        return new Quote
+        {
+            Id = document.GetValue("_id").AsString,
+            ClientId = document.GetValue("clientId").AsString,
+            ClientName = document.GetValue("clientName", "").AsString,
+            TargetType = target.GetValue("type", "venue").AsString,
+            TargetId = target.GetValue("id", "").AsString,
+            TargetName = target.GetValue("name", "").AsString,
+            EventId = document.TryGetValue("eventId", out var eventId) ? eventId.AsString : null,
+            EventType = document.GetValue("eventType", "Otro").AsString,
+            EventDate = document.GetValue("eventDate", "").AsString,
+            Guests = document.GetValue("guests", 0).ToInt32(),
+            RequestedServices = document.GetValue("requestedServices", new BsonArray()).AsBsonArray.Select(value => value.AsString).ToArray(),
+            Message = document.TryGetValue("message", out var message) ? message.AsString : null,
+            Response = document.TryGetValue("response", out var responseValue) && responseValue.IsBsonDocument ? MapResponse(responseValue.AsBsonDocument) : null,
+            Status = document.GetValue("status", "sent").AsString,
+            CreatedAt = document.GetValue("createdAt").ToUniversalTime(),
+            UpdatedAt = document.GetValue("updatedAt").ToUniversalTime()
+        };
+    }
+
+    private static QuoteResponse MapResponse(BsonDocument document) => new()
+    {
+        Total = document.GetValue("total", 0m).ToDecimal(),
+        Deposit = document.TryGetValue("deposit", out var deposit) && !deposit.IsBsonNull ? deposit.ToDecimal() : null,
+        Message = document.TryGetValue("message", out var message) && !message.IsBsonNull ? message.AsString : null
+    };
 }
 
 public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRepository
 {
     private readonly IMongoCollection<BsonDocument> bookings = database.GetCollection<BsonDocument>("bookings");
     private readonly IMongoCollection<BsonDocument> counters = database.GetCollection<BsonDocument>("counters");
+
+    public async Task<IReadOnlyList<Booking>> ListVisibleAsync(string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var filters = new List<FilterDefinition<BsonDocument>> { Builders<BsonDocument>.Filter.Eq("clientId", userId) };
+        if (venueIds.Count > 0) filters.Add(Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var documents = await bookings.Find(Builders<BsonDocument>.Filter.Or(filters)).SortByDescending(document => document["createdAt"]).Limit(100).ToListAsync(cancellationToken);
+        return documents.Select(Map).ToArray();
+    }
+
+    public async Task<Booking?> FindVisibleAsync(string id, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", userId);
+        if (venueIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), visibility);
+        var document = await bookings.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Booking?> FindByFolioVisibleAsync(string folio, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", userId);
+        if (venueIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("folio", folio), visibility);
+        var document = await bookings.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
 
     public async Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
     {
@@ -318,6 +698,26 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
         }
     }
 
+    public async Task<Booking?> UpdateStatusAsync(string id, string userId, string status, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), Builders<BsonDocument>.Filter.Eq("clientId", userId), Builders<BsonDocument>.Filter.Ne("status", "cancelled"));
+        var document = await bookings.FindOneAndUpdateAsync(filter, Builders<BsonDocument>.Update.Set("status", status).Set("updatedAt", new BsonDateTime(DateTime.UtcNow)), new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After }, cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Booking?> AddPaymentAsync(string id, string userId, IReadOnlyCollection<string> venueIds, BookingPayment payment, CancellationToken cancellationToken = default)
+    {
+        var current = await FindVisibleAsync(id, userId, venueIds, cancellationToken);
+        if (current is null) return null;
+        var existing = current.Payments.FirstOrDefault(item => item.IdempotencyKey == payment.IdempotencyKey);
+        if (existing is not null) return current;
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), Builders<BsonDocument>.Filter.Not(Builders<BsonDocument>.Filter.ElemMatch("payments", Builders<BsonDocument>.Filter.Eq("idempotencyKey", payment.IdempotencyKey))));
+        var paymentDocument = new BsonDocument { ["_id"] = payment.Id, ["idempotencyKey"] = payment.IdempotencyKey, ["amount"] = new BsonDecimal128(payment.Amount), ["status"] = payment.Status, ["createdAt"] = new BsonDateTime(payment.CreatedAt) };
+        var update = Builders<BsonDocument>.Update.Push("payments", paymentDocument).Set("status", "confirmed").Set("updatedAt", new BsonDateTime(DateTime.UtcNow));
+        var updated = await bookings.FindOneAndUpdateAsync(filter, update, new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After }, cancellationToken);
+        return updated is null ? null : Map(updated);
+    }
+
     private static Booking Map(BsonDocument document) => new()
     {
         Id = document.GetValue("_id").AsString,
@@ -334,6 +734,7 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
         Deposit = document.GetValue("deposit").ToDecimal(),
         Folio = document.GetValue("folio").AsString,
         Status = document.GetValue("status").AsString,
+        Payments = document.GetValue("payments", new BsonArray()).AsBsonArray.Select(payment => new BookingPayment { Id = payment.AsBsonDocument.GetValue("_id").AsString, IdempotencyKey = payment.AsBsonDocument.GetValue("idempotencyKey").AsString, Amount = payment.AsBsonDocument.GetValue("amount").ToDecimal(), Status = payment.AsBsonDocument.GetValue("status").AsString, CreatedAt = payment.AsBsonDocument.GetValue("createdAt").ToUniversalTime() }).ToArray(),
         CreatedAt = document.GetValue("createdAt").AsBsonDateTime.ToUniversalTime(),
         UpdatedAt = document.GetValue("updatedAt").AsBsonDateTime.ToUniversalTime()
     };

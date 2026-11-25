@@ -8,6 +8,10 @@ using VirGo.Infrastructure.Persistence.MongoDb;
 using VirGo.Infrastructure.Auth;
 using VirGo.Application.Auth;
 using VirGo.Application.Marketplace;
+using VirGo.Application.Assistant;
+using VirGo.Application.Contact;
+using VirGo.Application.Providers;
+using VirGo.Application.Events;
 using VirGo.Infrastructure.Caching;
 using Amazon.SimpleEmailV2;
 using Amazon.SQS;
@@ -43,6 +47,8 @@ public static class DependencyInjection
         services.AddScoped<RegisterHandler>();
         services.AddScoped<LogoutHandler>();
         services.AddScoped<DeleteAccountHandler>();
+        services.AddScoped<UpdateProfileHandler>();
+        services.AddScoped<ChangePasswordHandler>();
         services.AddScoped<QuoteHandler>();
         services.AddScoped<BookingHandler>();
 
@@ -51,21 +57,46 @@ public static class DependencyInjection
             services.AddSingleton<IUserRepository, InMemoryUserRepository>();
             services.AddSingleton<ISessionRepository, InMemorySessionRepository>();
             services.AddSingleton<IVenueRepository, InMemoryVenueRepository>();
+            services.AddSingleton<IVenueAvailabilityRepository, InMemoryVenueAvailabilityRepository>();
+            services.AddSingleton<IAssistantMessageRepository, InMemoryAssistantMessageRepository>();
+            services.AddSingleton<IContactMessageRepository, InMemoryContactMessageRepository>();
+            services.AddSingleton<IProviderRepository, InMemoryProviderRepository>();
+            services.AddSingleton<IGigRepository, InMemoryGigRepository>();
+            services.AddSingleton<IEventRepository, InMemoryEventRepository>();
+            services.AddSingleton<IEventGuestRepository, InMemoryEventGuestRepository>();
+            services.AddSingleton<IEventTaskRepository, InMemoryEventTaskRepository>();
             services.AddSingleton<InMemoryQuoteRepository>();
             services.AddSingleton<IQuoteRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryQuoteRepository>());
             services.AddSingleton<IQuoteExpiry>(serviceProvider => serviceProvider.GetRequiredService<InMemoryQuoteRepository>());
             services.AddSingleton<INoticeRepository, InMemoryNoticeRepository>();
-            services.AddSingleton<IBookingRepository, InMemoryBookingRepository>();
+             services.AddSingleton<IBookingRepository, InMemoryBookingRepository>();
+             services.AddSingleton<IReviewRepository, InMemoryReviewRepository>();
+             services.AddSingleton<IFavoriteRepository, InMemoryFavoriteRepository>();
+             services.AddSingleton<IConversationRepository, InMemoryConversationRepository>();
+             services.AddSingleton<IPaymentCardRepository, InMemoryPaymentCardRepository>();
         }
         else
         {
             services.AddSingleton<IUserRepository, MongoUserRepository>();
             services.AddSingleton<ISessionRepository, MongoSessionRepository>();
             services.AddSingleton<IVenueRepository, MongoVenueRepository>();
+            services.AddSingleton<IVenueAvailabilityRepository, MongoVenueAvailabilityRepository>();
+            services.AddSingleton<IAssistantMessageRepository, MongoAssistantMessageRepository>();
+            services.AddSingleton<IContactMessageRepository, MongoContactMessageRepository>();
+            services.AddSingleton<IProviderRepository, MongoProviderRepository>();
+            services.AddSingleton<IGigRepository, MongoGigRepository>();
+            services.AddSingleton<IEventRepository, MongoEventRepository>();
+            services.AddSingleton<IEventGuestRepository, MongoEventGuestRepository>();
+            services.AddSingleton<IEventTaskRepository, MongoEventTaskRepository>();
             services.AddSingleton<IQuoteRepository, MongoQuoteRepository>();
             services.AddSingleton<IQuoteExpiry, MongoQuoteExpiry>();
             services.AddSingleton<INoticeRepository, MongoNoticeRepository>();
-            services.AddSingleton<IBookingRepository, MongoBookingRepository>();
+             services.AddSingleton<IBookingRepository, MongoBookingRepository>();
+             services.AddSingleton<IReviewRepository, MongoReviewRepository>();
+             services.AddSingleton<IFavoriteRepository, MongoFavoriteRepository>();
+             services.AddSingleton<IConversationRepository, MongoConversationRepository>();
+             services.AddSingleton<IPaymentCardRepository, MongoPaymentCardRepository>();
+            services.AddHealthChecks().AddCheck<MongoReadinessCheck>("mongodb", tags: ["ready"]);
         }
 
         if (string.Equals(configuration["Persistence:Provider"], "MongoDb", StringComparison.OrdinalIgnoreCase))

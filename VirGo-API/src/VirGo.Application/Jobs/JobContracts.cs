@@ -69,6 +69,12 @@ public interface INoticeRepository
 {
     /// <summary>Inserts the notice; returns false when a notice with the same id already exists.</summary>
     Task<bool> AddIfAbsentAsync(Notice notice, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Notice>> ListByUserAsync(string userId, CancellationToken cancellationToken = default);
+
+    Task<Notice?> MarkReadAsync(string userId, string noticeId, CancellationToken cancellationToken = default);
+
+    Task<long> MarkAllReadAsync(string userId, CancellationToken cancellationToken = default);
 }
 
 public interface IQuoteExpiry

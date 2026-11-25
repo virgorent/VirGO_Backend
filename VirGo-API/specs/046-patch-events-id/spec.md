@@ -5,7 +5,7 @@
 | Módulo | `046-patch-events-id` |
 | Endpoint | `PATCH /api/v1/events/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Eventos |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -23,6 +23,7 @@ Permitir crear y planear un evento en un solo lugar. Este spec cubre solo `PATCH
 | RF-01 | Eventos: actualizar con permiso `edit`. |
 | RF-02 | `venue` se guarda como copia validada contra un salón publicado. |
 | RF-03 | `budgetPlan`, `reminders`, `vendors`, `externalPayments`, `design` e `invitation` viajan dentro del evento. |
+| RF-04 | Solo el propietario o colaborador con permiso `edit` puede actualizar el evento. |
 
 ## 3. Requerimientos no funcionales
 

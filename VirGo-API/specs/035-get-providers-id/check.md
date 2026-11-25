@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `035-get-providers-id` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,15 +15,15 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
+| CA-01 | `AuthTests.PublicProviderDetailReturnsPublishedProviderWithoutInternalFields` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 | ✅ |
+| Integración | `AuthTests`: incluido en 76/76 | ✅ |
+| Seguridad | `InputSecurityTests`: incluido en 36/36 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |

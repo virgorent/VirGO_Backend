@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `050-patch-events-id-guests-guestid` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,18 +15,18 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
-| CA-03 | Prueba | ⏳ |
-| CA-04 | Prueba | ⏳ |
+| CA-01 | Ruta implementada y compilada | ✅ |
+| CA-02 | `[Authorize]` global del controlador | ✅ |
+| CA-03 | Filtro por `eventId` y permiso `edit` | ✅ |
+| CA-04 | Reutiliza validación de invitados | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 previa | ✅ |
+| Integración | Pendiente por bloqueo intermitente del host Windows | ⏳ |
+| Seguridad | Pendiente por bloqueo intermitente del host Windows | ⏳ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | Límite, límite + 1 y 1500 caracteres | ⏳ |

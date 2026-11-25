@@ -37,6 +37,7 @@ public sealed class MongoUserRepository(IMongoDatabase database, IMongoClient cl
             ["isVerified"] = user.IsVerified,
             ["failedLoginCount"] = user.FailedLoginCount,
             ["unreadNotices"] = user.UnreadNotices,
+            ["defaultGuests"] = user.DefaultGuests,
             ["createdAt"] = new BsonDateTime(user.CreatedAt),
             ["updatedAt"] = new BsonDateTime(user.UpdatedAt)
         };
@@ -54,9 +55,26 @@ public sealed class MongoUserRepository(IMongoDatabase database, IMongoClient cl
     {
         var filter = Builders<BsonDocument>.Filter.Eq("_id", user.Id);
         var update = Builders<BsonDocument>.Update
+            .Set("name", user.Name)
+            .Set("phone", user.Phone)
             .Set("passwordHash", user.PasswordHash)
+            .Set("defaultGuests", user.DefaultGuests)
             .Set("updatedAt", new BsonDateTime(user.UpdatedAt));
+        update = user.City is null
+            ? update.Unset("city")
+            : update.Set("city", user.City);
         await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+    }
+
+    public async Task<bool> SetProviderIdAsync(string userId, string providerId, DateTime updatedAt, CancellationToken cancellationToken = default)
+    {
+        var result = await users.UpdateOneAsync(
+            Builders<BsonDocument>.Filter.Eq("_id", userId),
+            Builders<BsonDocument>.Update
+                .Set("providerId", providerId)
+                .Set("updatedAt", new BsonDateTime(updatedAt)),
+            cancellationToken: cancellationToken);
+        return result.MatchedCount == 1;
     }
 
     public async Task<bool> AnonymizeAsync(
@@ -161,6 +179,9 @@ public sealed class MongoUserRepository(IMongoDatabase database, IMongoClient cl
             FailedLoginCount = document.TryGetValue("failedLoginCount", out var failedLoginCount) && failedLoginCount.IsInt32 ? failedLoginCount.AsInt32 : 0,
             LockoutEndsAt = document.TryGetValue("lockoutEndsAt", out var lockoutEndsAt) && lockoutEndsAt.IsBsonDateTime ? lockoutEndsAt.AsBsonDateTime.ToUniversalTime() : null,
             UnreadNotices = document.TryGetValue("unreadNotices", out var unreadNotices) && unreadNotices.IsInt32 ? unreadNotices.AsInt32 : 0,
+            City = document.TryGetValue("city", out var city) && city.IsString ? city.AsString : null,
+            DefaultGuests = document.TryGetValue("defaultGuests", out var defaultGuests) && defaultGuests.IsInt32 ? defaultGuests.AsInt32 : 0,
+            ProviderId = document.TryGetValue("providerId", out var providerId) && providerId.IsString ? providerId.AsString : null,
             CreatedAt = document.GetValue("createdAt").AsBsonDateTime.ToUniversalTime(),
             UpdatedAt = document.GetValue("updatedAt").AsBsonDateTime.ToUniversalTime()
         };

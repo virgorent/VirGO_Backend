@@ -5,7 +5,7 @@
 | Módulo | `037-post-providers` |
 | Endpoint | `POST /api/v1/providers` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -25,6 +25,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.6. Los errores siguen el Art. I
 - Solo el rol `provider`.
 - Un usuario tiene un solo perfil: el segundo responde 409.
 - Crear el perfil actualiza `users.providerId` de forma consistente.
+- El perfil se crea en `draft`; `description` se limita a 1000 caracteres para cumplir CA-03.
 
 ## 3. Datos
 

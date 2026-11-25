@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `096-post-contact` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,16 +15,17 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
+| CA-01 | `AuthTests.AnyoneCanSubmitAContactMessage` | ⏳ |
+| CA-02 | `AuthTests.ContactRejectsOversizedInputAsProblemDetails` | ⏳ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 | ✅ |
+| Integración | Bloqueada por Control de aplicaciones de Windows | ⏳ |
+| Contrato | Bloqueada por Control de aplicaciones de Windows | ⏳ |
+| Seguridad | Endpoint público; validación pendiente por Control de aplicaciones | ⏳ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | Límite, límite + 1 y 1500 caracteres | ⏳ |

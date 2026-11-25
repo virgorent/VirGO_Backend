@@ -5,7 +5,7 @@
 | Módulo | `034-get-providers` |
 | Endpoint | `GET /api/v1/providers` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Catálogo de proveedores |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -24,6 +24,8 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.6. Los errores siguen el Art. I
 
 - Filtros: `category`, `zone`, `minPrice`, `maxPrice`, `rating`, `q`, `cursor`, `limit`.
 - La comparación (B18) se resuelve en la app.
+- `limit` acepta de 1 a 50 y por defecto es 20; `cursor` usa el UUID del último elemento.
+- `minPrice` y `maxPrice` filtran paquetes publicados; `rating` filtra el promedio mínimo.
 
 ## 3. Datos
 

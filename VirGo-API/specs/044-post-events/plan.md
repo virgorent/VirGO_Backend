@@ -5,7 +5,7 @@
 | Módulo | `044-post-events` |
 | Endpoint | `POST /api/v1/events` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Eventos |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -24,6 +24,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.7. Los errores siguen el Art. I
 
 - `venue` se guarda como copia validada contra un salón publicado.
 - `budgetPlan`, `reminders`, `vendors`, `externalPayments`, `design` e `invitation` viajan dentro del evento.
+- `name`, `eventType`, `date`, `guests`, `budget` y `hours` se validan antes de persistir.
 
 ## 3. Datos
 

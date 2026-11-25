@@ -5,7 +5,7 @@
 | Módulo | `044-post-events` |
 | Endpoint | `POST /api/v1/events` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Eventos |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -23,6 +23,7 @@ Permitir crear y planear un evento en un solo lugar. Este spec cubre solo `POST 
 | RF-01 | Eventos: crear un evento. |
 | RF-02 | `venue` se guarda como copia validada contra un salón publicado. |
 | RF-03 | `budgetPlan`, `reminders`, `vendors`, `externalPayments`, `design` e `invitation` viajan dentro del evento. |
+| RF-04 | Si se indica `venueId`, se valida contra un salón publicado y se guarda su snapshot. |
 
 ## 3. Requerimientos no funcionales
 

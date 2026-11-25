@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `092-post-notices-read-all` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,16 +15,17 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
+| CA-01 | `AuthTests.AuthenticatedUserCanMarkAllTheirUnreadNoticesAsRead` | ✅ |
+| CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 | ✅ |
+| Integración | `AuthTests`: incluido en 69/69 | ✅ |
+| Contrato | `MobileContractTests`: 23/23 | ✅ |
+| Seguridad | `InputSecurityTests`: 33/33 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |

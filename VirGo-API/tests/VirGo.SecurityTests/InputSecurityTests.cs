@@ -70,6 +70,15 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
     [Theory]
     [InlineData("/api/v1/users/me", "GET")]
     [InlineData("/api/v1/users/me", "DELETE")]
+    [InlineData("/api/v1/users/me", "PATCH")]
+    [InlineData("/api/v1/users/me/password", "PATCH")]
+    [InlineData("/api/v1/notices", "GET")]
+    [InlineData("/api/v1/notices/not-owned/read", "PATCH")]
+    [InlineData("/api/v1/notices/read-all", "POST")]
+    [InlineData("/api/v1/assistant/messages", "GET")]
+    [InlineData("/api/v1/venues/mine", "GET")]
+    [InlineData("/api/v1/venues", "POST")]
+    [InlineData("/api/v1/venues/11111111-1111-4111-8111-111111111111", "PATCH")]
     [InlineData("/api/v1/auth/logout", "POST")]
     [InlineData("/api/v1/quotes", "POST")]
     [InlineData("/api/v1/bookings", "POST")]
@@ -93,6 +102,124 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
             "/api/v1/users/8f6b8b48-f5d0-4f65-8fb0-2a7f0f6ab4b1/public");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ProviderCatalogDoesNotRequireAToken()
+    {
+        using var response = await client.GetAsync("/api/v1/providers");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ProviderDetailTreatsInjectionPayloadAsNotFound()
+    {
+        using var response = await client.GetAsync("/api/v1/providers/%24ne%3Anull");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ProviderOwnProfileRequiresAuthentication()
+    {
+        using var response = await client.GetAsync("/api/v1/providers/me");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task ProviderCreationRequiresAuthentication()
+    {
+        using var response = await client.PostAsJsonAsync("/api/v1/providers", new { businessName = "No autorizado" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ProviderUpdateRequiresAuthentication()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Patch, "/api/v1/providers/me")
+        {
+            Content = JsonContent.Create(new { businessName = "No autorizado" })
+        };
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ProviderGigsRequireAuthentication()
+    {
+        using var response = await client.GetAsync("/api/v1/providers/me/gigs");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GigCreationRequiresAuthentication()
+    {
+        using var response = await client.PostAsJsonAsync("/api/v1/providers/me/gigs", new { eventName = "No autorizado" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GigUpdateRequiresAuthentication()
+    {
+        using var response = await client.PatchAsJsonAsync("/api/v1/providers/me/gigs/cccccccc-cccc-4ccc-8ccc-cccccccccccc", new { eventName = "No autorizado" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task EventsRequireAuthentication()
+    {
+        using var response = await client.GetAsync("/api/v1/events");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task EventCreationRequiresAuthentication()
+    {
+        using var response = await client.PostAsJsonAsync("/api/v1/events", new { name = "No autorizado" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task EventDetailRequiresAuthentication()
+    {
+        using var response = await client.GetAsync("/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task EventUpdateRequiresAuthentication()
+    {
+        using var response = await client.PatchAsJsonAsync("/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee", new { name = "No autorizado" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task EventGuestsRequireAuthentication()
+    {
+        using var response = await client.GetAsync("/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/guests");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GuestCreationRequiresAuthentication()
+    {
+        using var response = await client.PostAsJsonAsync("/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/guests", new { name = "No autorizado" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]

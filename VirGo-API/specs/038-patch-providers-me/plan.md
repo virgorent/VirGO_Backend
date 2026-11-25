@@ -5,7 +5,7 @@
 | Módulo | `038-patch-providers-me` |
 | Endpoint | `PATCH /api/v1/providers/me` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -23,6 +23,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.6. Los errores siguen el Art. I
 ## 2. Reglas
 
 - Solo el rol `provider`.
+- La actualización se limita al perfil del usuario autenticado y conserva `status` y rating.
 
 ## 3. Datos
 

@@ -5,7 +5,7 @@
 | Módulo | `048-get-events-id-guests` |
 | Endpoint | `GET /api/v1/events/:id/guests` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Invitados |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -23,6 +23,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.7. Los errores siguen el Art. I
 ## 2. Reglas
 
 - Requiere permiso sobre el evento: `view` para leer y `edit` para escribir.
+- La autorización del evento se evalúa antes de consultar `eventGuests`.
 
 ## 3. Datos
 

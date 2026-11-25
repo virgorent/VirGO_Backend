@@ -5,7 +5,7 @@
 | Módulo | `024-get-venues-id` |
 | Endpoint | `GET /api/v1/venues/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Detalle de salón |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |

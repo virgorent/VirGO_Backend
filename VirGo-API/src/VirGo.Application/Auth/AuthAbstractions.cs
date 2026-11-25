@@ -19,6 +19,8 @@ public interface IUserRepository
 
     Task UpdateAsync(User user, CancellationToken cancellationToken = default);
 
+    Task<bool> SetProviderIdAsync(string userId, string providerId, DateTime updatedAt, CancellationToken cancellationToken = default);
+
     Task<bool> AnonymizeAsync(
         string userId,
         string email,

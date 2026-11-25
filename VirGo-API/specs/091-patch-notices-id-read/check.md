@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `091-patch-notices-id-read` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,17 +15,18 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
-| CA-03 | Prueba | ⏳ |
+| CA-01 | `AuthTests.AuthenticatedUserCanMarkTheirNoticeAsRead` | ✅ |
+| CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
+| CA-03 | `AuthTests.UserCannotMarkAnotherUsersNoticeAsRead` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 | ✅ |
+| Integración | `AuthTests`: incluido en 68/68 | ✅ |
+| Contrato | `MobileContractTests`: 22/22 | ✅ |
+| Seguridad | `InputSecurityTests`: 32/32 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |

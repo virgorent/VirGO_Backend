@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `093-get-assistant-messages` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,16 +15,17 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
+| CA-01 | `AuthTests.AuthenticatedUserCanReadTheirAssistantHistory` | ✅ |
+| CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 | ✅ |
+| Integración | `AuthTests`: incluido en 70/70 | ✅ |
+| Contrato | Bloqueada por Control de aplicaciones de Windows | ⏳ |
+| Seguridad | Bloqueada por Control de aplicaciones de Windows | ⏳ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |

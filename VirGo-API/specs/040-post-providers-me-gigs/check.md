@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `040-post-providers-me-gigs` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,17 +15,17 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
-| CA-03 | Prueba | ⏳ |
+| CA-01 | `VerticalSliceTests.ProviderCanCreateAGigAndOverlapsAreRejected` | ✅ |
+| CA-02 | `InputSecurityTests.GigCreationRequiresAuthentication` | ✅ |
+| CA-03 | `VerticalSliceTests.GigCreationRejectsInvalidTimeRange` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | Suite unitaria: 35/35 | ✅ |
+| Integración | `VerticalSliceTests`: pendiente por bloqueo de Windows | ⏳ |
+| Seguridad | `InputSecurityTests`: pendiente por bloqueo de Windows | ⏳ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | Límite, límite + 1 y 1500 caracteres | ⏳ |

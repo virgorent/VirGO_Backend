@@ -5,7 +5,7 @@
 | Módulo | `037-post-providers` |
 | Endpoint | `POST /api/v1/providers` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -24,6 +24,7 @@ Permitir que el proveedor publique y mantenga su perfil. Este spec cubre solo `P
 | RF-02 | Solo el rol `provider`. |
 | RF-03 | Un usuario tiene un solo perfil: el segundo responde 409. |
 | RF-04 | Crear el perfil actualiza `users.providerId` de forma consistente. |
+| RF-05 | `description` acepta como máximo 1000 caracteres en el contrato móvil. |
 
 ## 3. Requerimientos no funcionales
 

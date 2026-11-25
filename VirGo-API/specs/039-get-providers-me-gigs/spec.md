@@ -5,7 +5,7 @@
 | Módulo | `039-get-providers-me-gigs` |
 | Endpoint | `GET /api/v1/providers/me/gigs` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Agenda del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -22,6 +22,7 @@ Permitir que el proveedor organice sus servicios por semana. Este spec cubre sol
 |---|---|
 | RF-01 | Agenda del proveedor: agenda propia. |
 | RF-02 | Solo sobre la agenda propia. |
+| RF-03 | El proveedor se resuelve por `sub`; la respuesta no expone `providerId`. |
 
 ## 3. Requerimientos no funcionales
 

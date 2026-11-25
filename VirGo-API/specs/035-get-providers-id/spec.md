@@ -5,7 +5,7 @@
 | Módulo | `035-get-providers-id` |
 | Endpoint | `GET /api/v1/providers/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Catálogo de proveedores |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -21,6 +21,8 @@ Permitir buscar y comparar proveedores publicados. Este spec cubre solo `GET /ap
 | ID | Requerimiento |
 |---|---|
 | RF-01 | Catálogo de proveedores: detalle publicado. |
+| RF-02 | Solo se devuelve un proveedor con `status=published`; proveedores inexistentes o no publicados responden 404. |
+| RF-03 | La respuesta no expone `userId` ni `status`. |
 
 ## 3. Requerimientos no funcionales
 

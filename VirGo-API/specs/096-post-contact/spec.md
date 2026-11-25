@@ -5,7 +5,7 @@
 | Módulo | `096-post-contact` |
 | Endpoint | `POST /api/v1/contact` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Contacto |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.16 |
@@ -22,6 +22,7 @@ Recibir mensajes de ayuda. Este spec cubre solo `POST /api/v1/contact`.
 |---|---|
 | RF-01 | Contacto: enviar un mensaje de contacto. |
 | RF-02 | Tiene límite de solicitudes. |
+| RF-03 | El `userId` autenticado es opcional y nunca se acepta desde el body. |
 
 ## 3. Requerimientos no funcionales
 

@@ -5,7 +5,7 @@
 | Módulo | `040-post-providers-me-gigs` |
 | Endpoint | `POST /api/v1/providers/me/gigs` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Agenda del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -23,6 +23,7 @@ Permitir que el proveedor organice sus servicios por semana. Este spec cubre sol
 | RF-01 | Agenda del proveedor: crear un servicio. |
 | RF-02 | Solo sobre la agenda propia. |
 | RF-03 | Avisa de empalmes en la semana (H74). |
+| RF-04 | Los gigs creados quedan ligados al proveedor autenticado y no aceptan `providerId` del cliente. |
 
 ## 3. Requerimientos no funcionales
 

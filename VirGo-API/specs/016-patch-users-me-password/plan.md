@@ -5,7 +5,7 @@
 | Módulo | `016-patch-users-me-password` |
 | Endpoint | `PATCH /api/v1/users/me/password` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil de usuario |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.3 |

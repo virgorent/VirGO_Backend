@@ -11,11 +11,11 @@ public sealed class User
 {
     public required string Id { get; init; }
 
-    public required string Name { get; init; }
+    public required string Name { get; set; }
 
     public required string Email { get; init; }
 
-    public required string Phone { get; init; }
+    public required string Phone { get; set; }
 
     public required string PasswordHash { get; set; }
 
@@ -28,6 +28,12 @@ public sealed class User
     public DateTime? LockoutEndsAt { get; set; }
 
     public int UnreadNotices { get; set; }
+
+    public string? City { get; set; }
+
+    public int DefaultGuests { get; set; }
+
+    public string? ProviderId { get; set; }
 
     public DateTime CreatedAt { get; init; }
 

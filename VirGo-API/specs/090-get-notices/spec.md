@@ -5,7 +5,7 @@
 | Módulo | `090-get-notices` |
 | Endpoint | `GET /api/v1/notices` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Notificaciones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.14 |

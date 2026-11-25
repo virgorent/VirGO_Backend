@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `090-get-notices` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,16 +15,17 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
+| CA-01 | `AuthTests.NoticesReturnsOnlyTheAuthenticatedUsersCollection` | ✅ |
+| CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` incluye `GET /api/v1/notices` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | No aplica: lectura cubierta por integración | ➖ |
+| Integración | `AuthTests`: 22/22 | ✅ |
+| Contrato | `MobileContractTests`: 16/16 | ✅ |
+| Seguridad | `InputSecurityTests`: 24/24 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |

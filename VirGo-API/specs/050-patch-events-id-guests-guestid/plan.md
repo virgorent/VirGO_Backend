@@ -5,7 +5,7 @@
 | Módulo | `050-patch-events-id-guests-guestid` |
 | Endpoint | `PATCH /api/v1/events/:id/guests/:guestId` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Invitados |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.7 |
@@ -23,6 +23,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.7. Los errores siguen el Art. I
 ## 2. Reglas
 
 - Requiere permiso sobre el evento: `view` para leer y `edit` para escribir.
+- La actualización valida la pertenencia de `guestId` a `eventId` antes de modificar.
 
 ## 3. Datos
 

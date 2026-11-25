@@ -5,7 +5,7 @@
 | Módulo | `092-post-notices-read-all` |
 | Endpoint | `POST /api/v1/notices/read-all` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Notificaciones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.14 |
@@ -21,6 +21,7 @@ Avisar a cada persona lo que requiere su atención. Este spec cubre solo `POST /
 | ID | Requerimiento |
 |---|---|
 | RF-01 | Notificaciones: marcar todos como leídos. |
+| RF-02 | Solo se modifican avisos del usuario autenticado; la operación es idempotente. |
 
 ## 3. Requerimientos no funcionales
 

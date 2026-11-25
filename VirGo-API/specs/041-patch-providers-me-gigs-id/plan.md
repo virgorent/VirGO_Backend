@@ -5,7 +5,7 @@
 | Módulo | `041-patch-providers-me-gigs-id` |
 | Endpoint | `PATCH /api/v1/providers/me/gigs/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Agenda del proveedor |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.6 |
@@ -24,6 +24,7 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.6. Los errores siguen el Art. I
 
 - Solo sobre la agenda propia.
 - Avisa de empalmes en la semana (H74).
+- La actualización filtra por `id` y el proveedor asociado al `sub` autenticado; los empalmes responden 404/409 sin filtrar datos.
 
 ## 3. Datos
 
