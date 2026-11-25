@@ -38,7 +38,7 @@ public sealed class RegisterHandler(
             Email = email,
             Phone = command.Phone.Trim(),
             PasswordHash = string.Empty,
-            Role = UserRole.Client,
+            Role = command.Role,
             IsVerified = false,
             CreatedAt = now,
             UpdatedAt = now
