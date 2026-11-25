@@ -339,7 +339,7 @@ public sealed class InMemoryBookingRepository : IBookingRepository
             if (index < 0) return Task.FromResult<Booking?>(null);
             var current = bookings[index];
             if (current.Payments.Any(existing => existing.IdempotencyKey == payment.IdempotencyKey)) return Task.FromResult<Booking?>(current);
-            var updated = Copy(current, "confirmed", [.. current.Payments, payment]);
+            var updated = Copy(current, current.Status, [.. current.Payments, payment]);
             bookings[index] = updated;
             return Task.FromResult<Booking?>(updated);
         }
@@ -767,7 +767,7 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
         if (existing is not null) return current;
         var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), Builders<BsonDocument>.Filter.Not(Builders<BsonDocument>.Filter.ElemMatch("payments", Builders<BsonDocument>.Filter.Eq("idempotencyKey", payment.IdempotencyKey))));
         var paymentDocument = new BsonDocument { ["_id"] = payment.Id, ["idempotencyKey"] = payment.IdempotencyKey, ["amount"] = new BsonDecimal128(payment.Amount), ["status"] = payment.Status, ["createdAt"] = new BsonDateTime(payment.CreatedAt) };
-        var update = Builders<BsonDocument>.Update.Push("payments", paymentDocument).Set("status", "confirmed").Set("updatedAt", new BsonDateTime(DateTime.UtcNow));
+        var update = Builders<BsonDocument>.Update.Push("payments", paymentDocument).Set("updatedAt", new BsonDateTime(DateTime.UtcNow));
         var updated = await bookings.FindOneAndUpdateAsync(filter, update, new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After }, cancellationToken);
         return updated is null ? null : Map(updated);
     }

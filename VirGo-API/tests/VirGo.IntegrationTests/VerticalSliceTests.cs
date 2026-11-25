@@ -1187,6 +1187,9 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
 
         Assert.Equal(HttpStatusCode.Created, paymentResponse.StatusCode);
         Assert.Equal("pending", payment.RootElement.GetProperty("status").GetString());
+        using var bookingAfter = await client.GetAsync($"/api/v1/bookings/{bookingId}");
+        using var bookingAfterJson = JsonDocument.Parse(await bookingAfter.Content.ReadAsStringAsync());
+        Assert.Equal("pending_payment", bookingAfterJson.RootElement.GetProperty("status").GetString());
     }
 
     private static async Task<string> CreatePublishedVenueAsync(HttpClient ownerClient, string name)
