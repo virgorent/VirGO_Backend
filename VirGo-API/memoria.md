@@ -468,3 +468,24 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 - **Qué se hizo:** se implementaron listado, alta, edición, eliminación y selección de tarjeta predeterminada. La respuesta pública nunca serializa `gatewayToken`; cada usuario solo puede operar sus propias tarjetas y se mantiene una sola predeterminada.
 - **Persistencia:** repositorios InMemory y MongoDB registrados en DI.
 - **Evidencia:** `dotnet build VirGo.slnx -c Release --no-restore`: 0 advertencias y 0 errores.
+### 2026-11-18 · Landing page en AWS (S3 + CloudFront)
+
+- **Autor:** Angelica + Claude Code (`devops-aws`, `seguridad`)
+- **Módulo / tareas:** infraestructura fuera de la API; mismo patrón que el bucket de medios de `904`
+- **Qué se hizo:** `infra/landing.yaml` crea el stack `virgo-landing`: bucket `virgo-landing-<cuenta>` privado (bloqueo de acceso público, SSE-S3, `BucketOwnerEnforced`, solo TLS) y CloudFront con OAC, HTTPS obligatorio, HTTP/2 y 3, `PriceClass_100` y la política administrada de cabeceras de seguridad. El contenido es `docs/index.html` y `docs/assets/` de `VirGO_Movil` (PR #16). Los avisos legales y la guía de marca siguen en GitHub Pages porque son Markdown y Play ya conoce sus URL.
+- **URL:** https://d2vzpj6yeszxa2.cloudfront.net/
+- **Evidencia:**
+  - cfn-lint sin hallazgos; Checkov 9 de 9 controles en verde, sin omisiones.
+  - `/` 200 `text/html`; video, fuentes, `sitemap.xml` y `robots.txt` 200; ruta inexistente 404.
+  - HTTP → 301 a HTTPS; bucket directo 403.
+  - Cabeceras: `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy` y `X-XSS-Protection`.
+- **Cómo se publica una versión nueva** (manual, desde la sesión de la titular):
+
+  ```powershell
+  aws s3 sync docs/assets s3://virgo-landing-544413868280/assets --delete --cache-control "public, max-age=604800"
+  aws s3 cp docs/index.html s3://virgo-landing-544413868280/index.html --content-type "text/html; charset=utf-8" --cache-control "public, max-age=300"
+  aws cloudfront create-invalidation --distribution-id E3M8OP6AVHNZEU --paths "/*"
+  ```
+
+- **Costo:** $0. CloudFront tiene 1 TB y 10 millones de peticiones al mes gratis; el sitio pesa unos 1.2 MB.
+- **Pendiente:** automatizar la publicación con un workflow y OIDC (un rol con permiso solo de `s3:PutObject`/`DeleteObject` en el bucket y `cloudfront:CreateInvalidation`); registrar la URL en Google Search Console.
