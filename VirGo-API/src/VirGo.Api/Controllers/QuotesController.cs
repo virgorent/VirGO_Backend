@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirGo.Application.Abstractions;
 using VirGo.Application.Auth;
 using VirGo.Application.Marketplace;
 using VirGo.Api.Dto;
@@ -11,7 +13,7 @@ namespace VirGo.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/v1/quotes")]
-public sealed class QuotesController(QuoteHandler handler, IUserRepository users, IQuoteRepository quotes, IVenueRepository venues) : ControllerBase
+public sealed class QuotesController(QuoteHandler handler, IUserRepository users, IQuoteRepository quotes, IVenueRepository venues, IClock clock) : ControllerBase
 {
     [HttpPost]
     [Authorize(Roles = "client")]
@@ -23,27 +25,19 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
             return Unauthorized();
         }
 
-        if (string.IsNullOrWhiteSpace(request.Target?.Id)
-            || !Guid.TryParse(request.Target.Id, out _)
-            || !string.Equals(request.Target.Type, "venue", StringComparison.OrdinalIgnoreCase)
-            || string.IsNullOrWhiteSpace(request.EventType)
-            || !AllowedEventTypes.Contains(request.EventType, StringComparer.Ordinal)
-            || request.Guests < 1
-            || !DateOnly.TryParseExact(request.EventDate, "yyyy-MM-dd", out var eventDate)
-            || request.EventId is not null && !Guid.TryParse(request.EventId, out _)
-            || request.RequestedServices is not null && request.RequestedServices.Any(service => string.IsNullOrWhiteSpace(service) || service.Length > 100)
-            || request.Message is not null && request.Message.Length > 2000)
+        var errors = ValidateCreate(request, out var eventDate);
+        if (errors.Count > 0)
         {
-            return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La solicitud de cotización es inválida.");
+            return ValidationProblem(errors);
         }
 
         var result = await handler.HandleAsync(new CreateQuoteCommand(
             user.Id,
             user.Name,
-            request.Target.Type ?? "venue",
-            request.Target.Id,
+            request.Target!.Type ?? "venue",
+            request.Target.Id!,
             request.EventId ?? string.Empty,
-            request.EventType,
+            request.EventType!,
             eventDate,
             request.Guests,
             request.RequestedServices ?? [],
@@ -78,8 +72,9 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
         return quote is null ? NotFound() : Ok(quote);
     }
 
+    // Hoy solo existen cotizaciones a salón: responde el propietario del salón destino.
     [HttpPost("{id}/response")]
-    [Authorize(Roles = "provider")]
+    [Authorize(Roles = "owner")]
     public async Task<IActionResult> Respond(string id, QuoteResponseRequest? request, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue("sub");
@@ -142,6 +137,66 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
         CreatedAt = quote.CreatedAt,
         UpdatedAt = DateTime.UtcNow
     };
+
+    private Dictionary<string, string[]> ValidateCreate(CreateQuoteRequest request, out DateOnly eventDate)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
+        eventDate = default;
+        if (string.IsNullOrWhiteSpace(request.Target?.Id) || !Guid.TryParse(request.Target.Id, out _))
+        {
+            errors["target.id"] = ["El destino debe ser un identificador válido."];
+        }
+        if (!string.Equals(request.Target?.Type, "venue", StringComparison.OrdinalIgnoreCase))
+        {
+            errors["target.type"] = ["Solo se pueden cotizar salones."];
+        }
+        if (string.IsNullOrWhiteSpace(request.EventType) || !AllowedEventTypes.Contains(request.EventType, StringComparer.Ordinal))
+        {
+            errors["eventType"] = ["El tipo de evento no es válido."];
+        }
+        if (request.Guests < 1)
+        {
+            errors["guests"] = ["Debe haber al menos un invitado."];
+        }
+        if (!DateOnly.TryParseExact(request.EventDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out eventDate))
+        {
+            errors["eventDate"] = ["La fecha debe usar el formato yyyy-MM-dd."];
+        }
+        else if (eventDate < DateOnly.FromDateTime(clock.UtcNow))
+        {
+            errors["eventDate"] = ["La fecha del evento no puede estar en el pasado."];
+        }
+        if (request.EventId is not null && !Guid.TryParse(request.EventId, out _))
+        {
+            errors["eventId"] = ["El evento debe ser un identificador válido."];
+        }
+        if (request.RequestedServices is not null && request.RequestedServices.Any(service => string.IsNullOrWhiteSpace(service) || service.Length > 100))
+        {
+            errors["requestedServices"] = ["Cada servicio debe tener entre 1 y 100 caracteres."];
+        }
+        if (request.Message is not null && request.Message.Length > 2000)
+        {
+            errors["message"] = ["El mensaje no puede superar 2000 caracteres."];
+        }
+
+        return errors;
+    }
+
+    private ObjectResult ValidationProblem(Dictionary<string, string[]> errors)
+    {
+        var problem = new ValidationProblemDetails(errors)
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "La solicitud de cotización es inválida.",
+            Instance = Request.Path
+        };
+        problem.Extensions["traceId"] = HttpContext.TraceIdentifier;
+        return new ObjectResult(problem)
+        {
+            StatusCode = StatusCodes.Status400BadRequest,
+            ContentTypes = ["application/problem+json"]
+        };
+    }
 
     private Task<VirGo.Domain.Auth.User?> GetCurrentUser(CancellationToken cancellationToken) =>
         users.FindByIdAsync(User.FindFirstValue("sub")!, cancellationToken);
