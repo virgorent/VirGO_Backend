@@ -114,7 +114,7 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
         var current = await bookings.FindVisibleAsync(parsedId.ToString("D"), userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
         if (current is null) return NotFound();
         if (current.Status == "cancelled" || request.Amount > current.Total) return Conflict();
-        var payment = new VirGo.Domain.Marketplace.BookingPayment { Id = Guid.NewGuid().ToString("D"), IdempotencyKey = key.ToString().Trim(), Amount = request.Amount.Value, Status = "validated", CreatedAt = DateTime.UtcNow };
+        var payment = new VirGo.Domain.Marketplace.BookingPayment { Id = Guid.NewGuid().ToString("D"), IdempotencyKey = key.ToString().Trim(), Amount = request.Amount.Value, Status = "pending", CreatedAt = DateTime.UtcNow };
         var updated = await bookings.AddPaymentAsync(current.Id, userId, [], payment, cancellationToken);
         return updated is null ? Conflict() : CreatedAtAction(nameof(Payments), new { id = current.Id }, payment);
     }
