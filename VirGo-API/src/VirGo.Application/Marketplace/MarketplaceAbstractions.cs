@@ -22,6 +22,10 @@ public interface IVenueRepository
 public interface IQuoteRepository
 {
     Task AddAsync(Quote quote, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Quote>> ListVisibleAsync(string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default);
+    Task<Quote?> FindVisibleAsync(string id, string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default);
+    Task<Quote?> FindByIdAsync(string id, CancellationToken cancellationToken = default);
+    Task<Quote?> UpdateAsync(Quote quote, string expectedStatus, CancellationToken cancellationToken = default);
 }
 
 public interface IBookingRepository
