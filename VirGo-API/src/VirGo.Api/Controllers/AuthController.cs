@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirGo.Application.Auth;
 using VirGo.Api.Dto;
+using VirGo.Domain.Auth;
 
 namespace VirGo.Api.Controllers;
 
@@ -36,6 +37,10 @@ public sealed class AuthController(
         {
             errors["phone"] = ["El teléfono es obligatorio y no puede superar 16 caracteres."];
         }
+        if (!TryParsePublicRole(request.Role, out var role))
+        {
+            errors["role"] = ["El rol debe ser client, owner o provider."];
+        }
         if (errors.Count > 0)
         {
             return ValidationProblem(errors);
@@ -45,7 +50,7 @@ public sealed class AuthController(
         try
         {
             outcome = await registerHandler.HandleAsync(
-                new RegisterCommand(request.Name!, request.Email!, request.Password!, request.Phone!),
+                new RegisterCommand(request.Name!, request.Email!, request.Password!, request.Phone!, role),
                 cancellationToken);
         }
         catch (DuplicateUserEmailException)
@@ -172,5 +177,19 @@ public sealed class AuthController(
             StatusCode = StatusCodes.Status401Unauthorized,
             ContentTypes = ["application/problem+json"]
         };
+    }
+
+    /// <summary>Roles que una persona puede elegir al registrarse; sin rol es `client`.</summary>
+    private static bool TryParsePublicRole(string? value, out UserRole role)
+    {
+        UserRole? parsed = value switch
+        {
+            null or "" or "client" => UserRole.Client,
+            "owner" => UserRole.Owner,
+            "provider" => UserRole.Provider,
+            _ => null
+        };
+        role = parsed ?? UserRole.Client;
+        return parsed is not null;
     }
 }
