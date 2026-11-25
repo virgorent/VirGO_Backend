@@ -5,7 +5,7 @@
 | Módulo | `026-post-venues` |
 | Endpoint | `POST /api/v1/venues` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Aprobado por Móvil; implementación local |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -23,6 +23,8 @@ Permitir que el propietario cree y mantenga sus salones. Este spec cubre solo `P
 | RF-01 | Gestión de salones: crear un salón en `draft`. |
 | RF-02 | Solo el rol `owner` y solo sobre sus salones. |
 | RF-03 | Ignora `rating`, `verified`, `createdAt` y `updatedAt` enviados por el cliente. |
+| RF-04 | Valida el body contra los límites y enums ejecutables de `db/schema/venues.json`. |
+| RF-05 | `location` y `photos` son opcionales para el MVP; si no se envían, se persisten como campo omitido y lista vacía respectivamente. |
 
 ## 3. Requerimientos no funcionales
 
@@ -45,4 +47,4 @@ Aplican los del Art. IV (contrato), V (seguridad), VI.6 (longitudes) y VII (cost
 
 | # | Pregunta | Responsable |
 |---|---|---|
-| P-01 | No hay endpoint de carga de archivos para fotos y planos. | Equipo |
+| P-01 | No hay endpoint de carga de archivos para fotos y planos. El MVP permite crear el salón sin fotos. | Equipo |

@@ -96,7 +96,6 @@ export const venuesValidator = jsonSchema('venues', {
   'description',
   'address',
   'zone',
-  'location',
   'capacity',
   'price',
   'services',

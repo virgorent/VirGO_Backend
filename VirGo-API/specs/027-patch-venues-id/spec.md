@@ -5,7 +5,7 @@
 | Módulo | `027-patch-venues-id` |
 | Endpoint | `PATCH /api/v1/venues/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -23,6 +23,7 @@ Permitir que el propietario cree y mantenga sus salones. Este spec cubre solo `P
 | RF-01 | Gestión de salones: actualizar un salón propio. |
 | RF-02 | Solo el rol `owner` y solo sobre sus salones. |
 | RF-03 | Ignora `rating`, `verified`, `createdAt` y `updatedAt` enviados por el cliente. |
+| RF-04 | La actualización se limita al salón cuyo `ownerId` coincide con el `sub` del token. |
 
 ## 3. Requerimientos no funcionales
 

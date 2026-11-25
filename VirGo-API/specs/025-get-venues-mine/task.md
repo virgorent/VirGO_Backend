@@ -5,7 +5,7 @@
 | Módulo | `025-get-venues-mine` |
 | Endpoint | `GET /api/v1/venues/mine` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -16,6 +16,6 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T2501 | Implementar `GET /api/v1/venues/mine` | `000`, `010` | `dev-dotnet` | Prueba de integración: 200 (CA-01) | ⏳ |
+| T2501 | Implementar `GET /api/v1/venues/mine` | `000`, `010` | `dev-dotnet` | Prueba de integración: 200 (CA-01) | ✅ |
 | T2502 | Pruebas de repositorio, integración y seguridad | T2501 | `qa` + `seguridad` | Todos los CA en verde | ⏳ |
 | T2503 | PR, despliegue, humo y entrega del contrato a Móvil | T2502 | `devops-aws` + `arquitecto` | Humo por HTTPS; `check.md` completo | ⏳ |

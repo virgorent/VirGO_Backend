@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `025-get-venues-mine` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,16 +15,17 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
+| CA-01 | `VerticalSliceTests.OwnerCanReadOnlyTheirVenueCollection` | ✅ |
+| CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | `CacheTests`: 35/35 | ✅ |
+| Integración | `VerticalSliceTests`: 59/59 | ✅ |
+| Contrato | `MobileContractTests`: 18/18 | ✅ |
+| Seguridad | `InputSecurityTests`: 29/29 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | ➖ Sin cuerpo | ➖ |
