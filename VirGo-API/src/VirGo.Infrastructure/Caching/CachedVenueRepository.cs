@@ -63,6 +63,19 @@ public sealed class CachedVenueRepository(IVenueRepository inner, ICacheService 
         return venue;
     }
 
+    public async Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default)
+    {
+        var venue = await inner.PublishAsync(venueId, ownerId, cancellationToken);
+        if (venue is not null)
+        {
+            await cache.RemoveAsync(OwnedKey(ownerId), cancellationToken);
+            await cache.RemoveAsync(DetailKey(venue.Id), cancellationToken);
+            await cache.RemoveAsync(ListKey(null, null), cancellationToken);
+        }
+
+        return venue;
+    }
+
     public static string ListKey(string? zone, string? category) => $"cache:venues:{Hash($"{zone}\u001f{category}")}";
 
     public static string DetailKey(string id) => $"cache:venue:{Hash(id)}";

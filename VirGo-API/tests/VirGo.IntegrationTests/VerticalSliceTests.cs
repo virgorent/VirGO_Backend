@@ -594,6 +594,65 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
     }
 
     [Fact]
+    public async Task OwnerCanCreateAVenueWithoutLocationOrPhotos()
+    {
+        using var client = factory.CreateClient();
+        var token = await CreateUserTokenAsync(UserRole.Owner);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await client.PostAsJsonAsync("/api/v1/venues", new
+        {
+            name = "Salon Sin Fotos",
+            shortName = "Sin Fotos",
+            description = "Un salon creado sin mapa ni fotos para el MVP.",
+            address = "Centro, Querétaro",
+            zone = "Centro",
+            capacity = 80,
+            price = new { @base = 1200m, unit = "hour", minHours = 2 },
+            services = Array.Empty<object>(),
+            categories = NewVenueCategories,
+            amenities = Array.Empty<string>()
+        });
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Empty(body.RootElement.GetProperty("photos").EnumerateArray());
+        Assert.Equal("draft", body.RootElement.GetProperty("status").GetString());
+    }
+
+    [Fact]
+    public async Task OwnerCanPublishTheirDraftVenue()
+    {
+        using var client = factory.CreateClient();
+        var token = await CreateUserTokenAsync(UserRole.Owner);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var create = await client.PostAsJsonAsync("/api/v1/venues", new
+        {
+            name = "Salon Publicable",
+            shortName = "Publicable",
+            description = "Un salon creado para probar publicación directa.",
+            address = "Centro, Querétaro",
+            zone = "Centro",
+            capacity = 80,
+            price = new { @base = 1200m, unit = "hour", minHours = 2 },
+            services = Array.Empty<object>(),
+            photos = Array.Empty<object>(),
+            categories = NewVenueCategories,
+            amenities = Array.Empty<string>()
+        });
+        using var created = JsonDocument.Parse(await create.Content.ReadAsStringAsync());
+        var venueId = created.RootElement.GetProperty("id").GetString();
+
+        using var publish = await client.PostAsync($"/api/v1/venues/{venueId}/publish", null);
+        using var body = JsonDocument.Parse(await publish.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, publish.StatusCode);
+        Assert.Equal(venueId, body.RootElement.GetProperty("id").GetString());
+        Assert.Equal("published", body.RootElement.GetProperty("status").GetString());
+    }
+
+    [Fact]
     public async Task VenueCreationRejectsOversizedInputAsProblemDetails()
     {
         using var client = factory.CreateClient();

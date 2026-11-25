@@ -87,6 +87,7 @@ public sealed class MobileContractTests(ContractApiFactory factory) : IClassFixt
     [InlineData("/api/v1/venues/mine", "get")]
     [InlineData("/api/v1/venues", "post")]
     [InlineData("/api/v1/venues/{id}", "patch")]
+    [InlineData("/api/v1/venues/{id}/publish", "post")]
     [InlineData("/api/v1/venues/{id}/availability", "get")]
     [InlineData("/api/v1/users/{id}/public", "get")]
     [InlineData("/api/v1/venues", "get")]

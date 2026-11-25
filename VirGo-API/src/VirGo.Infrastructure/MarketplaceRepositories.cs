@@ -97,6 +97,40 @@ public sealed class InMemoryVenueRepository : IVenueRepository
         return Task.FromResult<Venue?>(updated);
     }
 
+    public Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = venues.FindIndex(venue => venue.Id == venueId && venue.OwnerId == ownerId);
+        if (index < 0)
+        {
+            return Task.FromResult<Venue?>(null);
+        }
+
+        var current = venues[index];
+        var published = new Venue
+        {
+            Id = current.Id,
+            OwnerId = current.OwnerId,
+            Name = current.Name,
+            ShortName = current.ShortName,
+            Description = current.Description,
+            Address = current.Address,
+            Zone = current.Zone,
+            Capacity = current.Capacity,
+            BasePrice = current.BasePrice,
+            PriceUnit = current.PriceUnit,
+            MinimumHours = current.MinimumHours,
+            Categories = current.Categories,
+            Amenities = current.Amenities,
+            Photos = current.Photos,
+            Status = "published",
+            RatingAverage = current.RatingAverage,
+            RatingCount = current.RatingCount
+        };
+        venues[index] = published;
+        return Task.FromResult<Venue?>(published);
+    }
+
     private static Venue ToVenue(CreateVenueCommand command, string id) => new()
     {
         Id = id,
@@ -371,11 +405,6 @@ public sealed class MongoVenueRepository(IMongoDatabase database) : IVenueReposi
             ["description"] = command.Description,
             ["address"] = command.Address,
             ["zone"] = command.Zone,
-            ["location"] = new BsonDocument
-            {
-                ["type"] = "Point",
-                ["coordinates"] = new BsonArray(command.Coordinates.Select(value => new BsonDouble(value)))
-            },
             ["capacity"] = command.Capacity,
             ["price"] = new BsonDocument
             {
@@ -402,6 +431,15 @@ public sealed class MongoVenueRepository(IMongoDatabase database) : IVenueReposi
             ["createdAt"] = new BsonDateTime(now),
             ["updatedAt"] = new BsonDateTime(now)
         };
+
+        if (command.Coordinates is not null)
+        {
+            document["location"] = new BsonDocument
+            {
+                ["type"] = "Point",
+                ["coordinates"] = new BsonArray(command.Coordinates.Select(value => new BsonDouble(value)))
+            };
+        }
 
         await venues.InsertOneAsync(document, cancellationToken: cancellationToken);
         return Map(document);
@@ -455,6 +493,22 @@ public sealed class MongoVenueRepository(IMongoDatabase database) : IVenueReposi
         var document = await venues.FindOneAndUpdateAsync(
             filter,
             updateBuilder.Combine(updates),
+            new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After },
+            cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("_id", venueId),
+            Builders<BsonDocument>.Filter.Eq("ownerId", ownerId));
+        var update = Builders<BsonDocument>.Update
+            .Set("status", "published")
+            .Set("updatedAt", new BsonDateTime(DateTime.UtcNow));
+        var document = await venues.FindOneAndUpdateAsync(
+            filter,
+            update,
             new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After },
             cancellationToken);
         return document is null ? null : Map(document);

@@ -163,6 +163,9 @@ public sealed class CacheTests
 
         public Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default) =>
             Task.FromResult(Venue);
+
+        public Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Venue);
     }
 
     private sealed class BrokenCache(Exception? failure = null) : IDistributedCache

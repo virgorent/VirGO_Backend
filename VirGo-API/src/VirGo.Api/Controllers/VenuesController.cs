@@ -98,14 +98,14 @@ public sealed class VenuesController(
             request.Description!.Trim(),
             request.Address!.Trim(),
             request.Zone!,
-            request.Location!.Coordinates!,
+            request.Location?.Coordinates,
             request.Capacity!.Value,
             request.Price!.Base!.Value,
             request.Price.Unit!,
             request.Price.MinHours!.Value,
             request.Services!.Select(service => new VenueServiceCommand(
                 service.Name!.Trim(), service.Included!.Value, service.Price!.Value)).ToArray(),
-            request.Photos!.Select(photo => new VenuePhotoCommand(photo.Url!.Trim(), photo.Order!.Value)).ToArray(),
+            request.Photos?.Select(photo => new VenuePhotoCommand(photo.Url!.Trim(), photo.Order!.Value)).ToArray() ?? [],
             request.Categories!,
             request.Amenities!);
 
@@ -127,6 +127,22 @@ public sealed class VenuesController(
             status = venue.Status,
             rating = new { average = venue.RatingAverage, count = venue.RatingCount }
         });
+    }
+
+    [HttpPost("{id}/publish")]
+    [Authorize(Roles = "owner")]
+    public async Task<IActionResult> Publish(string id, CancellationToken cancellationToken)
+    {
+        var ownerId = User.FindFirstValue("sub");
+        if (string.IsNullOrWhiteSpace(ownerId) || !Guid.TryParse(id, out var parsedId))
+        {
+            return NotFound();
+        }
+
+        var venue = await venues.PublishAsync(parsedId.ToString("D"), ownerId, cancellationToken);
+        return venue is null
+            ? NotFound()
+            : Ok(new { id = venue.Id, status = venue.Status });
     }
 
     [HttpPatch("{id}")]
@@ -329,11 +345,11 @@ public sealed class VenuesController(
         {
             errors["zone"] = ["La zona no es válida."];
         }
-        if (request.Location is null
-            || !string.Equals(request.Location.Type, "Point", StringComparison.Ordinal)
-            || request.Location.Coordinates is null
-            || request.Location.Coordinates.Length != 2
-            || request.Location.Coordinates.Any(value => !double.IsFinite(value)))
+        if (request.Location is not null
+            && (!string.Equals(request.Location.Type, "Point", StringComparison.Ordinal)
+                || request.Location.Coordinates is null
+                || request.Location.Coordinates.Length != 2
+                || request.Location.Coordinates.Any(value => !double.IsFinite(value))))
         {
             errors["location"] = ["La ubicación debe ser un punto con exactamente dos coordenadas numéricas."];
         }
@@ -383,11 +399,7 @@ public sealed class VenuesController(
                 }
             }
         }
-        if (request.Photos is null)
-        {
-            errors["photos"] = ["Las fotos son obligatorias, aunque pueden ser una lista vacía."];
-        }
-        else
+        if (request.Photos is not null)
         {
             for (var index = 0; index < request.Photos.Length; index++)
             {

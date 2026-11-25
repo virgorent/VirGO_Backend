@@ -37,7 +37,7 @@ public sealed record CreateVenueCommand(
     string Description,
     string Address,
     string Zone,
-    double[] Coordinates,
+    double[]? Coordinates,
     int Capacity,
     decimal BasePrice,
     string PriceUnit,
