@@ -17,7 +17,7 @@
 |---|---|---|
 | CA-01 | Prueba | ⏳ |
 | CA-02 | Prueba | ⏳ |
-| CA-03 | Prueba | ⏳ |
+| CA-03 | `VenueNegativeTests.OwnerCannotDeleteAnotherOwnersBlock`, `OwnerCannotDeleteABlockThroughTheirOwnVenueRoute`, `DeletingAnUnknownOrAlreadyDeletedBlockIsNotFound` | ✅ |
 
 ## 3. Pruebas
 
