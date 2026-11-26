@@ -5,7 +5,7 @@ using VirGo.Domain.Marketplace;
 
 namespace VirGo.Application.Marketplace;
 
-public sealed class BookingHandler(IVenueRepository venues, IBookingRepository bookings, IClock clock, IJobPublisher jobs)
+public sealed class BookingHandler(IVenueRepository venues, IBookingRepository bookings, IQuoteRepository quotes, IClock clock, IJobPublisher jobs)
 {
     public async Task<BookingCreationResult> HandleAsync(CreateBookingCommand command, CancellationToken cancellationToken = default)
     {
@@ -40,11 +40,24 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
             return new(null, true);
         }
 
+        // Con cotización, el precio es el que respondió el propietario y la fecha es la cotizada.
+        Quote? quote = null;
+        if (!string.IsNullOrWhiteSpace(command.QuoteId))
+        {
+            quote = await quotes.FindVisibleAsync(command.QuoteId, command.ClientId, [], cancellationToken);
+            if (!IsBookable(quote, command, venue.Id))
+            {
+                return new(null, true);
+            }
+        }
+
         var billingUnits = string.Equals(venue.PriceUnit, "day", StringComparison.OrdinalIgnoreCase)
             ? (int)Math.Ceiling(command.Hours / 24m)
             : command.Hours;
-        var total = venue.BasePrice * billingUnits;
-        var deposit = command.Deposit ?? Math.Round(total * 0.30m, 2, MidpointRounding.AwayFromZero);
+        var total = quote?.Response?.Total ?? venue.BasePrice * billingUnits;
+        var deposit = command.Deposit
+            ?? quote?.Response?.Deposit
+            ?? Math.Round(total * 0.30m, 2, MidpointRounding.AwayFromZero);
         if (deposit < 0 || deposit > total)
         {
             return new(null, true);
@@ -79,6 +92,12 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
             return new(await bookings.FindByIdempotencyKeyAsync(command.ClientId, command.IdempotencyKey, cancellationToken), false);
         }
 
+        if (quote is not null)
+        {
+            // Reservar con la cotización equivale a aceptarla; si otro intento ya la aceptó, se conserva.
+            await quotes.UpdateAsync(Accepted(quote, now), "answered", cancellationToken);
+        }
+
         await jobs.PublishAsync(
             new JobMessage(
                 JobTypes.BookingCreated,
@@ -94,4 +113,33 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
 
         return new(booking, false);
     }
+
+    private static bool IsBookable(Quote? quote, CreateBookingCommand command, string venueId) =>
+        quote is not null
+        && quote.ClientId == command.ClientId
+        && quote.Status == "answered"
+        && quote.Response is not null
+        && string.Equals(quote.TargetType, "venue", StringComparison.OrdinalIgnoreCase)
+        && quote.TargetId == venueId
+        && quote.EventDate == command.Date;
+
+    private static Quote Accepted(Quote quote, DateTime now) => new()
+    {
+        Id = quote.Id,
+        ClientId = quote.ClientId,
+        ClientName = quote.ClientName,
+        TargetType = quote.TargetType,
+        TargetId = quote.TargetId,
+        TargetName = quote.TargetName,
+        EventId = quote.EventId,
+        EventType = quote.EventType,
+        EventDate = quote.EventDate,
+        Guests = quote.Guests,
+        RequestedServices = quote.RequestedServices,
+        Message = quote.Message,
+        Response = quote.Response,
+        Status = "accepted",
+        CreatedAt = quote.CreatedAt,
+        UpdatedAt = now
+    };
 }
