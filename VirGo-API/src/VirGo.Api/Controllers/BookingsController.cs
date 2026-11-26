@@ -58,7 +58,7 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
 
         return result.Booking is null
             ? NotFound()
-            : Created($"/api/v1/bookings/{result.Booking.Id}", result.Booking);
+            : Created($"/api/v1/bookings/{result.Booking.Id}", BookingResponse.From(result.Booking));
     }
 
     [HttpGet]
@@ -68,7 +68,7 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
         if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
         var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
         var result = await bookings.ListVisibleAsync(userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
-        return Ok(new { data = result });
+        return Ok(new { data = result.Select(BookingResponse.From) });
     }
 
     [HttpGet("{id}")]
@@ -78,7 +78,7 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
         if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(id, out var parsedId)) return NotFound();
         var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
         var booking = await bookings.FindVisibleAsync(parsedId.ToString("D"), userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
-        return booking is null ? NotFound() : Ok(booking);
+        return booking is null ? NotFound() : Ok(BookingResponse.From(booking));
     }
 
     [HttpGet("by-folio/{folio}")]
@@ -88,7 +88,7 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
         if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(folio) || folio.Length > 32) return NotFound();
         var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
         var booking = await bookings.FindByFolioVisibleAsync(folio, userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
-        return booking is null ? NotFound() : Ok(booking);
+        return booking is null ? NotFound() : Ok(BookingResponse.From(booking));
     }
 
 }
