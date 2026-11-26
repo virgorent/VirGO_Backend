@@ -20,6 +20,8 @@ public sealed class VenueNegativeTests(ApiFactory factory) : IClassFixture<ApiFa
     private const string UnknownVenueId = "99999999-9999-4999-8999-999999999999";
     private const string PrivateVenueName = "Salon privado de otra persona";
     private static readonly string[] VenueCategories = ["Salon"];
+    private static readonly string[] InvalidCategories = ["Castillo"];
+    private static readonly string[] InvalidAmenities = ["Helipuerto"];
 
     // ---------- Venues: 403 por rol ----------
 
@@ -132,8 +134,8 @@ public sealed class VenueNegativeTests(ApiFactory factory) : IClassFixture<ApiFa
             price = new { @base = -1m, unit = "week", minHours = 0 },
             services = new[] { new { name = "", included = (bool?)null, price = -5m } },
             photos = new[] { new { url = "", order = -1 } },
-            categories = new[] { "Castillo" },
-            amenities = new[] { "Helipuerto" }
+            categories = InvalidCategories,
+            amenities = InvalidAmenities
         });
 
         using var json = await AssertProblemAsync(response, HttpStatusCode.BadRequest);
