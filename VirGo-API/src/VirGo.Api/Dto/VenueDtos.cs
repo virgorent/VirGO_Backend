@@ -9,8 +9,8 @@ public sealed record CreateVenueRequest(
     VenueLocationRequest? Location,
     int? Capacity,
     VenuePriceRequest? Price,
-    VenueServiceRequest[]? Services,
-    VenuePhotoRequest[]? Photos,
+    VenueServiceRequest?[]? Services,
+    VenuePhotoRequest?[]? Photos,
     string[]? Categories,
     string[]? Amenities);
 
@@ -23,8 +23,8 @@ public sealed record PatchVenueRequest(
     VenueLocationRequest? Location,
     int? Capacity,
     VenuePriceRequest? Price,
-    VenueServiceRequest[]? Services,
-    VenuePhotoRequest[]? Photos,
+    VenueServiceRequest?[]? Services,
+    VenuePhotoRequest?[]? Photos,
     string[]? Categories,
     string[]? Amenities);
 
