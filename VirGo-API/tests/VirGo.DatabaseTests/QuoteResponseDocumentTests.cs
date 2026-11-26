@@ -49,7 +49,7 @@ public sealed class QuoteResponseDocumentTests
         using var schema = LoadQuotesSchema();
         var note = schema.RootElement.GetProperty("validator").GetProperty("$jsonSchema").GetProperty("properties")
             .GetProperty("response").GetProperty("properties").GetProperty("note");
-        Assert.Equal(note.GetProperty("maxLength").GetInt32(), QuoteResponseDocument.MaxNoteLength);
+        Assert.Equal(QuoteResponseDocument.MaxNoteLength, note.GetProperty("maxLength").GetInt32());
     }
 
     [Fact]
