@@ -16,6 +16,7 @@
 | CA | Evidencia | Estado |
 |---|---|---|
 | CA-01 | `VerticalSliceTests.PublicVenueAvailabilityHidesInternalBookingDetails` | ✅ |
+| RF-03 (#50) | `AvailabilityLimitTests`: 1, 365 y 366 días → 200; 367 días → 400 (incluye años bisiestos) | ✅ |
 
 ## 3. Pruebas
 

@@ -13,6 +13,8 @@ public sealed class VenuesController(
     IVenueRepository venues,
     IVenueAvailabilityRepository availability) : ControllerBase
 {
+    // Spec 031 RF-03: from y to son inclusivos y el rango cubre como máximo 366 días.
+    private const int MaxAvailabilityRangeDays = 366;
     private static readonly string[] Zones = ["Juriquilla", "Centro", "El Refugio", "Santa Fe", "Antea", "Jurica", "Corregidora", "El Marqués"];
     private static readonly string[] Categories = ["Salon", "Jardin", "Terraza", "Hacienda", "Rooftop", "Salon de eventos"];
     private static readonly string[] Amenities = ["Estacionamiento", "Cocina", "Aire acondicionado", "Pista de baile", "Sonido", "Pantalla LED"];
@@ -280,11 +282,11 @@ public sealed class VenuesController(
                 ["range"] = ["La fecha inicial no puede ser posterior a la fecha final."]
             });
         }
-        if (to.DayNumber - from.DayNumber > 366)
+        if (to.DayNumber - from.DayNumber + 1 > MaxAvailabilityRangeDays)
         {
             return ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal)
             {
-                ["range"] = ["El rango no puede superar 366 días."]
+                ["range"] = [$"El rango no puede superar {MaxAvailabilityRangeDays} días, contando ambas fechas."]
             });
         }
 
