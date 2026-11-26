@@ -115,6 +115,29 @@ public sealed class QuoteResponseTests(ApiFactory factory) : IClassFixture<ApiFa
         Assert.False(errors.TryGetProperty("eventType", out _));
     }
 
+    [Fact]
+    public async Task QuoteResponsesDoNotExposeTheClientId()
+    {
+        using var ownerClient = factory.CreateClient();
+        ownerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await CreateUserTokenAsync(UserRole.Owner));
+        var venueId = await CreatePublishedVenueAsync(ownerClient, "Salon Privado");
+        var quoteId = await CreateClientQuoteAsync(venueId);
+
+        using var answered = await ownerClient.PostAsJsonAsync($"/api/v1/quotes/{quoteId}/response", new { total = 18000m });
+        using var detail = await ownerClient.GetAsync($"/api/v1/quotes/{quoteId}");
+        using var list = await ownerClient.GetAsync("/api/v1/quotes");
+
+        foreach (var response in new[] { answered, detail })
+        {
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.False(json.RootElement.TryGetProperty("clientId", out _));
+            Assert.True(json.RootElement.TryGetProperty("clientName", out _));
+        }
+        using var listJson = JsonDocument.Parse(await list.Content.ReadAsStringAsync());
+        Assert.All(listJson.RootElement.GetProperty("data").EnumerateArray(), item => Assert.False(item.TryGetProperty("clientId", out _)));
+    }
+
     private static async Task<string> CreatePublishedVenueAsync(HttpClient ownerClient, string name)
     {
         using var create = await ownerClient.PostAsJsonAsync("/api/v1/venues", new

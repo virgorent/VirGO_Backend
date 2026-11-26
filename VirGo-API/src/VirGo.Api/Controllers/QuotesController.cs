@@ -49,7 +49,7 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
 
         return result.Quote is null
             ? NotFound()
-            : Created($"/api/v1/quotes/{result.Quote.Id}", result.Quote);
+            : Created($"/api/v1/quotes/{result.Quote.Id}", QuoteView.From(result.Quote));
     }
 
     [HttpGet]
@@ -59,7 +59,7 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
         if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
         var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
         var result = await quotes.ListVisibleAsync(userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
-        return Ok(new { data = result });
+        return Ok(new { data = result.Select(QuoteView.From) });
     }
 
     [HttpGet("{id}")]
@@ -69,7 +69,7 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
         if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(id, out var parsedId)) return NotFound();
         var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
         var quote = await quotes.FindVisibleAsync(parsedId.ToString("D"), userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
-        return quote is null ? NotFound() : Ok(quote);
+        return quote is null ? NotFound() : Ok(QuoteView.From(quote));
     }
 
     // Hoy solo existen cotizaciones a salón: responde el propietario del salón destino.
@@ -90,7 +90,7 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
         if (quote is null || !ownedVenues.Any(venue => venue.Id == quote.TargetId)) return NotFound();
         if (quote.Status != "sent") return Conflict();
         var updated = await quotes.UpdateAsync(Transition(quote, "answered", new QuoteResponse { Total = request.Total.Value, Deposit = request.Deposit, Message = request.Message }), "sent", cancellationToken);
-        return updated is null ? Conflict() : Ok(updated);
+        return updated is null ? Conflict() : Ok(QuoteView.From(updated));
     }
 
     [HttpPost("{id}/accept")]
@@ -117,7 +117,7 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
         var expectedStatus = allowedStatuses.Length == 0 ? "answered" : allowedStatuses.FirstOrDefault(value => value == quote.Status);
         if (expectedStatus is null) return Conflict();
         var updated = await quotes.UpdateAsync(Transition(quote, status), expectedStatus, cancellationToken);
-        return updated is null ? Conflict() : Ok(updated);
+        return updated is null ? Conflict() : Ok(QuoteView.From(updated));
     }
 
     private static Quote Transition(Quote quote, string status, QuoteResponse? response = null) => new()
