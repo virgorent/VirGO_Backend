@@ -252,6 +252,24 @@ public sealed class InMemoryBookingRepository : IBookingRepository
     private readonly Dictionary<string, Booking> idempotentBookings = new(StringComparer.Ordinal);
     private readonly Lock gate = new();
 
+    public Task<IReadOnlyList<Booking>> ListVisibleAsync(string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult<IReadOnlyList<Booking>>(bookings.Where(booking => booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal)).OrderByDescending(booking => booking.CreatedAt).Take(100).ToArray());
+    }
+
+    public Task<Booking?> FindVisibleAsync(string id, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(bookings.FirstOrDefault(booking => booking.Id == id && (booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal))));
+    }
+
+    public Task<Booking?> FindByFolioVisibleAsync(string folio, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(bookings.FirstOrDefault(booking => booking.Folio == folio && (booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal))));
+    }
+
     public Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -583,6 +601,32 @@ public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRe
 {
     private readonly IMongoCollection<BsonDocument> bookings = database.GetCollection<BsonDocument>("bookings");
     private readonly IMongoCollection<BsonDocument> counters = database.GetCollection<BsonDocument>("counters");
+
+    public async Task<IReadOnlyList<Booking>> ListVisibleAsync(string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var filters = new List<FilterDefinition<BsonDocument>> { Builders<BsonDocument>.Filter.Eq("clientId", userId) };
+        if (venueIds.Count > 0) filters.Add(Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var documents = await bookings.Find(Builders<BsonDocument>.Filter.Or(filters)).SortByDescending(document => document["createdAt"]).Limit(100).ToListAsync(cancellationToken);
+        return documents.Select(Map).ToArray();
+    }
+
+    public async Task<Booking?> FindVisibleAsync(string id, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", userId);
+        if (venueIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), visibility);
+        var document = await bookings.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Booking?> FindByFolioVisibleAsync(string folio, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", userId);
+        if (venueIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("folio", folio), visibility);
+        var document = await bookings.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
 
     public async Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
     {
