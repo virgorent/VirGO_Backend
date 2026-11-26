@@ -514,12 +514,7 @@ public sealed class MongoQuoteRepository(IMongoDatabase database) : IQuoteReposi
         }
         if (quote.Response is not null)
         {
-            document["response"] = new BsonDocument
-            {
-                ["total"] = new BsonDecimal128(quote.Response.Total),
-                ["deposit"] = quote.Response.Deposit is null ? BsonNull.Value : new BsonDecimal128(quote.Response.Deposit.Value),
-                ["message"] = quote.Response.Message is null ? BsonNull.Value : quote.Response.Message
-            };
+            document["response"] = QuoteResponseDocument.From(quote.Response, quote.UpdatedAt);
         }
 
         return quotes.InsertOneAsync(document, cancellationToken: cancellationToken);
@@ -552,14 +547,11 @@ public sealed class MongoQuoteRepository(IMongoDatabase database) : IQuoteReposi
     {
         var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", quote.Id), Builders<BsonDocument>.Filter.Eq("status", expectedStatus));
         var update = Builders<BsonDocument>.Update.Set("status", quote.Status).Set("updatedAt", new BsonDateTime(quote.UpdatedAt));
-        if (quote.Response is not null)
+        // Solo al responder se escribe la respuesta; aceptar, rechazar o vencer conserva la guardada
+        // (y su answeredAt).
+        if (quote.Response is not null && quote.Status == "answered")
         {
-            update = update.Set("response", new BsonDocument
-            {
-                ["total"] = new BsonDecimal128(quote.Response.Total),
-                ["deposit"] = quote.Response.Deposit is null ? BsonNull.Value : new BsonDecimal128(quote.Response.Deposit.Value),
-                ["message"] = quote.Response.Message is null ? BsonNull.Value : quote.Response.Message
-            });
+            update = update.Set("response", QuoteResponseDocument.From(quote.Response, quote.UpdatedAt));
         }
         var result = await quotes.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
         return result.ModifiedCount == 0 ? null : quote;
@@ -582,19 +574,13 @@ public sealed class MongoQuoteRepository(IMongoDatabase database) : IQuoteReposi
             Guests = document.GetValue("guests", 0).ToInt32(),
             RequestedServices = document.GetValue("requestedServices", new BsonArray()).AsBsonArray.Select(value => value.AsString).ToArray(),
             Message = document.TryGetValue("message", out var message) ? message.AsString : null,
-            Response = document.TryGetValue("response", out var response) && response.IsBsonDocument ? MapResponse(response.AsBsonDocument) : null,
+            Response = document.TryGetValue("response", out var response) && response.IsBsonDocument ? QuoteResponseDocument.To(response.AsBsonDocument) : null,
             Status = document.GetValue("status", "sent").AsString,
             CreatedAt = document.GetValue("createdAt").ToUniversalTime(),
             UpdatedAt = document.GetValue("updatedAt").ToUniversalTime()
         };
     }
 
-    private static QuoteResponse MapResponse(BsonDocument document) => new()
-    {
-        Total = document.GetValue("total", 0m).ToDecimal(),
-        Deposit = document.TryGetValue("deposit", out var deposit) && !deposit.IsBsonNull ? deposit.ToDecimal() : null,
-        Message = document.TryGetValue("message", out var message) && !message.IsBsonNull ? message.AsString : null
-    };
 }
 
 public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRepository
