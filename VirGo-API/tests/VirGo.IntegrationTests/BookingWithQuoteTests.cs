@@ -35,6 +35,26 @@ public sealed class BookingWithQuoteTests(ApiFactory factory) : IClassFixture<Ap
     }
 
     [Fact]
+    public async Task ConcurrentBookingsWithTheSameQuoteCreateOnlyOne()
+    {
+        using var client = await ClientWithQuoteAsync("2027-08-14");
+        var quoteId = await AnswerLatestQuoteAsync(30000m, null);
+
+        // Diez intentos simultáneos con la misma cotización y claves distintas: solo uno puede reservar.
+        var responses = await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => BookAsync(client, quoteId, "2027-08-14")));
+        try
+        {
+            Assert.Equal(1, responses.Count(response => response.StatusCode == HttpStatusCode.Created));
+            Assert.All(responses.Where(response => response.StatusCode != HttpStatusCode.Created),
+                response => Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode));
+        }
+        finally
+        {
+            foreach (var response in responses) response.Dispose();
+        }
+    }
+
+    [Fact]
     public async Task BookingRejectsAQuoteThatIsNotAnsweredOrForAnotherDate()
     {
         using var client = await ClientWithQuoteAsync("2027-07-10");

@@ -83,6 +83,15 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
             CreatedAt = now,
             UpdatedAt = now
         };
+        // Reservar con la cotización equivale a aceptarla. Se aparta antes de guardar la reserva
+        // (de answered a accepted, solo si sigue answered): así una cotización no genera dos reservas
+        // aunque lleguen varias peticiones a la vez con claves distintas.
+        if (quote is not null && await quotes.UpdateAsync(Accepted(quote, now), "answered", cancellationToken) is null)
+        {
+            var replay = await bookings.FindByIdempotencyKeyAsync(command.ClientId, command.IdempotencyKey, cancellationToken);
+            return replay is not null ? new(replay, false) : new(null, true);
+        }
+
         try
         {
             await bookings.AddAsync(booking, cancellationToken);
@@ -91,11 +100,11 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
         {
             return new(await bookings.FindByIdempotencyKeyAsync(command.ClientId, command.IdempotencyKey, cancellationToken), false);
         }
-
-        if (quote is not null)
+        catch when (quote is not null)
         {
-            // Reservar con la cotización equivale a aceptarla; si otro intento ya la aceptó, se conserva.
-            await quotes.UpdateAsync(Accepted(quote, now), "answered", cancellationToken);
+            // La reserva no se guardó: la cotización vuelve a estar disponible.
+            await quotes.UpdateAsync(Reverted(quote, clock.UtcNow), "accepted", CancellationToken.None);
+            throw;
         }
 
         await jobs.PublishAsync(
@@ -123,7 +132,11 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
         && quote.TargetId == venueId
         && quote.EventDate == command.Date;
 
-    private static Quote Accepted(Quote quote, DateTime now) => new()
+    private static Quote Accepted(Quote quote, DateTime now) => WithStatus(quote, "accepted", now);
+
+    private static Quote Reverted(Quote quote, DateTime now) => WithStatus(quote, "answered", now);
+
+    private static Quote WithStatus(Quote quote, string status, DateTime now) => new()
     {
         Id = quote.Id,
         ClientId = quote.ClientId,
@@ -138,7 +151,7 @@ public sealed class BookingHandler(IVenueRepository venues, IBookingRepository b
         RequestedServices = quote.RequestedServices,
         Message = quote.Message,
         Response = quote.Response,
-        Status = "accepted",
+        Status = status,
         CreatedAt = quote.CreatedAt,
         UpdatedAt = now
     };
