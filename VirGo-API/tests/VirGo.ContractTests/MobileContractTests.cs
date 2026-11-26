@@ -19,6 +19,18 @@ public sealed class MobileContractTests(ContractApiFactory factory) : IClassFixt
     [InlineData("/api/v1/venues", "get")]
     [InlineData("/api/v1/quotes", "post")]
     [InlineData("/api/v1/bookings", "post")]
+    [InlineData("/api/v1/events", "get")]
+    [InlineData("/api/v1/events", "post")]
+    [InlineData("/api/v1/events/{id}", "get")]
+    [InlineData("/api/v1/events/{id}", "patch")]
+    [InlineData("/api/v1/events/{id}/guests", "get")]
+    [InlineData("/api/v1/events/{id}/guests", "post")]
+    [InlineData("/api/v1/events/{id}/guests/{guestId}", "patch")]
+    [InlineData("/api/v1/events/{id}/guests/{guestId}", "delete")]
+    [InlineData("/api/v1/events/{id}/tasks", "get")]
+    [InlineData("/api/v1/events/{id}/tasks", "post")]
+    [InlineData("/api/v1/events/{id}/tasks/{taskId}", "patch")]
+    [InlineData("/api/v1/events/{id}/tasks/{taskId}", "delete")]
     public async Task OpenApiPublishesEveryEndpoint(string path, string method)
     {
         using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
