@@ -30,6 +30,41 @@ public sealed class QuoteResponseTests(ApiFactory factory) : IClassFixture<ApiFa
         Assert.Equal("answered", body.RootElement.GetProperty("status").GetString());
     }
 
+    [Theory]
+    [InlineData(18000, 20000, null)]
+    [InlineData(18000, -1, null)]
+    [InlineData(18000, null, 1001)]
+    public async Task AnswerOutsideTheStoredLimitsIsRejected(int total, int? deposit, int? messageLength)
+    {
+        using var ownerClient = factory.CreateClient();
+        ownerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await CreateUserTokenAsync(UserRole.Owner));
+        var venueId = await CreatePublishedVenueAsync(ownerClient, "Salon Limites");
+        var quoteId = await CreateClientQuoteAsync(venueId);
+
+        using var response = await ownerClient.PostAsJsonAsync($"/api/v1/quotes/{quoteId}/response", new
+        {
+            total = (decimal)total,
+            deposit = (decimal?)deposit,
+            message = messageLength is null ? null : new string('a', messageLength.Value)
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AnswerAtTheNoteLimitIsAccepted()
+    {
+        using var ownerClient = factory.CreateClient();
+        ownerClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await CreateUserTokenAsync(UserRole.Owner));
+        var venueId = await CreatePublishedVenueAsync(ownerClient, "Salon Nota Larga");
+        var quoteId = await CreateClientQuoteAsync(venueId);
+
+        using var response = await ownerClient.PostAsJsonAsync($"/api/v1/quotes/{quoteId}/response",
+            new { total = 18000m, deposit = 18000m, message = new string('a', 1000) });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
     [Fact]
     public async Task OwnerCannotAnswerAQuoteForAnotherOwnersVenue()
     {

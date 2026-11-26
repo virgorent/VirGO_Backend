@@ -17,5 +17,8 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\VirGo.Infrastructure\VirGo.Infrastructure.csproj" />
+  </ItemGroup>
 
 </Project>

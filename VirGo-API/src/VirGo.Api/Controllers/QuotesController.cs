@@ -78,7 +78,9 @@ public sealed class QuotesController(QuoteHandler handler, IUserRepository users
     public async Task<IActionResult> Respond(string id, QuoteResponseRequest? request, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue("sub");
-        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(id, out var parsedId) || request?.Total is null || request.Total <= 0 || request.Message?.Length > 2000)
+        // La nota se guarda en quotes.response.note (máximo 1000 en db/schema/quotes.json).
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(id, out var parsedId) || request?.Total is null || request.Total <= 0
+            || request.Deposit < 0 || request.Deposit > request.Total || request.Message?.Length > 1000)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "La respuesta de cotización es inválida.");
         }
