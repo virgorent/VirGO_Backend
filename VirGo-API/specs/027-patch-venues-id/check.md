@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `027-patch-venues-id` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,18 +15,19 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
-| CA-03 | Prueba | ⏳ |
-| CA-04 | Prueba | ⏳ |
+| CA-01 | `VerticalSliceTests.OwnerCanPatchTheirVenueAndServerFieldsRemainProtected` | ✅ |
+| CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
+| CA-03 | `VerticalSliceTests.OwnerCannotPatchAnotherOwnersVenue` | ✅ |
+| CA-04 | `VerticalSliceTests.VenuePatchRejectsOversizedInputAsProblemDetails` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | `CacheTests`: 35/35 | ✅ |
+| Integración | `VerticalSliceTests`: 64/64 | ✅ |
+| Contrato | `MobileContractTests`: 20/20 | ✅ |
+| Seguridad | `InputSecurityTests`: 31/31 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | Límite, límite + 1 y 1500 caracteres | ⏳ |

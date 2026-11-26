@@ -5,7 +5,7 @@
 | Módulo | `029-post-venues-id-publish` |
 | Endpoint | `POST /api/v1/venues/:id/publish` |
 | Versión | 1.0.0 |
-| Estado | Borrador; **requiere decisión** |
+| Estado | Aprobado por Móvil; implementación local |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -44,4 +44,4 @@ Aplican los del Art. IV (contrato), V (seguridad), VI.6 (longitudes) y VII (cost
 
 | # | Pregunta | Responsable |
 |---|---|---|
-| P-01 | ¿Quién aprueba la publicación? No existe rol de administrador. | Equipo |
+| P-01 | Publica directamente el propietario; no requiere administrador en el MVP. | Resuelto |

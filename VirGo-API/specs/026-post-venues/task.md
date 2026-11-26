@@ -5,7 +5,7 @@
 | Módulo | `026-post-venues` |
 | Endpoint | `POST /api/v1/venues` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -16,6 +16,6 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T2601 | Implementar `POST /api/v1/venues` | `000`, `010` | `dev-dotnet` | Prueba de integración: 201 (CA-01) | ⏳ |
+| T2601 | Implementar `POST /api/v1/venues` | `000`, `010` | `dev-dotnet` | Prueba de integración: 201 (CA-01) | ✅ |
 | T2602 | Pruebas de repositorio, integración y seguridad | T2601 | `qa` + `seguridad` | Todos los CA en verde | ⏳ |
 | T2603 | PR, despliegue, humo y entrega del contrato a Móvil | T2602 | `devops-aws` + `arquitecto` | Humo por HTTPS; `check.md` completo | ⏳ |

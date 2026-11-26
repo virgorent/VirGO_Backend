@@ -3,13 +3,13 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `029-post-venues-id-publish` |
-| Estado del spec | Borrador; **requiere decisión** |
-| Revisó | — |
+| Estado del spec | Aprobado por Móvil; implementación local |
+| Revisó | César, equipo Móvil |
 
 ## 1. Especificación
 
-- [ ] Otra persona revisó el spec.
-- [ ] Preguntas abiertas respondidas.
+- [x] Otra persona revisó el spec.
+- [x] Preguntas abiertas respondidas.
 
 ## 2. Criterios de aceptación
 

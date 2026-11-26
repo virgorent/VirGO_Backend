@@ -13,6 +13,7 @@ namespace VirGo.IntegrationTests;
 public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFactory>
 {
     private static readonly string[] RequestedServices = ["Banquete"];
+    private static readonly string[] VenueCategories = ["Salon"];
 
     [Fact]
     public async Task RegisterCreatesAClientAccount()
@@ -128,6 +129,41 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         Assert.Empty(json.RootElement.GetProperty("data").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task OwnerCanCreateAndPublishVenueWithoutLocationOrPhotos()
+    {
+        using var client = factory.CreateClient();
+        var token = await CreateUserTokenAsync(UserRole.Owner);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var create = await client.PostAsJsonAsync("/api/v1/venues", new
+        {
+            name = "Salon MVP",
+            shortName = "Salon MVP",
+            description = "Un salon creado sin mapa ni fotos para el MVP.",
+            address = "Centro, Querétaro",
+            zone = "Centro",
+            capacity = 80,
+            price = new { @base = 1200m, unit = "hour", minHours = 2 },
+            services = Array.Empty<object>(),
+            categories = VenueCategories,
+            amenities = Array.Empty<string>()
+        });
+        using var created = JsonDocument.Parse(await create.Content.ReadAsStringAsync());
+        var venueId = created.RootElement.GetProperty("id").GetString();
+
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        Assert.Empty(created.RootElement.GetProperty("photos").EnumerateArray());
+        Assert.Equal("draft", created.RootElement.GetProperty("status").GetString());
+
+        using var publish = await client.PostAsync($"/api/v1/venues/{venueId}/publish", null);
+        using var published = JsonDocument.Parse(await publish.Content.ReadAsStringAsync());
+
+        Assert.Equal(HttpStatusCode.OK, publish.StatusCode);
+        Assert.Equal(venueId, published.RootElement.GetProperty("id").GetString());
+        Assert.Equal("published", published.RootElement.GetProperty("status").GetString());
     }
 
     [Fact]

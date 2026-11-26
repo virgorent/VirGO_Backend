@@ -51,6 +51,7 @@ public static class DependencyInjection
             services.AddSingleton<IUserRepository, InMemoryUserRepository>();
             services.AddSingleton<ISessionRepository, InMemorySessionRepository>();
             services.AddSingleton<IVenueRepository, InMemoryVenueRepository>();
+            services.AddSingleton<IVenueAvailabilityRepository, InMemoryVenueAvailabilityRepository>();
             services.AddSingleton<InMemoryQuoteRepository>();
             services.AddSingleton<IQuoteRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryQuoteRepository>());
             services.AddSingleton<IQuoteExpiry>(serviceProvider => serviceProvider.GetRequiredService<InMemoryQuoteRepository>());
@@ -62,6 +63,7 @@ public static class DependencyInjection
             services.AddSingleton<IUserRepository, MongoUserRepository>();
             services.AddSingleton<ISessionRepository, MongoSessionRepository>();
             services.AddSingleton<IVenueRepository, MongoVenueRepository>();
+            services.AddSingleton<IVenueAvailabilityRepository, MongoVenueAvailabilityRepository>();
             services.AddSingleton<IQuoteRepository, MongoQuoteRepository>();
             services.AddSingleton<IQuoteExpiry, MongoQuoteExpiry>();
             services.AddSingleton<INoticeRepository, MongoNoticeRepository>();

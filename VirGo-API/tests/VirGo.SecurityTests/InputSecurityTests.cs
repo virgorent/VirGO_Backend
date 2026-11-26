@@ -133,6 +133,8 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var text = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"role\":\"client\"", text, StringComparison.Ordinal);
+        Assert.Contains("\"isVerified\":false", text, StringComparison.Ordinal);
         Assert.DoesNotContain("passwordHash", text, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("11111111-1111", text, StringComparison.Ordinal);
     }

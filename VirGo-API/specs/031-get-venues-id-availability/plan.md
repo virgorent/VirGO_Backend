@@ -5,7 +5,7 @@
 | Módulo | `031-get-venues-id-availability` |
 | Endpoint | `GET /api/v1/venues/:id/availability` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Disponibilidad de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -16,13 +16,14 @@
 
 | Método | Ruta | Auth | Éxito | Errores |
 |---|---|---|---|---|
-| `GET` | `/api/v1/venues/:id/availability` | No | 200 | 404, 429, 500 |
+| `GET` | `/api/v1/venues/:id/availability?from=yyyy-MM-dd&to=yyyy-MM-dd` | No | 200 | 400, 404, 429, 500 |
 
 El cuerpo exacto se toma de `API-HANDOFF.md` §9.5. Los errores siguen el Art. IV.3 (Problem Details), no el formato propuesto en ese documento.
 
 ## 2. Reglas
 
 - No expone notas ni `bookingId` a personas no autorizadas.
+- `from` y `to` son inclusivos y el rango no puede superar 366 días.
 
 ## 3. Datos
 

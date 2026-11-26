@@ -9,40 +9,142 @@ namespace VirGo.Infrastructure;
 
 public sealed class InMemoryVenueRepository : IVenueRepository
 {
-    private readonly Venue venue = new()
-    {
-        Id = "11111111-1111-4111-8111-111111111111",
-        OwnerId = "22222222-2222-4222-8222-222222222222",
-        Name = "VirGo Demo Venue",
-        ShortName = "Demo Venue",
-        Description = "Venue de demostración para el flujo inicial de VirGo.",
-        Address = "Centro, Querétaro",
-        Zone = "Centro",
-        Capacity = 150,
-        BasePrice = 45000m,
-        PriceUnit = "day",
-        MinimumHours = 1,
-        Categories = ["Salon"],
-        Amenities = ["Estacionamiento"],
-        Photos = [],
-        Status = "published",
-        RatingAverage = 5m,
-        RatingCount = 1
-    };
+    private readonly List<Venue> venues =
+    [
+        new Venue
+        {
+            Id = "11111111-1111-4111-8111-111111111111",
+            OwnerId = "22222222-2222-4222-8222-222222222222",
+            Name = "VirGo Demo Venue",
+            ShortName = "Demo Venue",
+            Description = "Venue de demostración para el flujo inicial de VirGo.",
+            Address = "Centro, Querétaro",
+            Zone = "Centro",
+            Capacity = 150,
+            BasePrice = 45000m,
+            PriceUnit = "day",
+            MinimumHours = 1,
+            Categories = ["Salon"],
+            Amenities = ["Estacionamiento"],
+            Photos = [],
+            Status = "published",
+            RatingAverage = 5m,
+            RatingCount = 1
+        }
+    ];
 
     public Task<IReadOnlyList<Venue>> ListPublishedAsync(string? zone, string? category, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var matches = string.IsNullOrWhiteSpace(zone) || string.Equals(zone, venue.Zone, StringComparison.OrdinalIgnoreCase);
-        matches &= string.IsNullOrWhiteSpace(category) || venue.Categories.Contains(category, StringComparer.OrdinalIgnoreCase);
-        return Task.FromResult<IReadOnlyList<Venue>>(matches ? [venue] : []);
+        var result = venues.Where(venue =>
+            (string.IsNullOrWhiteSpace(zone) || string.Equals(zone, venue.Zone, StringComparison.OrdinalIgnoreCase))
+            && (string.IsNullOrWhiteSpace(category) || venue.Categories.Contains(category, StringComparer.OrdinalIgnoreCase))
+            && venue.Status == "published").ToArray();
+        return Task.FromResult<IReadOnlyList<Venue>>(result);
     }
 
     public Task<Venue?> FindPublishedAsync(string id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult<Venue?>(venue.Id == id ? venue : null);
+        return Task.FromResult<Venue?>(venues.FirstOrDefault(venue => venue.Id == id && venue.Status == "published"));
     }
+
+    public Task<IReadOnlyList<Venue>> ListOwnedAsync(string ownerId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<IReadOnlyList<Venue>>(venues.Where(venue => venue.OwnerId == ownerId).ToArray());
+    }
+
+    public Task<Venue> CreateAsync(CreateVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var venue = ToVenue(command, Guid.NewGuid().ToString("D"));
+        venues.Add(venue);
+        return Task.FromResult(venue);
+    }
+
+    public Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = venues.FindIndex(venue => venue.Id == command.VenueId && venue.OwnerId == command.OwnerId);
+        if (index < 0) return Task.FromResult<Venue?>(null);
+
+        var current = venues[index];
+        var updated = new Venue
+        {
+            Id = current.Id,
+            OwnerId = current.OwnerId,
+            Name = command.Name ?? current.Name,
+            ShortName = command.ShortName ?? current.ShortName,
+            Description = command.Description ?? current.Description,
+            Address = command.Address ?? current.Address,
+            Zone = command.Zone ?? current.Zone,
+            Capacity = command.Capacity ?? current.Capacity,
+            BasePrice = command.BasePrice ?? current.BasePrice,
+            PriceUnit = command.PriceUnit ?? current.PriceUnit,
+            MinimumHours = command.MinimumHours ?? current.MinimumHours,
+            Categories = command.Categories ?? current.Categories,
+            Amenities = command.Amenities ?? current.Amenities,
+            Photos = command.Photos?.Select(photo => photo.Url).ToArray() ?? current.Photos,
+            Status = current.Status,
+            RatingAverage = current.RatingAverage,
+            RatingCount = current.RatingCount
+        };
+        venues[index] = updated;
+        return Task.FromResult<Venue?>(updated);
+    }
+
+    public Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var index = venues.FindIndex(venue => venue.Id == venueId && venue.OwnerId == ownerId);
+        if (index < 0) return Task.FromResult<Venue?>(null);
+
+        var current = venues[index];
+        var published = new Venue
+        {
+            Id = current.Id,
+            OwnerId = current.OwnerId,
+            Name = current.Name,
+            ShortName = current.ShortName,
+            Description = current.Description,
+            Address = current.Address,
+            Zone = current.Zone,
+            Capacity = current.Capacity,
+            BasePrice = current.BasePrice,
+            PriceUnit = current.PriceUnit,
+            MinimumHours = current.MinimumHours,
+            Categories = current.Categories,
+            Amenities = current.Amenities,
+            Photos = current.Photos,
+            Status = "published",
+            RatingAverage = current.RatingAverage,
+            RatingCount = current.RatingCount
+        };
+        venues[index] = published;
+        return Task.FromResult<Venue?>(published);
+    }
+
+    private static Venue ToVenue(CreateVenueCommand command, string id) => new()
+    {
+        Id = id,
+        OwnerId = command.OwnerId,
+        Name = command.Name,
+        ShortName = command.ShortName,
+        Description = command.Description,
+        Address = command.Address,
+        Zone = command.Zone,
+        Capacity = command.Capacity,
+        BasePrice = command.BasePrice,
+        PriceUnit = command.PriceUnit,
+        MinimumHours = command.MinimumHours,
+        Categories = command.Categories,
+        Amenities = command.Amenities,
+        Photos = command.Photos.Select(photo => photo.Url).ToArray(),
+        Status = "draft",
+        RatingAverage = 0m,
+        RatingCount = 0
+    };
 }
 
 public sealed class InMemoryQuoteRepository : IQuoteRepository, IQuoteExpiry
@@ -184,6 +286,121 @@ public sealed class MongoVenueRepository(IMongoDatabase database) : IVenueReposi
             Builders<BsonDocument>.Filter.Eq("_id", id),
             Builders<BsonDocument>.Filter.Eq("status", "published"));
         var document = await venues.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<IReadOnlyList<Venue>> ListOwnedAsync(string ownerId, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("ownerId", ownerId);
+        var documents = await venues.Find(filter).Limit(100).ToListAsync(cancellationToken);
+        return documents.Select(Map).ToArray();
+    }
+
+    public async Task<Venue> CreateAsync(CreateVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        var id = Guid.NewGuid().ToString("D");
+        var now = DateTime.UtcNow;
+        var document = new BsonDocument
+        {
+            ["_id"] = id,
+            ["ownerId"] = command.OwnerId,
+            ["name"] = command.Name,
+            ["shortName"] = command.ShortName,
+            ["description"] = command.Description,
+            ["address"] = command.Address,
+            ["zone"] = command.Zone,
+            ["capacity"] = command.Capacity,
+            ["price"] = new BsonDocument
+            {
+                ["base"] = new BsonDecimal128(command.BasePrice),
+                ["unit"] = command.PriceUnit,
+                ["minHours"] = command.MinimumHours
+            },
+            ["services"] = new BsonArray(command.Services.Select(service => new BsonDocument
+            {
+                ["name"] = service.Name,
+                ["included"] = service.Included,
+                ["price"] = new BsonDecimal128(service.Price)
+            })),
+            ["photos"] = new BsonArray(command.Photos.Select(photo => new BsonDocument
+            {
+                ["url"] = photo.Url,
+                ["order"] = photo.Order
+            })),
+            ["categories"] = new BsonArray(command.Categories),
+            ["amenities"] = new BsonArray(command.Amenities),
+            ["rating"] = new BsonDocument { ["average"] = 0m, ["count"] = 0 },
+            ["verified"] = false,
+            ["status"] = "draft",
+            ["createdAt"] = new BsonDateTime(now),
+            ["updatedAt"] = new BsonDateTime(now)
+        };
+
+        if (command.Coordinates is not null)
+        {
+            document["location"] = new BsonDocument
+            {
+                ["type"] = "Point",
+                ["coordinates"] = new BsonArray(command.Coordinates.Select(value => new BsonDouble(value)))
+            };
+        }
+
+        await venues.InsertOneAsync(document, cancellationToken: cancellationToken);
+        return Map(document);
+    }
+
+    public async Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default)
+    {
+        var updates = new List<UpdateDefinition<BsonDocument>>();
+        var updateBuilder = Builders<BsonDocument>.Update;
+        if (command.Name is not null) updates.Add(updateBuilder.Set("name", command.Name));
+        if (command.ShortName is not null) updates.Add(updateBuilder.Set("shortName", command.ShortName));
+        if (command.Description is not null) updates.Add(updateBuilder.Set("description", command.Description));
+        if (command.Address is not null) updates.Add(updateBuilder.Set("address", command.Address));
+        if (command.Zone is not null) updates.Add(updateBuilder.Set("zone", command.Zone));
+        if (command.Coordinates is not null)
+        {
+            updates.Add(updateBuilder.Set("location", new BsonDocument
+            {
+                ["type"] = "Point",
+                ["coordinates"] = new BsonArray(command.Coordinates.Select(value => new BsonDouble(value)))
+            }));
+        }
+        if (command.Capacity is not null) updates.Add(updateBuilder.Set("capacity", command.Capacity.Value));
+        if (command.BasePrice is not null) updates.Add(updateBuilder.Set("price.base", new BsonDecimal128(command.BasePrice.Value)));
+        if (command.PriceUnit is not null) updates.Add(updateBuilder.Set("price.unit", command.PriceUnit));
+        if (command.MinimumHours is not null) updates.Add(updateBuilder.Set("price.minHours", command.MinimumHours.Value));
+        if (command.Services is not null) updates.Add(updateBuilder.Set("services", new BsonArray(command.Services.Select(service => new BsonDocument
+        {
+            ["name"] = service.Name,
+            ["included"] = service.Included,
+            ["price"] = new BsonDecimal128(service.Price)
+        }))));
+        if (command.Photos is not null) updates.Add(updateBuilder.Set("photos", new BsonArray(command.Photos.Select(photo => new BsonDocument
+        {
+            ["url"] = photo.Url,
+            ["order"] = photo.Order
+        }))));
+        if (command.Categories is not null) updates.Add(updateBuilder.Set("categories", new BsonArray(command.Categories)));
+        if (command.Amenities is not null) updates.Add(updateBuilder.Set("amenities", new BsonArray(command.Amenities)));
+        updates.Add(updateBuilder.Set("updatedAt", new BsonDateTime(DateTime.UtcNow)));
+
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("_id", command.VenueId),
+            Builders<BsonDocument>.Filter.Eq("ownerId", command.OwnerId));
+        var document = await venues.FindOneAndUpdateAsync(filter, updateBuilder.Combine(updates),
+            new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After }, cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("_id", venueId),
+            Builders<BsonDocument>.Filter.Eq("ownerId", ownerId));
+        var update = Builders<BsonDocument>.Update.Set("status", "published").Set("updatedAt", new BsonDateTime(DateTime.UtcNow));
+        var document = await venues.FindOneAndUpdateAsync(filter, update,
+            new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After }, cancellationToken);
         return document is null ? null : Map(document);
     }
 

@@ -5,7 +5,7 @@
 | Módulo | `031-get-venues-id-availability` |
 | Endpoint | `GET /api/v1/venues/:id/availability` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Disponibilidad de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -22,6 +22,7 @@ Mostrar y administrar los días ocupados de cada salón. Este spec cubre solo `G
 |---|---|
 | RF-01 | Disponibilidad de salones: días ocupados o bloqueados en un rango. |
 | RF-02 | No expone notas ni `bookingId` a personas no autorizadas. |
+| RF-03 | El rango se recibe como `from` y `to` en formato `yyyy-MM-dd`, inclusive y con máximo 366 días. |
 
 ## 3. Requerimientos no funcionales
 
