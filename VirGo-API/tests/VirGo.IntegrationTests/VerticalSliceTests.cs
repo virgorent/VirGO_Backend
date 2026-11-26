@@ -319,6 +319,9 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         using var bookingJson = JsonDocument.Parse(await bookingResponse.Content.ReadAsStringAsync());
         var bookingId = bookingJson.RootElement.GetProperty("id").GetString();
         Assert.Equal("pending_payment", bookingJson.RootElement.GetProperty("status").GetString());
+        Assert.False(bookingJson.RootElement.TryGetProperty("clientId", out _));
+        Assert.False(bookingJson.RootElement.TryGetProperty("idempotencyKey", out _));
+        Assert.True(bookingJson.RootElement.TryGetProperty("folio", out _));
 
         using var replayRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/bookings")
         {
