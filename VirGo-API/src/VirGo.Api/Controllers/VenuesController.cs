@@ -311,7 +311,9 @@ public sealed class VenuesController(
     public async Task<IActionResult> Block(string id, CreateVenueBlockRequest? request, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue("sub");
-        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(id, out var parsedId) || request is null || !DateOnly.TryParseExact(request.Date, "yyyy-MM-dd", out var date) || request.Reason is not ("maintenance" or "own_event" or "other") || request.Note?.Length > 200) return Problem(statusCode: StatusCodes.Status400BadRequest, title: "El bloqueo es inválido.");
+        // Un id que no es GUID no puede existir: 404, igual que en DELETE y en el resto de rutas del salón.
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(id, out var parsedId)) return NotFound();
+        if (request is null || !DateOnly.TryParseExact(request.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) || request.Reason is not ("maintenance" or "own_event" or "other") || request.Note?.Length > 200) return Problem(statusCode: StatusCodes.Status400BadRequest, title: "El bloqueo es inválido.");
         var owned = (await venues.ListOwnedAsync(userId, cancellationToken)).Any(venue => venue.Id == parsedId.ToString("D"));
         if (!owned) return NotFound();
         var created = await availability.AddBlockAsync(parsedId.ToString("D"), new VenueBlockRequest(date, request.Reason, request.Note), cancellationToken);

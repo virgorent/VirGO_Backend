@@ -17,8 +17,8 @@
 |---|---|---|
 | CA-01 | Prueba | ⏳ |
 | CA-02 | Prueba | ⏳ |
-| CA-03 | Prueba | ⏳ |
-| CA-04 | Prueba | ⏳ |
+| CA-03 | `VenueNegativeTests.OwnerCannotBlockAnotherOwnersVenue`, `BlockingAnUnknownVenueIsNotFound`, `BlockingANonGuidVenueWithAnInvalidBodyIsStillNotFound`, `ClientCannotBlockAVenue` | ✅ |
+| CA-04 | `VenueNegativeTests.InvalidBlocksAreValidationProblemsAndDoNotBlockTheDay` (incluye nota de 201 y 1500 caracteres); 409: `DuplicateBlockOnTheSameDayIsAConflict`, `BlockingADayAlreadyBlockedBySeedDataIsAConflict` | ✅ |
 
 ## 3. Pruebas
 
