@@ -8,6 +8,7 @@ using VirGo.Infrastructure.Persistence.MongoDb;
 using VirGo.Infrastructure.Auth;
 using VirGo.Application.Auth;
 using VirGo.Application.Marketplace;
+using VirGo.Application.Events;
 using VirGo.Infrastructure.Caching;
 using Amazon.SimpleEmailV2;
 using Amazon.SQS;
@@ -57,6 +58,9 @@ public static class DependencyInjection
             services.AddSingleton<IQuoteExpiry>(serviceProvider => serviceProvider.GetRequiredService<InMemoryQuoteRepository>());
             services.AddSingleton<INoticeRepository, InMemoryNoticeRepository>();
             services.AddSingleton<IBookingRepository, InMemoryBookingRepository>();
+            services.AddSingleton<IEventRepository, InMemoryEventRepository>();
+            services.AddSingleton<IEventGuestRepository, InMemoryEventGuestRepository>();
+            services.AddSingleton<IEventTaskRepository, InMemoryEventTaskRepository>();
         }
         else
         {
@@ -68,6 +72,9 @@ public static class DependencyInjection
             services.AddSingleton<IQuoteExpiry, MongoQuoteExpiry>();
             services.AddSingleton<INoticeRepository, MongoNoticeRepository>();
             services.AddSingleton<IBookingRepository, MongoBookingRepository>();
+            services.AddSingleton<IEventRepository, MongoEventRepository>();
+            services.AddSingleton<IEventGuestRepository, MongoEventGuestRepository>();
+            services.AddSingleton<IEventTaskRepository, MongoEventTaskRepository>();
         }
 
         if (string.Equals(configuration["Persistence:Provider"], "MongoDb", StringComparison.OrdinalIgnoreCase))

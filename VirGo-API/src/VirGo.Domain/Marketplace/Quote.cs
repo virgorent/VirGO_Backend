@@ -14,7 +14,15 @@ public sealed class Quote
     public required int Guests { get; init; }
     public required string[] RequestedServices { get; init; }
     public string? Message { get; init; }
+    public QuoteResponse? Response { get; init; }
     public required string Status { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required DateTime UpdatedAt { get; init; }
+}
+
+public sealed class QuoteResponse
+{
+    public required decimal Total { get; init; }
+    public decimal? Deposit { get; init; }
+    public string? Message { get; init; }
 }

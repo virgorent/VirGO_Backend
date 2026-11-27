@@ -7,11 +7,12 @@ using VirGo.Api.Dto;
 namespace VirGo.Api.Controllers;
 
 [ApiController]
-[Authorize(Roles = "client")]
+[Authorize]
 [Route("api/v1/bookings")]
-public sealed class BookingsController(BookingHandler handler, IUserRepository users) : ControllerBase
+public sealed class BookingsController(BookingHandler handler, IUserRepository users, IBookingRepository bookings, IVenueRepository venues) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = "client")]
     public async Task<IActionResult> Create(CreateBookingRequest request, CancellationToken cancellationToken)
     {
         var userId = User.FindFirst("sub")?.Value;
@@ -57,6 +58,37 @@ public sealed class BookingsController(BookingHandler handler, IUserRepository u
 
         return result.Booking is null
             ? NotFound()
-            : Created($"/api/v1/bookings/{result.Booking.Id}", result.Booking);
+            : Created($"/api/v1/bookings/{result.Booking.Id}", BookingResponse.From(result.Booking));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> List(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst("sub")?.Value;
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+        var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
+        var result = await bookings.ListVisibleAsync(userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
+        return Ok(new { data = result.Select(BookingResponse.From) });
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(string id, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst("sub")?.Value;
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(id, out var parsedId)) return NotFound();
+        var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
+        var booking = await bookings.FindVisibleAsync(parsedId.ToString("D"), userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
+        return booking is null ? NotFound() : Ok(BookingResponse.From(booking));
+    }
+
+    [HttpGet("by-folio/{folio}")]
+    public async Task<IActionResult> GetByFolio(string folio, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst("sub")?.Value;
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(folio) || folio.Length > 32) return NotFound();
+        var ownedVenues = await venues.ListOwnedAsync(userId, cancellationToken);
+        var booking = await bookings.FindByFolioVisibleAsync(folio, userId, ownedVenues.Select(venue => venue.Id).ToArray(), cancellationToken);
+        return booking is null ? NotFound() : Ok(BookingResponse.From(booking));
+    }
+
 }

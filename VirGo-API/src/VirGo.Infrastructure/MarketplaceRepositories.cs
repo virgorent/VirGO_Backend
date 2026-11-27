@@ -163,6 +163,40 @@ public sealed class InMemoryQuoteRepository : IQuoteRepository, IQuoteExpiry
         return Task.CompletedTask;
     }
 
+    public Task<IReadOnlyList<Quote>> ListVisibleAsync(string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            var visible = quotes.Where(quote => quote.ClientId == clientId || targetIds.Contains(quote.TargetId, StringComparer.Ordinal)).OrderByDescending(quote => quote.CreatedAt).Take(100).ToArray();
+            return Task.FromResult<IReadOnlyList<Quote>>(visible);
+        }
+    }
+
+    public Task<Quote?> FindVisibleAsync(string id, string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(quotes.FirstOrDefault(quote => quote.Id == id && (quote.ClientId == clientId || targetIds.Contains(quote.TargetId, StringComparer.Ordinal))));
+    }
+
+    public Task<Quote?> FindByIdAsync(string id, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(quotes.FirstOrDefault(quote => quote.Id == id));
+    }
+
+    public Task<Quote?> UpdateAsync(Quote quote, string expectedStatus, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate)
+        {
+            var index = quotes.FindIndex(item => item.Id == quote.Id && item.Status == expectedStatus);
+            if (index < 0) return Task.FromResult<Quote?>(null);
+            quotes[index] = quote;
+            return Task.FromResult<Quote?>(quote);
+        }
+    }
+
     public IReadOnlyList<Quote> Snapshot()
     {
         lock (gate)
@@ -197,6 +231,7 @@ public sealed class InMemoryQuoteRepository : IQuoteRepository, IQuoteExpiry
                         Guests = quote.Guests,
                         RequestedServices = quote.RequestedServices,
                         Message = quote.Message,
+                        Response = quote.Response,
                         Status = "expired",
                         CreatedAt = quote.CreatedAt,
                         UpdatedAt = now
@@ -216,6 +251,24 @@ public sealed class InMemoryBookingRepository : IBookingRepository
     private readonly Dictionary<int, int> folios = [];
     private readonly Dictionary<string, Booking> idempotentBookings = new(StringComparer.Ordinal);
     private readonly Lock gate = new();
+
+    public Task<IReadOnlyList<Booking>> ListVisibleAsync(string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult<IReadOnlyList<Booking>>(bookings.Where(booking => booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal)).OrderByDescending(booking => booking.CreatedAt).Take(100).ToArray());
+    }
+
+    public Task<Booking?> FindVisibleAsync(string id, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(bookings.FirstOrDefault(booking => booking.Id == id && (booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal))));
+    }
+
+    public Task<Booking?> FindByFolioVisibleAsync(string folio, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        lock (gate) return Task.FromResult(bookings.FirstOrDefault(booking => booking.Folio == folio && (booking.ClientId == userId || venueIds.Contains(booking.VenueId, StringComparer.Ordinal))));
+    }
 
     public Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
     {
@@ -459,15 +512,107 @@ public sealed class MongoQuoteRepository(IMongoDatabase database) : IQuoteReposi
         {
             document["message"] = quote.Message;
         }
+        if (quote.Response is not null)
+        {
+            document["response"] = QuoteResponseDocument.From(quote.Response, quote.UpdatedAt);
+        }
 
         return quotes.InsertOneAsync(document, cancellationToken: cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Quote>> ListVisibleAsync(string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        var filters = new List<FilterDefinition<BsonDocument>> { Builders<BsonDocument>.Filter.Eq("clientId", clientId) };
+        if (targetIds.Count > 0) filters.Add(Builders<BsonDocument>.Filter.In("target.id", targetIds));
+        var documents = await quotes.Find(Builders<BsonDocument>.Filter.Or(filters)).SortByDescending(document => document["createdAt"]).Limit(100).ToListAsync(cancellationToken);
+        return documents.Select(Map).ToArray();
+    }
+
+    public async Task<Quote?> FindVisibleAsync(string id, string clientId, IReadOnlyCollection<string> targetIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", clientId);
+        if (targetIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("target.id", targetIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), visibility);
+        var document = await quotes.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Quote?> FindByIdAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var document = await quotes.Find(Builders<BsonDocument>.Filter.Eq("_id", id)).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Quote?> UpdateAsync(Quote quote, string expectedStatus, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", quote.Id), Builders<BsonDocument>.Filter.Eq("status", expectedStatus));
+        var update = Builders<BsonDocument>.Update.Set("status", quote.Status).Set("updatedAt", new BsonDateTime(quote.UpdatedAt));
+        // Solo al responder se escribe la respuesta; aceptar, rechazar o vencer conserva la guardada
+        // (y su answeredAt).
+        if (quote.Response is not null && quote.Status == "answered")
+        {
+            update = update.Set("response", QuoteResponseDocument.From(quote.Response, quote.UpdatedAt));
+        }
+        var result = await quotes.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+        return result.ModifiedCount == 0 ? null : quote;
+    }
+
+    private static Quote Map(BsonDocument document)
+    {
+        var target = document.GetValue("target", new BsonDocument()).AsBsonDocument;
+        return new Quote
+        {
+            Id = document.GetValue("_id").AsString,
+            ClientId = document.GetValue("clientId").AsString,
+            ClientName = document.GetValue("clientName", "").AsString,
+            TargetType = target.GetValue("type", "venue").AsString,
+            TargetId = target.GetValue("id", "").AsString,
+            TargetName = target.GetValue("name", "").AsString,
+            EventId = document.TryGetValue("eventId", out var eventId) ? eventId.AsString : null,
+            EventType = document.GetValue("eventType", "Otro").AsString,
+            EventDate = document.GetValue("eventDate", "").AsString,
+            Guests = document.GetValue("guests", 0).ToInt32(),
+            RequestedServices = document.GetValue("requestedServices", new BsonArray()).AsBsonArray.Select(value => value.AsString).ToArray(),
+            Message = document.TryGetValue("message", out var message) ? message.AsString : null,
+            Response = document.TryGetValue("response", out var response) && response.IsBsonDocument ? QuoteResponseDocument.To(response.AsBsonDocument) : null,
+            Status = document.GetValue("status", "sent").AsString,
+            CreatedAt = document.GetValue("createdAt").ToUniversalTime(),
+            UpdatedAt = document.GetValue("updatedAt").ToUniversalTime()
+        };
+    }
+
 }
 
 public sealed class MongoBookingRepository(IMongoDatabase database) : IBookingRepository
 {
     private readonly IMongoCollection<BsonDocument> bookings = database.GetCollection<BsonDocument>("bookings");
     private readonly IMongoCollection<BsonDocument> counters = database.GetCollection<BsonDocument>("counters");
+
+    public async Task<IReadOnlyList<Booking>> ListVisibleAsync(string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var filters = new List<FilterDefinition<BsonDocument>> { Builders<BsonDocument>.Filter.Eq("clientId", userId) };
+        if (venueIds.Count > 0) filters.Add(Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var documents = await bookings.Find(Builders<BsonDocument>.Filter.Or(filters)).SortByDescending(document => document["createdAt"]).Limit(100).ToListAsync(cancellationToken);
+        return documents.Select(Map).ToArray();
+    }
+
+    public async Task<Booking?> FindVisibleAsync(string id, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", userId);
+        if (venueIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("_id", id), visibility);
+        var document = await bookings.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
+
+    public async Task<Booking?> FindByFolioVisibleAsync(string folio, string userId, IReadOnlyCollection<string> venueIds, CancellationToken cancellationToken = default)
+    {
+        var visibility = Builders<BsonDocument>.Filter.Eq("clientId", userId);
+        if (venueIds.Count > 0) visibility = Builders<BsonDocument>.Filter.Or(visibility, Builders<BsonDocument>.Filter.In("venue.venueId", venueIds));
+        var filter = Builders<BsonDocument>.Filter.And(Builders<BsonDocument>.Filter.Eq("folio", folio), visibility);
+        var document = await bookings.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return document is null ? null : Map(document);
+    }
 
     public async Task<Booking?> FindByIdempotencyKeyAsync(string clientId, string idempotencyKey, CancellationToken cancellationToken = default)
     {

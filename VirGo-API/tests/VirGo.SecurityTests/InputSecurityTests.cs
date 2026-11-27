@@ -149,4 +149,43 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
         Assert.DoesNotContain("Exception", text, StringComparison.Ordinal);
         Assert.DoesNotContain("   at ", text, StringComparison.Ordinal);
     }
+
+    [Theory]
+    [InlineData("GET", "/api/v1/events")]
+    [InlineData("POST", "/api/v1/events")]
+    [InlineData("GET", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee")]
+    [InlineData("PATCH", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee")]
+    [InlineData("GET", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/guests")]
+    [InlineData("POST", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/guests")]
+    [InlineData("PATCH", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/guests/f1111111-1111-4111-8111-111111111111")]
+    [InlineData("DELETE", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/guests/f1111111-1111-4111-8111-111111111111")]
+    [InlineData("GET", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/tasks")]
+    [InlineData("POST", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/tasks")]
+    [InlineData("PATCH", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/tasks/f2222222-2222-4222-8222-222222222222")]
+    [InlineData("DELETE", "/api/v1/events/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee/tasks/f2222222-2222-4222-8222-222222222222")]
+    public async Task EventRoutesRequireAuthentication(string method, string path)
+    {
+        using var request = new HttpRequestMessage(new HttpMethod(method), path);
+        if (method is "POST" or "PATCH")
+        {
+            request.Content = JsonContent.Create(new { name = "No autorizado" });
+        }
+
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task EventDetailTreatsInjectionPayloadAsNotFound()
+    {
+        using var login = await client.PostAsJsonAsync("/api/v1/auth/login", new { email = "demo@virgo.mx", password = "VirGo-local-only-password" });
+        using var json = JsonDocument.Parse(await login.Content.ReadAsStringAsync());
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/events/%7B%22%24ne%22%3Anull%7D");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", json.RootElement.GetProperty("accessToken").GetString());
+
+        using var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

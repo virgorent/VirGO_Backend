@@ -305,7 +305,6 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         {
             Content = JsonContent.Create(new
             {
-                quoteId = Guid.NewGuid().ToString("D"),
                 eventId = "22222222-2222-4222-8222-222222222222",
                 venueId = "11111111-1111-4111-8111-111111111111",
                 date = "2027-05-15",
@@ -319,12 +318,14 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         using var bookingJson = JsonDocument.Parse(await bookingResponse.Content.ReadAsStringAsync());
         var bookingId = bookingJson.RootElement.GetProperty("id").GetString();
         Assert.Equal("pending_payment", bookingJson.RootElement.GetProperty("status").GetString());
+        Assert.False(bookingJson.RootElement.TryGetProperty("clientId", out _));
+        Assert.False(bookingJson.RootElement.TryGetProperty("idempotencyKey", out _));
+        Assert.True(bookingJson.RootElement.TryGetProperty("folio", out _));
 
         using var replayRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/bookings")
         {
             Content = JsonContent.Create(new
             {
-                quoteId = Guid.NewGuid().ToString("D"),
                 eventId = "22222222-2222-4222-8222-222222222222",
                 venueId = "11111111-1111-4111-8111-111111111111",
                 date = "2027-05-15",
@@ -471,6 +472,22 @@ public sealed class VerticalSliceTests(ApiFactory factory) : IClassFixture<ApiFa
         });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ClientCanReadBookingQueries()
+    {
+        using var client = factory.CreateClient();
+        var token = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        using var list = await client.GetAsync("/api/v1/bookings");
+        using var listBody = JsonDocument.Parse(await list.Content.ReadAsStringAsync());
+        using var missingFolio = await client.GetAsync("/api/v1/bookings/by-folio/VG-2099-9999");
+
+        Assert.Equal(HttpStatusCode.OK, list.StatusCode);
+        Assert.True(listBody.RootElement.TryGetProperty("data", out _));
+        Assert.Equal(HttpStatusCode.NotFound, missingFolio.StatusCode);
     }
 
     private static async Task<string> LoginAsync(HttpClient client)
