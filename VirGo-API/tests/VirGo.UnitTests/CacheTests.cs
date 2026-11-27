@@ -137,6 +137,18 @@ public sealed class CacheTests
             FindCalls++;
             return Task.FromResult(Venue);
         }
+
+        public Task<IReadOnlyList<Venue>> ListOwnedAsync(string ownerId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<Venue>>([]);
+
+        public Task<Venue> CreateAsync(CreateVenueCommand command, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Venue ?? Sample());
+
+        public Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Venue);
+
+        public Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Venue);
     }
 
     private sealed class BrokenCache(Exception? failure = null) : IDistributedCache

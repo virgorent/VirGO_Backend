@@ -24,8 +24,9 @@ future changes with this file before deployment.
 
 ## 9.2 Authentication
 
-- `POST /api/v1/auth/register` accepts `name`, `email`, `password` and
-  `phone`; it returns `201` with the public client account.
+- `POST /api/v1/auth/register` accepts `name`, `email`, `password`,
+  `phone` and an optional `role` (`client` by default, `owner` or
+  `provider`; never `admin`); it returns `201` with the public account.
 - `POST /api/v1/auth/login` accepts `email` and `password`; it returns a JWT
   bearer token and refresh-session data.
 - `POST /api/v1/auth/logout` requires the current bearer token and returns

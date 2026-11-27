@@ -5,7 +5,7 @@
 | Módulo | `026-post-venues` |
 | Endpoint | `POST /api/v1/venues` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -23,6 +23,9 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.5. Los errores siguen el Art. I
 ## 2. Reglas
 
 - Solo el rol `owner` y solo sobre sus salones.
+- `ownerId`, `status`, `rating`, `verified`, `createdAt` y `updatedAt` son generados por el servidor.
+- `status` inicia como `draft` y `rating` como `{ average: 0, count: 0 }`.
+- La lista de zonas y categorías sigue `db/schema/venues.json`.
 - Ignora `rating`, `verified`, `createdAt` y `updatedAt` enviados por el cliente.
 
 ## 3. Datos

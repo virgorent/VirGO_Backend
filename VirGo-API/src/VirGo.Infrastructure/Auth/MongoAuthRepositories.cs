@@ -5,9 +5,10 @@ using VirGo.Domain.Auth;
 
 namespace VirGo.Infrastructure.Auth;
 
-public sealed class MongoUserRepository(IMongoDatabase database) : IUserRepository
+public sealed class MongoUserRepository(IMongoDatabase database, IMongoClient client) : IUserRepository
 {
     private readonly IMongoCollection<BsonDocument> users = database.GetCollection<BsonDocument>("users");
+    private readonly IMongoCollection<BsonDocument> sessions = database.GetCollection<BsonDocument>("sessions");
 
     public async Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
@@ -56,6 +57,50 @@ public sealed class MongoUserRepository(IMongoDatabase database) : IUserReposito
             .Set("passwordHash", user.PasswordHash)
             .Set("updatedAt", new BsonDateTime(user.UpdatedAt));
         await users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+    }
+
+    public async Task<bool> AnonymizeAsync(
+        string userId,
+        string email,
+        string phone,
+        string passwordHash,
+        DateTime now,
+        CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("_id", userId);
+        var update = Builders<BsonDocument>.Update
+            .Set("name", "Cuenta eliminada")
+            .Set("email", email)
+            .Set("phone", phone)
+            .Set("passwordHash", passwordHash)
+            .Set("isVerified", false)
+            .Set("failedLoginCount", 0)
+            .Set("unreadNotices", 0)
+            .Set("updatedAt", new BsonDateTime(now))
+            .Unset("providerId")
+            .Unset("city")
+            .Unset("defaultGuests");
+        using var session = await client.StartSessionAsync(cancellationToken: cancellationToken);
+        return await session.WithTransactionAsync(
+            async (transactionSession, transactionCancellationToken) =>
+            {
+                var result = await users.UpdateOneAsync(
+                    transactionSession,
+                    filter,
+                    update,
+                    cancellationToken: transactionCancellationToken);
+                if (result.MatchedCount != 1)
+                {
+                    return false;
+                }
+
+                await sessions.DeleteManyAsync(
+                    transactionSession,
+                    Builders<BsonDocument>.Filter.Eq("userId", userId),
+                    cancellationToken: transactionCancellationToken);
+                return true;
+            },
+            cancellationToken: cancellationToken);
     }
 
     public async Task<User?> RecordFailedLoginAsync(
@@ -164,6 +209,12 @@ public sealed class MongoSessionRepository(IMongoDatabase database) : ISessionRe
             Builders<BsonDocument>.Filter.Eq("userId", userId));
         var result = await sessions.DeleteOneAsync(filter, cancellationToken);
         return result.DeletedCount == 1;
+    }
+
+    public async Task DeleteAllAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq("userId", userId);
+        await sessions.DeleteManyAsync(filter, cancellationToken);
     }
 
     private static Session Map(BsonDocument document)

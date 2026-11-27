@@ -1,26 +1,42 @@
 # Estado de las pruebas de VirGo
 
-**Fecha de ejecución:** 2026-11-05. Los resultados de abajo vienen de ejecutar las pruebas, no de contarlas.
+**Fecha de ejecución:** 15 de noviembre de 2026. Los resultados vienen de **ejecutar** las pruebas, no de contarlas. La API y la base de datos se ejecutaron sobre `main` (commit `b76fbd8`); Móvil, sobre su CI de `main`.
 
 ## Resumen
 
-| Proyecto | Tipo | Pruebas | Resultado | Ubicación |
-|---|---|---|---|---|
-| `VirGo-API` | Unitarias | 2 | ✅ 2 de 2 | PR #5 |
-| `VirGo-API` | Integración | 30 | ✅ 30 de 30 | PR #5 |
-| `VirGo-API` | Seguridad | 3 | ✅ 3 de 3 | PR #5 |
-| `VirGo-API` | Mutación (Stryker) | — | ✅ El job del CI pasó; falta registrar el puntaje | PR #5 |
-| `VirGo-API` | Humo | Script listo | ⏳ Sin ejecutar: aún no hay despliegue | PR #5 |
-| `VirGo-Database` | Unitarias | 16 | ✅ 16 de 16 | `main` |
-| `VirGo-Database` | Integración | 20 declaradas | ⏳ No ejecutadas en esta revisión: requieren MongoDB local | `main` |
-| `VirGo-Movil` | Todas | 0 | ❌ Aún no existen | — |
+| Proyecto | Tipo | Pruebas | Resultado |
+|---|---|---|---|
+| `VirGo-API` | Unitarias | 34 | ✅ 34 de 34 |
+| `VirGo-API` | Integración | 49 | ✅ 49 de 49 |
+| `VirGo-API` | Seguridad | 25 | ✅ 25 de 25 |
+| `VirGo-API` | Contrato | 12 | ✅ 12 de 12 |
+| `VirGo-API` | Base de datos (validadores e índices) | 96 | ✅ 96 de 96 |
+| `VirGo-API` | Rendimiento | 3 | ✅ 3 de 3 |
+| `VirGo-API` | Mutación (Stryker) | Nocturna | ✅ Workflow `api-mutation-nightly` |
+| `VirGo-API` | Humo, en producción después de cada despliegue | Script | ✅ En verde en el último despliegue |
+| `VirGo-Database` | Unitarias | 82 | ✅ 82 de 82 |
+| `VirGo-Movil` | Unitarias, de red (MockWebServer) y de UI (Robolectric) | 107 | ✅ 107 de 107 en el CI |
+| `VirGo-Movil` | Mutación (Pitest) | Línea base | ✅ 73 % (35 de 48 mutantes) |
 
-**Total ejecutado:** 51 pruebas, 51 aprobadas y 0 fallidas.
+**Total ejecutado:** 408 pruebas, **408 aprobadas y 0 fallidas**.
+
+## Pruebas manuales en producción
+
+| Prueba | Resultado |
+|---|---|
+| `GET /health` | ✅ 200 |
+| Registro e inicio de sesión de la cuenta de revisión de Play | ✅ 201 y 200 |
+| `DELETE /api/v1/users/me` con una cuenta desechable | ✅ 204. Después, el token anterior da 401, el login da 401 y el perfil público queda como "Cuenta eliminada" sin correo ni teléfono |
+| Cola SQS → *worker*: `quotes.expire` y envío de correo con SES | ✅ Procesados; el correo llegó |
+| CloudFront: imagen pública 200, acceso directo al bucket 403 | ✅ |
+| X-Ray y alarmas de CloudWatch | ✅ Trazas visibles; alarmas en OK |
+| Páginas legales de Play (`/legal/privacidad`, `/terminos`, `/eliminar-cuenta`) | ✅ 200 |
+| Firma del AAB de v0.2.0 | ✅ Firmado con la llave de subida oficial (verificado con `keytool -printcert`) |
 
 ## Cómo reproducirlas
 
 ```bash
-# VirGo-API (rama feat/vertical-slice-7-apis, PR #5)
+# VirGo-API: todas las suites (unitarias, integración, seguridad, contrato, base de datos y rendimiento)
 cd VirGo-API
 dotnet test VirGo.slnx -c Release
 
@@ -28,53 +44,36 @@ dotnet test VirGo.slnx -c Release
 cd VirGo-Database
 npm ci
 npm test
+
+# VirGo-Movil (repositorio virgorent/VirGO_Movil)
+cd VirGo-Movil
+./gradlew testDebugUnitTest pitest
 ```
 
-## Qué cubren
-
-### VirGo-API
-
-| Proyecto | Pruebas |
-|---|---|
-| `VirGo.UnitTests` | El dominio no depende de otras capas; el repositorio en memoria guarda y lee |
-| `VirGo.SecurityTests` | Token sin sesión rechazado; encabezados de seguridad; CORS con origen no permitido |
-| `VirGo.IntegrationTests` · `AuthTests` (5) | Login y logout |
-| `VirGo.IntegrationTests` · `BaseApiTests` (6) | Salud, errores y OpenAPI |
-| `VirGo.IntegrationTests` · `RateLimitTests` (1) | Límite de solicitudes |
-| `VirGo.IntegrationTests` · `VerticalSliceTests` (18) | Registro, perfil, catálogo, cotizaciones, reservaciones, idempotencia y bloqueo de cuenta |
-
-### VirGo-Database
-
-| Archivo | Pruebas |
-|---|---|
-| `tests/unit/catalog.test.js` | 11: catálogo de colecciones e índices |
-| `tests/unit/format.test.js` | 2: formato del plan y de la verificación |
-| `tests/unit/plan.test.js` | 3: comparación de índices |
-| `tests/integration/database.test.js` | 20 declaradas, contra MongoDB 8 local |
+En GitHub, el job `api-build-test` publica en el resumen de cada ejecución una tabla por tipo de prueba con la cobertura y la lista de todas las pruebas (`tools/test_report.py`).
 
 ## Análisis automático en GitHub
 
-| Check | Resultado |
-|---|---|
-| `gitleaks` | ✅ En verde en `main` |
-| `dependency review` | ✅ En verde en los PRs #5 y #9 |
-| `CodeQL` | ✅ Check en verde en el PR #5, con 3 avisos por revisar |
-| `api-iac` (SAM, `cfn-lint`, Checkov) | ✅ En verde en el PR #5 |
-| `api-schema` | ✅ En verde en el PR #5 |
+| Check | Proyecto | Requerido para fusionar |
+|---|---|---|
+| `gitleaks` y `dependency review` | Ambos | ✅ |
+| `CodeQL` / `analyze` | Ambos | ✅ |
+| `api-build-test` (pruebas y cobertura) | API | ✅ |
+| `api-iac` (`sam validate`, `cfn-lint`, Checkov) | API | ✅ |
+| `api-schema` y `database` | API y base de datos | ✅ |
+| `movil-build-test` (ktlint, detekt, Lint, pruebas, `assembleDebug`) | Móvil | ✅ |
+| Semgrep, SonarCloud y OWASP ZAP | API | Informativos en cada PR |
 
 ## Limitaciones conocidas
 
-- Las 35 pruebas de la API usan **persistencia en memoria**: todavía no prueban contra MongoDB ni sus validadores.
-- Por eso no detectan errores que solo aparecen en Atlas. Una revisión de código encontró varios, como el conflicto al generar el folio de las reservaciones.
-- `virgo_dev` tiene **25 diferencias** frente a `VirGo-API/db/schema/`, pendientes de `VirGo-Database` `001`.
-- Solo hay 3 pruebas de seguridad y 2 unitarias en la API; las pruebas de longitud por campo aún no existen.
-- Móvil no tiene pruebas, aunque su arquitectura base ya está en `main`.
+- **Integración:** las pruebas de la API usan persistencia en memoria. Las de base de datos validan los esquemas e índices de `db/schema/`, pero no corren contra Atlas.
+- **Base de producción:** `virgo` tiene 26 diferencias frente a `db/schema/`; se remediarán con respaldo y Go/No-Go.
+- **Móvil:** la mutación es una línea base; el umbral se fijará después de medir más módulos.
+- **Cola SQS:** el flujo `booking.created` no se ha probado en la nube porque la base de producción aún no tiene salones.
 
 ## Lo que sigue
 
-1. Pruebas de repositorios con Testcontainers y los validadores reales (`010-contrato-datos`, T1006).
-2. Pruebas de longitud por campo: límite, límite + 1 y 1500 caracteres.
-3. Ampliar las pruebas unitarias y de seguridad de la API.
-4. Pruebas de Móvil: T028, T029 y T038.
-5. Ejecutar las pruebas de integración de `VirGo-Database` en el CI (T006).
-6. Ejecutar las pruebas de humo tras el primer despliegue.
+1. Pruebas de longitud por campo: límite, límite + 1 y 1500 caracteres.
+2. Pruebas de integración contra MongoDB real (Testcontainers) en el CI.
+3. Pruebas de Móvil para "Eliminar cuenta" y el registro conectado a la API.
+4. Prueba de `booking.created` en la nube, cuando haya datos de ejemplo.

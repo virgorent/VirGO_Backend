@@ -5,7 +5,7 @@
 | Módulo | `027-patch-venues-id` |
 | Endpoint | `PATCH /api/v1/venues/:id` |
 | Versión | 1.0.0 |
-| Estado | Borrador |
+| Estado | Implementación local; despliegue pendiente |
 | Fecha | 2026-11-05 |
 | Grupo | Gestión de salones |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.5 |
@@ -16,6 +16,6 @@
 
 | ID | Tarea | Depende de | Responsable | Verificación | Estado |
 |---|---|---|---|---|---|
-| T2701 | Implementar `PATCH /api/v1/venues/:id` | `000`, `010` | `dev-dotnet` | Prueba de integración: 200 (CA-01) | ⏳ |
+| T2701 | Implementar `PATCH /api/v1/venues/:id` | `000`, `010` | `dev-dotnet` | Prueba de integración: 200 (CA-01) | ✅ |
 | T2702 | Pruebas de repositorio, integración y seguridad | T2701 | `qa` + `seguridad` | Todos los CA en verde | ⏳ |
 | T2703 | PR, despliegue, humo y entrega del contrato a Móvil | T2702 | `devops-aws` + `arquitecto` | Humo por HTTPS; `check.md` completo | ⏳ |

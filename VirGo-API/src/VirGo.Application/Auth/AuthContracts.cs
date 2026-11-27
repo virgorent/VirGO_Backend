@@ -22,7 +22,7 @@ public sealed record LoginOutcome(LoginResult? Result, LoginFailure? Failure, in
     public bool IsSuccess => Result is not null;
 }
 
-public sealed record RegisterCommand(string Name, string Email, string Password, string Phone);
+public sealed record RegisterCommand(string Name, string Email, string Password, string Phone, UserRole Role = UserRole.Client);
 
 public enum RegisterFailure
 {

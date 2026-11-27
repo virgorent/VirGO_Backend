@@ -12,7 +12,11 @@ public sealed class DuplicateBookingIdempotencyException : Exception
 public interface IVenueRepository
 {
     Task<IReadOnlyList<Venue>> ListPublishedAsync(string? zone, string? category, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Venue>> ListOwnedAsync(string ownerId, CancellationToken cancellationToken = default);
     Task<Venue?> FindPublishedAsync(string id, CancellationToken cancellationToken = default);
+    Task<Venue> CreateAsync(CreateVenueCommand command, CancellationToken cancellationToken = default);
+    Task<Venue?> UpdateAsync(PatchVenueCommand command, CancellationToken cancellationToken = default);
+    Task<Venue?> PublishAsync(string venueId, string ownerId, CancellationToken cancellationToken = default);
 }
 
 public interface IQuoteRepository

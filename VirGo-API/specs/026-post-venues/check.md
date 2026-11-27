@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Módulo | `026-post-venues` |
-| Estado del spec | Borrador |
+| Estado del spec | Implementación local; despliegue pendiente |
 | Revisó | — |
 
 ## 1. Especificación
@@ -15,17 +15,18 @@
 
 | CA | Evidencia | Estado |
 |---|---|---|
-| CA-01 | Prueba | ⏳ |
-| CA-02 | Prueba | ⏳ |
-| CA-03 | Prueba | ⏳ |
+| CA-01 | `VerticalSliceTests.OwnerCanCreateADraftVenueWithoutControllingServerFields` | ✅ |
+| CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
+| CA-03 | `VerticalSliceTests.VenueCreationRejectsOversizedInputAsProblemDetails` | ✅ |
 
 ## 3. Pruebas
 
 | Tipo | Evidencia | Estado |
 |---|---|---|
-| Unitarias | Totales: — | ⏳ |
-| Integración | Totales: — | ⏳ |
-| Seguridad | Totales: — | ⏳ |
+| Unitarias | `CacheTests`: 35/35 | ✅ |
+| Integración | `VerticalSliceTests`: 61/61 | ✅ |
+| Contrato | `MobileContractTests`: 19/19 | ✅ |
+| Seguridad | `InputSecurityTests`: 30/30 | ✅ |
 | Mutación | Puntaje: — % | ⏳ |
 | Humo | `smoke.sh` | ⏳ |
 | Validación de longitudes | Límite, límite + 1 y 1500 caracteres | ⏳ |

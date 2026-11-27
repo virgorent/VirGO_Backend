@@ -69,6 +69,7 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
 
     [Theory]
     [InlineData("/api/v1/users/me", "GET")]
+    [InlineData("/api/v1/users/me", "DELETE")]
     [InlineData("/api/v1/auth/logout", "POST")]
     [InlineData("/api/v1/quotes", "POST")]
     [InlineData("/api/v1/bookings", "POST")]
@@ -83,6 +84,24 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
         var response = await client.SendAsync(request);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PublicProfileDoesNotRequireAToken()
+    {
+        using var response = await client.GetAsync(
+            "/api/v1/users/8f6b8b48-f5d0-4f65-8fb0-2a7f0f6ab4b1/public");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PublicProfileRejectsOperatorInjectionAsAnUnknownId()
+    {
+        using var response = await client.GetAsync(
+            "/api/v1/users/%24where%3A%22this.passwordHash%22/public");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Theory]
@@ -114,6 +133,8 @@ public sealed class InputSecurityTests(SecurityApiFactory factory) : IClassFixtu
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var text = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"role\":\"client\"", text, StringComparison.Ordinal);
+        Assert.Contains("\"isVerified\":false", text, StringComparison.Ordinal);
         Assert.DoesNotContain("passwordHash", text, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("11111111-1111", text, StringComparison.Ordinal);
     }

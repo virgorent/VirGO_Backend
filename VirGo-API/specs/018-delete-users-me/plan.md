@@ -5,7 +5,7 @@
 | Módulo | `018-delete-users-me` |
 | Endpoint | `DELETE /api/v1/users/me` |
 | Versión | 1.0.0 |
-| Estado | Borrador; **requiere decisión** |
+| Estado | En implementación |
 | Fecha | 2026-11-05 |
 | Grupo | Perfil de usuario |
 | Fuente | `VirGo-Database/docs/API-HANDOFF.md` §9.3 |
@@ -22,7 +22,12 @@ El cuerpo exacto se toma de `API-HANDOFF.md` §9.3. Los errores siguen el Art. I
 
 ## 2. Reglas
 
-- Sin reglas adicionales a las del Art. IV.
+- Anonimizar `name`, `email`, `phone` y `passwordHash`.
+- Usar un correo determinista `deleted+<userId>@invalid.virgo` para conservar la unicidad.
+- Reemplazar el teléfono por un valor neutro válido para el schema.
+- Desactivar verificación y preferencias personales; conservar `id`, `role` y fechas históricas.
+- Revocar todas las sesiones antes de devolver 204.
+- No borrar reservas ni reseñas que necesiten conservar referencias históricas.
 
 ## 3. Datos
 
@@ -42,6 +47,8 @@ Campos vigentes en `VirGo-Database/src/catalog`. La columna «Máx. propuesto» 
 | `isVerified` | bool | ✅ | — |
 | `createdAt` | date | ✅ | — |
 | `updatedAt` | date | ✅ | — |
+
+La operación no cambia el schema de MongoDB; usa campos existentes y elimina referencias opcionales de proveedor, ubicación y preferencias.
 
 ## 4. Estrategia de pruebas
 

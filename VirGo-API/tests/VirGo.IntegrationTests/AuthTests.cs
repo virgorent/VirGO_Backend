@@ -81,6 +81,81 @@ public sealed class AuthTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task DeleteAccountAnonymizesUserAndRevokesAllSessions()
+    {
+        using var client = factory.CreateClient();
+        var email = $"delete-{Guid.NewGuid():N}@virgo.test";
+        const string password = "Password-Segura-1";
+
+        using var register = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            name = "Cuenta por eliminar",
+            email,
+            password,
+            phone = "+524421234567"
+        });
+        Assert.Equal(HttpStatusCode.Created, register.StatusCode);
+
+        var firstToken = await LoginAsync(client, email, password);
+        var secondToken = await LoginAsync(client, email, password);
+        using var delete = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/users/me");
+        delete.Headers.Authorization = new AuthenticationHeaderValue("Bearer", firstToken);
+
+        using var deleteResponse = await client.SendAsync(delete);
+
+        Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, await StatusAsync(client, firstToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, await StatusAsync(client, secondToken));
+
+        using var login = await client.PostAsJsonAsync(
+            "/api/v1/auth/login",
+            new { email, password });
+        Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
+    }
+
+    [Fact]
+    public async Task PublicProfileReturnsOnlyPublicFieldsWithoutAuthentication()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(
+            "/api/v1/users/8f6b8b48-f5d0-4f65-8fb0-2a7f0f6ab4b1/public");
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var root = body.RootElement;
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("8f6b8b48-f5d0-4f65-8fb0-2a7f0f6ab4b1", root.GetProperty("id").GetString());
+        Assert.Equal("VirGo Demo", root.GetProperty("name").GetString());
+        Assert.Equal("client", root.GetProperty("role").GetString());
+        Assert.False(root.GetProperty("isVerified").GetBoolean());
+        Assert.DoesNotContain("email", root.EnumerateObject().Select(property => property.Name), StringComparer.OrdinalIgnoreCase);
+        Assert.DoesNotContain("phone", root.EnumerateObject().Select(property => property.Name), StringComparer.OrdinalIgnoreCase);
+        Assert.DoesNotContain("passwordHash", root.EnumerateObject().Select(property => property.Name), StringComparer.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task PublicProfileReturnsNotFoundForUnknownUser()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(
+            "/api/v1/users/11111111-1111-4111-8111-111111111111/public");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PublicProfileTreatsInjectionPayloadAsAnUnknownId()
+    {
+        using var client = factory.CreateClient();
+
+        using var response = await client.GetAsync(
+            "/api/v1/users/%24ne%3Anull/public");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task LogoutKeepsASecondSessionActive()
     {
         using var client = factory.CreateClient();
@@ -98,10 +173,23 @@ public sealed class AuthTests(ApiFactory factory) : IClassFixture<ApiFactory>
 
     private static async Task<string> LoginAsync(HttpClient client)
     {
+        return await LoginAsync(client, "demo@virgo.mx", "VirGo-local-only-password");
+    }
+
+    private static async Task<string> LoginAsync(HttpClient client, string email, string password)
+    {
         using var response = await client.PostAsJsonAsync(
             "/api/v1/auth/login",
-            new { email = "demo@virgo.mx", password = "VirGo-local-only-password" });
+            new { email, password });
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         return json.RootElement.GetProperty("accessToken").GetString()!;
+    }
+
+    private static async Task<HttpStatusCode> StatusAsync(HttpClient client, string token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/_diagnostics/secure");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var response = await client.SendAsync(request);
+        return response.StatusCode;
     }
 }
