@@ -27,7 +27,7 @@ Hay trabajo que no debe hacer esperar a quien usa la app: avisos, correos y tare
 |---|---|
 | RF-01 | Al crear una reservación (`009`), después de guardarla, la API publica en la cola `virgo-jobs` un mensaje de tipo `booking.created` con el `bookingId`, el `clientId`, el folio y la fecha. |
 | RF-02 | Un worker (`VirGoWorkerFunction`) consume la cola en lotes de hasta 10 mensajes y, para `booking.created`, crea un aviso en `notices` (`kind = booking`, `read = false`, `purgeAt` a 90 días). |
-| RF-03 | El procesamiento es idempotente: el aviso usa el `_id` `booking-created-{bookingId}`; si el mensaje llega dos veces, no se duplica. |
+| RF-03 | El procesamiento es idempotente: el aviso usa un `_id` UUIDv5 determinista derivado de `booking.created:{bookingId}`; si el mensaje llega dos veces, no se duplica. El formato se detalla en `100-notice-id-determinista`. |
 | RF-04 | Un mensaje que falla 3 veces pasa a la cola de errores `virgo-jobs-dlq`, que lo guarda 14 días. Una alarma avisa por correo si la cola de errores tiene mensajes. |
 | RF-05 | Si publicar en la cola falla, la reservación igual se crea (fallo abierto) y queda una advertencia en el log con el `correlationId`. |
 | RF-06 | Un tipo de mensaje desconocido no bloquea el lote: se registra y se descarta. |
