@@ -18,6 +18,7 @@
 | CA-01 | `VerticalSliceTests.OwnerCanCreateADraftVenueWithoutControllingServerFields` | ✅ |
 | CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
 | CA-03 | `VerticalSliceTests.VenueCreationRejectsOversizedInputAsProblemDetails` | ✅ |
+| CA-03 (#49) | `VenueValidationTests.CreateRejectsNullServiceElement`, `CreateRejectsNullPhotoElement`, `CreateReportsTheIndexOfTheNullElementAmongValidOnes` | ✅ |
 
 ## 3. Pruebas
 

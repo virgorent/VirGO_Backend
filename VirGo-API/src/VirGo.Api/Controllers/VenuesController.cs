@@ -104,8 +104,8 @@ public sealed class VenuesController(
             request.Price.Unit!,
             request.Price.MinHours!.Value,
             request.Services!.Select(service => new VenueServiceCommand(
-                service.Name!.Trim(), service.Included!.Value, service.Price!.Value)).ToArray(),
-            request.Photos?.Select(photo => new VenuePhotoCommand(photo.Url!.Trim(), photo.Order!.Value)).ToArray() ?? [],
+                service!.Name!.Trim(), service.Included!.Value, service.Price!.Value)).ToArray(),
+            request.Photos?.Select(photo => new VenuePhotoCommand(photo!.Url!.Trim(), photo.Order!.Value)).ToArray() ?? [],
             request.Categories!,
             request.Amenities!);
 
@@ -179,8 +179,8 @@ public sealed class VenuesController(
             request.Price?.Unit,
             request.Price?.MinHours,
             request.Services?.Select(service => new VenueServiceCommand(
-                service.Name!.Trim(), service.Included!.Value, service.Price!.Value)).ToArray(),
-            request.Photos?.Select(photo => new VenuePhotoCommand(photo.Url!.Trim(), photo.Order!.Value)).ToArray(),
+                service!.Name!.Trim(), service.Included!.Value, service.Price!.Value)).ToArray(),
+            request.Photos?.Select(photo => new VenuePhotoCommand(photo!.Url!.Trim(), photo.Order!.Value)).ToArray(),
             request.Categories,
             request.Amenities);
 
@@ -382,38 +382,9 @@ public sealed class VenuesController(
         }
         else
         {
-            for (var index = 0; index < request.Services.Length; index++)
-            {
-                var service = request.Services[index];
-                if (string.IsNullOrWhiteSpace(service.Name) || service.Name.Trim().Length > 100)
-                {
-                    errors[$"services[{index}].name"] = ["El nombre del servicio es obligatorio y no puede superar 100 caracteres."];
-                }
-                if (service.Included is null)
-                {
-                    errors[$"services[{index}].included"] = ["Debe indicar si el servicio está incluido."];
-                }
-                if (service.Price is null || service.Price < 0)
-                {
-                    errors[$"services[{index}].price"] = ["El precio del servicio debe ser mayor o igual a cero."];
-                }
-            }
+            ValidateServices(errors, request.Services);
         }
-        if (request.Photos is not null)
-        {
-            for (var index = 0; index < request.Photos.Length; index++)
-            {
-                var photo = request.Photos[index];
-                if (string.IsNullOrWhiteSpace(photo.Url) || photo.Url.Trim().Length > 500)
-                {
-                    errors[$"photos[{index}].url"] = ["La URL de la foto es obligatoria y no puede superar 500 caracteres."];
-                }
-                if (photo.Order is null or < 0)
-                {
-                    errors[$"photos[{index}].order"] = ["El orden de la foto no puede ser negativo."];
-                }
-            }
-        }
+        if (request.Photos is not null) ValidatePhotos(errors, request.Photos);
         ValidateEnumArray(errors, "categories", request.Categories, Categories);
         ValidateEnumArray(errors, "amenities", request.Amenities, Amenities);
         return errors;
@@ -470,43 +441,57 @@ public sealed class VenuesController(
                 errors["price.minHours"] = ["Las horas mínimas deben ser al menos 1."];
             }
         }
-        if (request.Services is not null)
-        {
-            for (var index = 0; index < request.Services.Length; index++)
-            {
-                var service = request.Services[index];
-                if (string.IsNullOrWhiteSpace(service.Name) || service.Name.Trim().Length > 100)
-                {
-                    errors[$"services[{index}].name"] = ["El nombre del servicio es obligatorio y no puede superar 100 caracteres."];
-                }
-                if (service.Included is null)
-                {
-                    errors[$"services[{index}].included"] = ["Debe indicar si el servicio está incluido."];
-                }
-                if (service.Price is null || service.Price < 0)
-                {
-                    errors[$"services[{index}].price"] = ["El precio del servicio debe ser mayor o igual a cero."];
-                }
-            }
-        }
-        if (request.Photos is not null)
-        {
-            for (var index = 0; index < request.Photos.Length; index++)
-            {
-                var photo = request.Photos[index];
-                if (string.IsNullOrWhiteSpace(photo.Url) || photo.Url.Trim().Length > 500)
-                {
-                    errors[$"photos[{index}].url"] = ["La URL de la foto es obligatoria y no puede superar 500 caracteres."];
-                }
-                if (photo.Order is null or < 0)
-                {
-                    errors[$"photos[{index}].order"] = ["El orden de la foto no puede ser negativo."];
-                }
-            }
-        }
+        if (request.Services is not null) ValidateServices(errors, request.Services);
+        if (request.Photos is not null) ValidatePhotos(errors, request.Photos);
         if (request.Categories is not null) ValidateEnumArray(errors, "categories", request.Categories, Categories);
         if (request.Amenities is not null) ValidateEnumArray(errors, "amenities", request.Amenities, Amenities);
         return errors;
+    }
+
+    private static void ValidateServices(Dictionary<string, string[]> errors, VenueServiceRequest?[] services)
+    {
+        for (var index = 0; index < services.Length; index++)
+        {
+            var service = services[index];
+            if (service is null)
+            {
+                errors[$"services[{index}]"] = ["El servicio no puede ser nulo."];
+                continue;
+            }
+            if (string.IsNullOrWhiteSpace(service.Name) || service.Name.Trim().Length > 100)
+            {
+                errors[$"services[{index}].name"] = ["El nombre del servicio es obligatorio y no puede superar 100 caracteres."];
+            }
+            if (service.Included is null)
+            {
+                errors[$"services[{index}].included"] = ["Debe indicar si el servicio está incluido."];
+            }
+            if (service.Price is null || service.Price < 0)
+            {
+                errors[$"services[{index}].price"] = ["El precio del servicio debe ser mayor o igual a cero."];
+            }
+        }
+    }
+
+    private static void ValidatePhotos(Dictionary<string, string[]> errors, VenuePhotoRequest?[] photos)
+    {
+        for (var index = 0; index < photos.Length; index++)
+        {
+            var photo = photos[index];
+            if (photo is null)
+            {
+                errors[$"photos[{index}]"] = ["La foto no puede ser nula."];
+                continue;
+            }
+            if (string.IsNullOrWhiteSpace(photo.Url) || photo.Url.Trim().Length > 500)
+            {
+                errors[$"photos[{index}].url"] = ["La URL de la foto es obligatoria y no puede superar 500 caracteres."];
+            }
+            if (photo.Order is null or < 0)
+            {
+                errors[$"photos[{index}].order"] = ["El orden de la foto no puede ser negativo."];
+            }
+        }
     }
 
     private static void ValidateText(Dictionary<string, string[]> errors, string field, string? value, int minimum, int maximum)

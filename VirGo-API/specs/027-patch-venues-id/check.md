@@ -19,6 +19,7 @@
 | CA-02 | `InputSecurityTests.ProtectedRoutesRequireAToken` | ✅ |
 | CA-03 | `VerticalSliceTests.OwnerCannotPatchAnotherOwnersVenue` | ✅ |
 | CA-04 | `VerticalSliceTests.VenuePatchRejectsOversizedInputAsProblemDetails` | ✅ |
+| CA-04 (#49) | `VenueValidationTests.PatchRejectsNullServiceElementAndKeepsTheVenue`, `PatchRejectsNullPhotoElementAndKeepsTheVenue` | ✅ |
 
 ## 3. Pruebas
 
