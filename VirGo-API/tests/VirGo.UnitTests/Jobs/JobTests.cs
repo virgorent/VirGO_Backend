@@ -16,9 +16,10 @@ namespace VirGo.UnitTests.Jobs;
 /// <summary>Spec 099 (queue and worker), 903 (email) and 905 (scheduled quote expiry).</summary>
 public sealed class JobTests
 {
+    private const string ValidBookingId = "4bf8f8c2-1c5a-4e3b-8b2a-7f9f3d1c2e44";
     private static readonly DateTime Now = new(2026, 11, 12, 3, 0, 0, DateTimeKind.Utc);
 
-    private static JobMessage BookingCreated(string bookingId = "b-1") => new(
+    private static JobMessage BookingCreated(string bookingId = ValidBookingId) => new(
         JobTypes.BookingCreated,
         new Dictionary<string, string>
         {
@@ -53,7 +54,7 @@ public sealed class JobTests
         await new BookingCreatedHandler(notices, new FixedClock(Now)).HandleAsync(BookingCreated());
 
         var notice = Assert.Single(notices.Notices);
-        Assert.Equal("booking-created-b-1", notice.Id);
+        Assert.Equal("238b0bd9-52c0-5976-86f0-b2b4a220b44a", notice.Id);
         Assert.Equal("client-1", notice.UserId);
         Assert.Equal("booking", notice.Kind);
         Assert.False(notice.Read);
@@ -71,6 +72,20 @@ public sealed class JobTests
         await handler.HandleAsync(BookingCreated());
 
         Assert.Single(notices.Notices);
+    }
+
+    [Fact]
+    public async Task RepeatedBookingCreatedEventKeepsOneDeterministicNotice()
+    {
+        var notices = new InMemoryNoticeRepository();
+        var handler = new BookingCreatedHandler(notices, new FixedClock(Now));
+        var expectedId = DeterministicNoticeIds.ForBookingCreated(ValidBookingId).ToString("D");
+
+        await handler.HandleAsync(BookingCreated());
+        await handler.HandleAsync(BookingCreated());
+
+        var notice = Assert.Single(notices.Notices);
+        Assert.Equal(expectedId, notice.Id);
     }
 
     [Fact]
@@ -202,7 +217,7 @@ public sealed class JobTests
         Assert.Equal("https://queue", request.QueueUrl);
         Assert.Equal(JobTypes.BookingCreated, request.MessageAttributes["type"].StringValue);
         Assert.Equal("corr-1", request.MessageAttributes["correlationId"].StringValue);
-        Assert.Equal("b-1", JobMessage.Parse(request.MessageBody).Get("bookingId"));
+        Assert.Equal(ValidBookingId, JobMessage.Parse(request.MessageBody).Get("bookingId"));
     }
 
     [Fact]

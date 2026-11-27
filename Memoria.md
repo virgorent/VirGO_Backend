@@ -32,6 +32,7 @@
 | 2026-11-11 | No inspeccionar, planificar ni aplicar sobre `virgo` sin credenciales y autorización explícitas | `virgo` es producción y no hay `.env.production` ni aprobación operativa |
 | 2026-11-11 | No integrar ni modificar la API desde `rama-backend` sin confirmar la rama de trabajo | La implementación C# solo está en `origin/feat/vertical-slice-7-apis` |
 | 2026-11-11 | `VirGo-Movil` sale de este repositorio | Indicación del curso: backend y frontend separados |
+| 2026-11-26 | Ratificar D-03: los avisos `booking.created` usan UUIDv5 RFC 4122 derivado de `booking.created:{bookingId}`; el catálogo MongoDB no cambia | Concilia la idempotencia con el validador autoritativo de `notices` |
 
 ## Errores a evitar
 

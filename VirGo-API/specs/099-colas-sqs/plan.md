@@ -98,7 +98,7 @@ La API recibe `Jobs__QueueUrl` como variable; si está vacía usa la cola en mem
 
 | Riesgo | Mitigación |
 |---|---|
-| Mensajes duplicados (entrega al menos una vez) | `_id` determinista del aviso |
+| Mensajes duplicados (entrega al menos una vez) | `_id` UUIDv5 determinista del aviso (`100-notice-id-determinista`) |
 | Bucle de reintentos | `maxReceiveCount` 3 y DLQ con alarma |
 
 ## 10. Fases

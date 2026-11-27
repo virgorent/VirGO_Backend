@@ -16,7 +16,7 @@ public sealed class BookingCreatedHandler(INoticeRepository notices, IClock cloc
         var now = clock.UtcNow;
         var notice = new Notice
         {
-            Id = $"booking-created-{bookingId}",
+            Id = DeterministicNoticeIds.ForBookingCreated(bookingId).ToString("D"),
             UserId = message.Get("clientId"),
             Kind = "booking",
             Title = "Reservación registrada",
