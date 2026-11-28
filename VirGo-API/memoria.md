@@ -423,3 +423,26 @@ Bitácora oficial del proyecto (Art. X de [`constitution.md`](constitution.md)).
 
 - **Costo:** $0. CloudFront tiene 1 TB y 10 millones de peticiones al mes gratis; el sitio pesa unos 1.2 MB.
 - **Pendiente:** automatizar la publicación con un workflow y OIDC (un rol con permiso solo de `s3:PutObject`/`DeleteObject` en el bucket y `cloudfront:CreateInvalidation`); registrar la URL en Google Search Console.
+
+### 2026-11-27 · Amenities opcionales en venues
+
+- **Autor:** OpenCode (`dev-dotnet`, `qa`, `arquitecto`)
+- **Módulo / tareas:** `101-amenities-opcionales` (T101–T105)
+- **Problema:** `MongoVenueRepository.Map` accedía a `amenities` sin protección, aunque el catálogo ejecutable de MongoDB declara ese campo como opcional. Un venue válido sin el campo podía provocar una excepción durante las lecturas HTTP.
+- **Corrección:** el mapper devuelve `[]` cuando `amenities` está ausente o no es `BsonArray`; conserva el mapeo actual cuando es un array válido. No cambia catálogo, esquema generado, OpenAPI, DTOs ni contrato.
+- **Archivos afectados:**
+  - `VirGo-API/specs/101-amenities-opcionales/spec.md`
+  - `VirGo-API/specs/101-amenities-opcionales/plan.md`
+  - `VirGo-API/specs/101-amenities-opcionales/task.md`
+  - `VirGo-API/specs/101-amenities-opcionales/check.md`
+  - `VirGo-API/src/VirGo.Infrastructure/MarketplaceRepositories.cs`
+  - `VirGo-API/tests/VirGo.UnitTests/MongoVenueMappingTests.cs`
+  - `VirGo-API/memoria.md`
+- **Evidencia:**
+  - Prueba dirigida `MongoVenueMappingTests`: 3/3 en verde.
+  - Suite completa `VirGo-API/VirGo.slnx`: 238/238 en verde (96 Database, 45 Unit, 3 Performance, 12 Contract, 25 Security, 57 Integration).
+  - `git diff --check`: sin hallazgos.
+- **Resultado:** listo para staging selectivo; no se hizo staging, commit, push ni PR.
+- **Pendiente:** PR, revisión humana, checks requeridos, despliegue y humo HTTPS.
+- **Limitaciones:** el test unitario invoca el mapper privado por reflexión para evitar `InternalsVisibleTo`; las factories de integración usan persistencia en memoria y no reproducen el documento Mongo sin `amenities`. No se ejecutó init de MongoDB, ni se conectó a Atlas/AWS/SSM/producción.
+- **Costo:** $0.

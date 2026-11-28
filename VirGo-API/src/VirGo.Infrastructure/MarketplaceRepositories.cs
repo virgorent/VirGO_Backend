@@ -418,7 +418,9 @@ public sealed class MongoVenueRepository(IMongoDatabase database) : IVenueReposi
         PriceUnit = document["price"].AsBsonDocument["unit"].AsString,
         MinimumHours = document["price"].AsBsonDocument["minHours"].ToInt32(),
         Categories = document["categories"].AsBsonArray.Select(value => value.AsString).ToArray(),
-        Amenities = document["amenities"].AsBsonArray.Select(value => value.AsString).ToArray(),
+        Amenities = document.TryGetValue("amenities", out var amenities) && amenities.IsBsonArray
+            ? amenities.AsBsonArray.Select(value => value.AsString).ToArray()
+            : [],
         Photos = document["photos"].AsBsonArray.Select(value => value.AsBsonDocument["url"].AsString).ToArray(),
         Status = document.GetValue("status").AsString,
         RatingAverage = document["rating"].AsBsonDocument["average"].ToDecimal(),
